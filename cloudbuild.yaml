@@ -1,3 +1,5 @@
+env:
+  - 'GOPATH=.'
 steps:
   # Build the Go binary.
   - name: 'gcr.io/cloud-builders/go'
