@@ -2,14 +2,11 @@ steps:
   # Build the Go binary.
   - name: 'gcr.io/cloud-builders/go'
     args: ['mod', 'download']
-    env: ['GOPATH=.']
   # Run the tests.
   - name: 'gcr.io/cloud-builders/go'
     args: ['test', './...']
-    env: ['GOPATH=.']
   - name: 'gcr.io/cloud-builders/go'
     args: ['build', '-o', 'server']
-    env: ['GOPATH=.']
   # Build the production image.
   - name: 'gcr.io/cloud-builders/docker'
     args: [
