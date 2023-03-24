@@ -17,7 +17,7 @@ steps:
       '--tag=gcr.io/$PROJECT_ID/helloworld',
       '--build-arg=PORT=8080',
       '--build-arg=NAME=World',
-      '--file=Dockerfile-alpine',
+      '--file=Dockerfile-cloudbuild',
       '.'
     ]
   # Push the production image to Container Registry.
