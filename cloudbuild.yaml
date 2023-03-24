@@ -1,20 +1,14 @@
 steps:
-  - name: 'pwd'
-  - name: 'ls'
-    args: ['-R']
   # Build the Go binary.
   - name: 'gcr.io/cloud-builders/go'
     args: ['mod', 'download']
-    dir: '/'
     env: ['GOPATH=.']
   # Run the tests.
   - name: 'gcr.io/cloud-builders/go'
     args: ['test', './...']
-    dir: '/app'
     env: ['GOPATH=.']
   - name: 'gcr.io/cloud-builders/go'
     args: ['build', '-o', 'server']
-    dir: '/app'
     env: ['GOPATH=.']
   # Build the production image.
   - name: 'gcr.io/cloud-builders/docker'
@@ -26,7 +20,6 @@ steps:
       '--file=Dockerfile-alpine',
       '.'
     ]
-    dir: '/app'
   # Push the production image to Container Registry.
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/helloworld']
