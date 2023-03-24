@@ -1,0 +1,28 @@
+steps:
+  # Build the Go binary.
+  - name: 'gcr.io/cloud-builders/go'
+    args: ['mod', 'download']
+    dir: '/'
+  # Run the tests.
+  - name: 'gcr.io/cloud-builders/go'
+    args: ['test', './...']
+    dir: '/app'
+  - name: 'gcr.io/cloud-builders/go'
+    args: ['build', '-o', 'server']
+    dir: '/app'
+  # Build the production image.
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '--tag=gcr.io/$PROJECT_ID/helloworld',
+      '--build-arg=PORT=8080',
+      '--build-arg=NAME=World',
+      '--file=Dockerfile-alpine',
+      '.'
+    ]
+    dir: '/app'
+  # Push the production image to Container Registry.
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/helloworld']
+images:
+  - 'gcr.io/$PROJECT_ID/helloworld'
