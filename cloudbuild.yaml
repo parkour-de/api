@@ -1,4 +1,6 @@
 steps:
+  - name: 'pwd'
+  - name: 'ls -R'
   # Build the Go binary.
   - name: 'gcr.io/cloud-builders/go'
     args: ['mod', 'download']
