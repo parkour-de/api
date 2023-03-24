@@ -1,13 +1,13 @@
 steps:
   # Build the Go binary.
-  - name: 'gcr.io/cloud-builders/go'
+  - name: 'gcr.io/cloud-builders/go:alpine-1.20'
     args: ['mod', 'download']
     env: ['GOPATH=/go']
   # Run the tests.
-  - name: 'gcr.io/cloud-builders/go'
+  - name: 'gcr.io/cloud-builders/go:alpine-1.20'
     args: ['test', './...']
     env: ['GOPATH=/go']
-  - name: 'gcr.io/cloud-builders/go'
+  - name: 'gcr.io/cloud-builders/go:alpine-1.20'
     args: ['build', '-o', 'server']
     env: ['GOPATH=/go']
   # Build the production image.
