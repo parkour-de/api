@@ -1,4 +1,11 @@
 steps:
+  - name: golang:1.20-alpine
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        pwd
+        ls -R
   # Build the Go binary.
   - name: 'gcr.io/cloud-builders/go'
     args: ['mod', 'download']
