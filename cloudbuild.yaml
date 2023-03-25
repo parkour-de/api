@@ -15,14 +15,9 @@ steps:
     args: [
       'build',
       '--tag=gcr.io/$PROJECT_ID/helloworld',
-      '--build-arg=PORT=8080',
-      '--build-arg=NAME=World',
       '--file=Dockerfile-cloudbuild',
       '.'
     ]
-  # Push the production image to Container Registry.
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/helloworld']
 images:
   - 'gcr.io/$PROJECT_ID/helloworld'
 options:
