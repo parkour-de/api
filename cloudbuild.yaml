@@ -21,6 +21,7 @@ steps:
 images:
   - 'gcr.io/$PROJECT_ID/helloworld'
 options:
+  logging: CLOUD_LOGGING_ONLY
   volumes:
     - name: go-modules
       path: /go
