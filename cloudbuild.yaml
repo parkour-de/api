@@ -18,6 +18,13 @@ steps:
       '--file=Dockerfile-cloudbuild',
       '.'
     ]
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'push', 'gcr.io/$PROJECT_ID/helloworld' ]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['run', 'deploy', 'helloworld', '--image', 'gcr.io/$PROJECT_ID/helloworld', '--region', 'europe-west4',
+           '--cpu=1', '--max-instances=2', '--memory=128Mi', '--timeout=20s', '--no-allow-unauthenticated', '--concurrency=80']
 images:
   - 'gcr.io/$PROJECT_ID/helloworld'
 options:
