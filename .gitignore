@@ -1,9 +1,23 @@
+# Config files (passwords)
+config.yml
+
+# Test files containing secrets
+frontend/facebook.htm
+frontend/login.htm
+
+# Asset files (for now)
+assets/
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+bin/
+
+# Artifacts from Swagger generators
+redoc-static.html
 
 # Test binary, built with `go test -c`
 *.test
@@ -28,4 +42,4 @@ log/
 *.pem
 dist/
 
-server
+endpoint1
