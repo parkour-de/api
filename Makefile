@@ -1,20 +1,22 @@
 # Variables
-IMAGE_NAME=myapp
-CONTAINER_NAME=myapp_container
+IMAGE_NAME=dpv
+CONTAINER_NAME=dpv_container
 PORT=8080
 
 # Targets
 .PHONY: all
 all: test build
 
+OUT_DIR := ./bin
+
 build:
-	go build -o server .
+	go build -o $(OUT_DIR)/endpoint1 ./src/cmd/endpoint1
 
 test:
 	go test ./...
 
 run:
-	./server
+	./bin/endpoint1
 
 docker-build:
 	DOCKER_CONFIG=~/invalid/ docker build -t $(IMAGE_NAME) .

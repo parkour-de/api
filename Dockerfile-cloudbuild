@@ -1,5 +1,5 @@
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
-COPY server .
-ENTRYPOINT ["/app/server"]
+COPY bin/endpoint1 /app/bin/endpoint1
+ENTRYPOINT ["/app/bin/endpoint1"]

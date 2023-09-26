@@ -1,7 +1,7 @@
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
-FROM golang:1.20-alpine as builder
+FROM golang:1.21-alpine as builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -19,12 +19,12 @@ COPY . ./
 RUN go test ./...
 
 # Build the binary.
-RUN go build -v -o server
+RUN go build -v -o /app/bin/endpoint1 ./src/cmd/endpoint1
 
 FROM alpine:latest
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/server /app/server
+COPY --from=builder /app/bin/endpoint1 /app/bin/endpoint1
 
 # Run the web service on container startup.
-CMD ["/app/server"]
+CMD ["/app/bin/endpoint1"]

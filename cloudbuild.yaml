@@ -1,32 +1,32 @@
 steps:
   # Build the Go binary.
-  - name: 'gcr.io/cloud-builders/go:alpine-1.20'
+  - name: 'gcr.io/cloud-builders/go:alpine-1.21'
     args: ['mod', 'download']
     env: ['GOPATH=/go']
   # Run the tests.
-  - name: 'gcr.io/cloud-builders/go:alpine-1.20'
+  - name: 'gcr.io/cloud-builders/go:alpine-1.21'
     args: ['test', './...']
     env: ['GOPATH=/go']
-  - name: 'gcr.io/cloud-builders/go:alpine-1.20'
-    args: ['build', '-o', 'server']
+  - name: 'gcr.io/cloud-builders/go:alpine-1.21'
+    args: ['build', '-v', '-o', '/app/bin/endpoint1', './src/cmd/endpoint1']
     env: ['GOPATH=/go']
   # Build the production image.
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
-      '--tag=gcr.io/$PROJECT_ID/helloworld',
+      '--tag=gcr.io/$PROJECT_ID/endpoint1',
       '--file=Dockerfile-cloudbuild',
       '.'
     ]
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'push', 'gcr.io/$PROJECT_ID/helloworld' ]
+    args: [ 'push', 'gcr.io/$PROJECT_ID/endpoint1' ]
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args: ['run', 'deploy', 'helloworld', '--image', 'gcr.io/$PROJECT_ID/helloworld', '--region', 'europe-west4',
+    args: ['run', 'deploy', 'endpoint1', '--image', 'gcr.io/$PROJECT_ID/endpoint1', '--region', 'europe-west4',
            '--cpu=1', '--max-instances=2', '--memory=128Mi', '--timeout=20s', '--no-allow-unauthenticated', '--concurrency=80']
 images:
-  - 'gcr.io/$PROJECT_ID/helloworld'
+  - 'gcr.io/$PROJECT_ID/endpoint1'
 options:
   logging: CLOUD_LOGGING_ONLY
   volumes:

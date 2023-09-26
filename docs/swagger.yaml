@@ -1,0 +1,445 @@
+basePath: /
+definitions:
+  crud.IdResponse:
+    type: object
+  domain.Comment:
+    description: Comments like a guestbook, news feed or blog
+    properties:
+      author:
+        example: user/123
+        type: string
+      created:
+        description: RFC 3339 date
+        type: string
+      text:
+        example: I have something to say here...
+        type: string
+      title:
+        example: Hey there
+        type: string
+    type: object
+  domain.Cycle:
+    description: Represent recurring events
+    properties:
+      begin:
+        description: seconds
+        type: integer
+      duration:
+        description: seconds
+        type: integer
+      enddate:
+        description: RFC 3339 date of when the cycle does not continue
+        type: string
+      interval:
+        type: integer
+      locationId:
+        example: location/123
+        type: string
+      monthday:
+        type: integer
+      startdate:
+        description: RFC 3339 date of the first possible day in a cycle
+        type: string
+      weekday:
+        type: integer
+    type: object
+  domain.Description:
+    properties:
+      text:
+        example: Something to describe
+        type: string
+      title:
+        example: My Item
+        type: string
+      translated:
+        description: whether this has automatically been translated from another language
+        example: false
+        type: boolean
+    type: object
+  domain.Descriptions:
+    additionalProperties:
+      $ref: '#/definitions/domain.Description'
+    description: A map of language code to title and text
+    type: object
+  domain.Location:
+    properties:
+      _id:
+        example: location/123
+        type: string
+      city:
+        example: Hamburg
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      descriptions:
+        $ref: '#/definitions/domain.Descriptions'
+      information:
+        additionalProperties:
+          type: string
+        type: object
+      lat:
+        example: 53.55
+        type: number
+      lng:
+        example: 9.99
+        type: number
+      photos:
+        items:
+          $ref: '#/definitions/domain.Photo'
+        type: array
+      type:
+        description: spot, gym, parkour-gym, office, public-transport
+        example: spot
+        type: string
+    type: object
+  domain.Photo:
+    description: Identify size and location of an image
+    properties:
+      h:
+        example: 480
+        type: integer
+      src:
+        example: image.jpg
+        type: string
+      w:
+        example: 640
+        type: integer
+    type: object
+  domain.TrainingDTO:
+    description: Enriches Training with some other related nodes such as Location
+      or User
+    properties:
+      _id:
+        example: training/123
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      cycles:
+        items:
+          $ref: '#/definitions/domain.Cycle'
+        type: array
+      descriptions:
+        $ref: '#/definitions/domain.Descriptions'
+      information:
+        additionalProperties:
+          type: string
+        type: object
+      location:
+        $ref: '#/definitions/domain.Location'
+      locationId:
+        example: location/123
+        type: string
+      organiserIds:
+        example:
+        - user/123
+        items:
+          type: string
+        type: array
+      organisers:
+        items:
+          $ref: '#/definitions/domain.User'
+        type: array
+      photos:
+        items:
+          $ref: '#/definitions/domain.Photo'
+        type: array
+      type:
+        description: parkour-training, parkour-jam, meeting, show, competition, slackline
+        example: training
+        type: string
+    type: object
+  domain.User:
+    description: Stores information about a user
+    properties:
+      _id:
+        example: user/123
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      descriptions:
+        $ref: '#/definitions/domain.Descriptions'
+      information:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        example: John Doe
+        type: string
+      photos:
+        items:
+          $ref: '#/definitions/domain.Photo'
+        type: array
+      type:
+        description: person, team, group, association, company
+        example: person
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: support@dpfv.de
+    name: API Support
+    url: http://dpfv.de/
+  description: API to get data about DPV
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://dpfv.de/
+  title: DPV API
+  version: "1.0"
+paths:
+  /api/facebook:
+    get:
+      description: |-
+        Request an OAuth token from https://www.facebook.com/v17.0/dialog/oauth, then call this endpoint
+        using Authorization: facebook mySuperSecretToken as a header. This endpoint will then make a debug
+        call to Facebook Graph API to extract a unique ID that can be attached to a user.
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Takes the authorization header from the browser and generates an access
+        token for a user
+      tags:
+      - authentication
+  /api/locations:
+    post:
+      parameters:
+      - description: item to be created
+        in: body
+        name: request
+        required: true
+        schema: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+    put:
+      parameters:
+      - description: item to be updated
+        in: body
+        name: request
+        required: true
+        schema: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+  /api/locations/{id}:
+    delete:
+      parameters:
+      - description: id of the item to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+    get:
+      parameters:
+      - description: id of the item to be retrieved
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+  /api/trainings:
+    get:
+      description: Returns a list of trainings.
+      parameters:
+      - description: Day of the week (1-7) or 0 to ignore
+        example: 0
+        in: query
+        name: weekday
+        type: integer
+      - description: City name
+        example: Hamburg
+        in: query
+        name: city
+        type: string
+      - description: Return only trainings that match provided Organiser ID
+        example: user/135
+        in: query
+        name: organiser
+        type: string
+      - description: Return only trainings that match provided Location ID
+        example: location/246
+        in: query
+        name: location
+        type: string
+      - collectionFormat: csv
+        description: 'comma-separated list of sections to include. Choose from: cycles,photos,comments,location,location_photos,location_comments,organisers,organiser_photos,organiser_comments'
+        example: cycles,photos,comments,location,organisers
+        in: query
+        items:
+          type: string
+        name: include
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.TrainingDTO'
+            type: array
+      summary: Get a list of trainings
+      tags:
+      - trainings
+    post:
+      parameters:
+      - description: item to be created
+        in: body
+        name: request
+        required: true
+        schema: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+    put:
+      parameters:
+      - description: item to be updated
+        in: body
+        name: request
+        required: true
+        schema: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+  /api/trainings/{id}:
+    delete:
+      parameters:
+      - description: id of the item to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+    get:
+      parameters:
+      - description: id of the item to be retrieved
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+  /api/users:
+    get:
+      description: Returns a list of users.
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.User'
+            type: array
+      summary: Get a list of users
+      tags:
+      - users
+    post:
+      parameters:
+      - description: item to be created
+        in: body
+        name: request
+        required: true
+        schema: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+    put:
+      parameters:
+      - description: item to be updated
+        in: body
+        name: request
+        required: true
+        schema: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+  /api/users/{id}:
+    delete:
+      parameters:
+      - description: id of the item to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+    get:
+      parameters:
+      - description: id of the item to be retrieved
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crud.IdResponse'
+      tags:
+      - crud
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

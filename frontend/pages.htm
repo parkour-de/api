@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pages Example</title>
+    <style>
+        dl { display: table; }
+        dl > div { display: table-row; }
+        dl > div > dt, dl > div > dd { display: table-cell; border: 1px solid black; padding: 0.25em; }
+        dl > div > dt { font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1>This is a Pages example</h1>
+
+<label for="page">Switch to page:</label> <select id="page" onchange="loadItem()">
+    <option>Please choose...</option>
+</select>
+
+<h2 id="title">Here will be title</h2>
+<p id="text">Here will be text</p>
+<dl id="properties">Here will be properties</dl>
+
+<script>
+    async function bootstrap(page) {
+        const apiUrl = 'http://localhost:8080/api/pages'
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                body: JSON.stringify(page)
+            })
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+
+    async function bootstrapAll() {
+        await bootstrap({
+            "descriptions": {
+                "de-DE": {
+                    "title": "Hello World",
+                    "text": "I just want to say <b>hello</b> here."
+                }
+            },
+            "information": {
+                "html": "true",
+                "purpose": "demo"
+            }
+        })
+        await init()
+    }
+
+    async function init() {
+        const apiUrl = 'http://localhost:8080/api/pages'
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                console.log('API Response:', data)
+                const p = document.getElementById('page')
+                p.childNodes.length = 0
+                const please = document.createElement('option')
+                please.innerText = 'Please choose...'
+                data?.forEach(item => {
+                    const option = document.createElement('option')
+                    option.innerText = item._id
+                    option.value = item._id
+                    p.append(option)
+                })
+                if (data === null) {
+                    await bootstrapAll()
+                }
+            } else {
+                console.error('API Request Failed:', response.statusText)
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+    async function load(page) {
+        const apiUrl = 'http://localhost:8080/api/'
+        try {
+            const response = await fetch(apiUrl + page, {
+                method: 'GET',
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                console.log('API Response:', data)
+                const p = document.getElementById('properties')
+                p.childNodes.length = 0
+                for (const [k, v] of Object.entries(data.information)) {
+                    const div = document.createElement('div')
+                    const dt = document.createElement('dt')
+                    const dd = document.createElement('dd')
+                    dt.innerText = k
+                    dd.innerText = v
+                    div.append(dt, dd)
+                    p.append(div)
+                }
+                document.getElementById('title').innerText = data.descriptions['de-DE'].title
+                const text = data.descriptions['de-DE'].text
+                const textNode = document.getElementById('text')
+                if (data.information?.html === 'true') {
+                    textNode.innerHTML = text
+                } else {
+                    textNode.innerText = text
+                }
+            } else {
+                console.error('API Request Failed:', response.statusText)
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+
+    function loadItem() {
+        load(document.getElementById('page').value)
+    }
+    init()
+</script>
+</body>
+</html>
