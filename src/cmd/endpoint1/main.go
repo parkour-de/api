@@ -25,6 +25,6 @@ import (
 // @externalDocs.description	OpenAPI
 // @externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
-	server := router.NewServer()
+	server := router.NewServer("config.yml")
 	log.Fatal(server.ListenAndServe())
 }

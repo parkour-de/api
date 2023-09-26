@@ -13,9 +13,9 @@ import (
 	"pkv/api/src/internal/graph"
 )
 
-func NewServer() *http.Server {
+func NewServer(configPath string) *http.Server {
 	var err error
-	dpv.ConfigInstance, err = dpv.NewConfig("config.yml")
+	dpv.ConfigInstance, err = dpv.NewConfig(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}

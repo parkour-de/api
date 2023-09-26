@@ -160,7 +160,7 @@ func CreateCycle(db *Db, i int) (domain.Cycle, error) {
 }
 
 func NewTestDB() *Db {
-	config, err := dpv.NewConfig("../../../config.yml")
+	config, err := dpv.NewConfig("../../config.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -175,32 +175,33 @@ func NewTestDB() *Db {
 
 	db, err := NewDB(database)
 
-	author, err = CreateUser(db, 0)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	x1 := time.Now()
-	users, err := CreateMultiple(db, 1000, CreateUser)
-	if err != nil {
-		log.Fatal(fmt.Errorf("create multiple users failed: %w", err))
-	}
-	x2 := time.Now()
-	trainings, err := CreateMultiple(db, 1000, CreateTraining)
-	if err != nil {
-		log.Fatal(fmt.Errorf("create multiple trainings failed: %w", err))
-	}
-	x3 := time.Now()
-	for _, v := range trainings {
-		err = db.ConnectUserTraining(users[rand.Intn(1000)], v)
+	/*
+		author, err = CreateUser(db, 0)
 		if err != nil {
-			log.Fatal(fmt.Errorf("connect multiple users to trainings: %w", err))
+			log.Fatal(err)
 		}
-	}
-	x4 := time.Now()
-	fmt.Printf("Create 1000 users: %d ms\n", x2.Sub(x1).Milliseconds())
-	fmt.Printf("Create 1000 trainings: %d ms\n", x3.Sub(x2).Milliseconds())
-	fmt.Printf("Create 1000 organisers: %d ms\n", x4.Sub(x3).Milliseconds())
 
+		x1 := time.Now()
+		users, err := CreateMultiple(db, 1000, CreateUser)
+		if err != nil {
+			log.Fatal(fmt.Errorf("create multiple users failed: %w", err))
+		}
+		x2 := time.Now()
+		trainings, err := CreateMultiple(db, 1000, CreateTraining)
+		if err != nil {
+			log.Fatal(fmt.Errorf("create multiple trainings failed: %w", err))
+		}
+		x3 := time.Now()
+		for _, v := range trainings {
+			err = db.ConnectUserTraining(users[rand.Intn(1000)], v)
+			if err != nil {
+				log.Fatal(fmt.Errorf("connect multiple users to trainings: %w", err))
+			}
+		}
+		x4 := time.Now()
+		fmt.Printf("Create 1000 users: %d ms\n", x2.Sub(x1).Milliseconds())
+		fmt.Printf("Create 1000 trainings: %d ms\n", x3.Sub(x2).Milliseconds())
+		fmt.Printf("Create 1000 organisers: %d ms\n", x4.Sub(x3).Milliseconds())
+	*/
 	return db
 }

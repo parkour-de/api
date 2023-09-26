@@ -29,7 +29,8 @@ func NewConfig(configPath string) (*Config, error) {
 
 	file, err := os.Open(configPath)
 	if err != nil {
-		return nil, fmt.Errorf("could not load config file: %w", err)
+		wd, _ := os.Getwd()
+		return nil, fmt.Errorf("could not load config file, looking for %v in %v: %w", configPath, wd, err)
 	}
 	defer file.Close()
 
