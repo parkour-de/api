@@ -9,12 +9,6 @@ import (
 )
 
 // GetUsers handles the GET /api/users endpoint.
-//
-//	@Summary		Get a list of users
-//	@Description	Returns a list of users.
-//	@Tags			users
-//	@Success		200	{array}	domain.User
-//	@Router			/api/users [get]
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return

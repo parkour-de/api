@@ -1,7 +1,6 @@
 package domain
 
-// Descriptions
-// @description A map of language code to title and text
+// Descriptions are maps of language code to title and text
 type Descriptions map[string]Description // per language
 
 type Description struct {

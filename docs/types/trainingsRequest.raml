@@ -1,0 +1,30 @@
+#%RAML 1.0 DataType
+properties:
+  weekday?:
+    description: Day of the week (1-7) or 0 to ignore
+    example: 0
+    type: integer
+    minimum: 0
+    maximum: 7
+  city?:
+    description: City name
+    example: Hamburg
+    type: string
+  organiser?:
+    description: Return only trainings that match provided Organiser ID
+    example: user/135
+    type: string
+  location?:
+    description: Return only trainings that match provided Location ID
+    example: location/246
+    type: string
+  include?:
+    description: 'comma-separated list of sections to include. Choose from: cycles,photos,comments,location,location_photos,location_comments,organisers,organiser_photos,organiser_comments'
+    example: cycles,photos,comments,location,organisers
+    type: string
+  skip?:
+    description: skip over this many results
+    type: integer
+  limit?:
+    description: show only this many results
+    type: integer

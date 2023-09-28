@@ -1,0 +1,35 @@
+#%RAML 1.0 DataType
+properties:
+  weekday?:
+    description: Day of the week (1-7) or 0 to ignore
+    example: 0
+    type: integer
+    minimum: 0
+    maximum: 7
+  monthday?:
+    description: Day of the month (-31 to 31) or 0 to ignore
+    example: 0
+    type: integer
+    minimum: -31
+    maximum: 31
+  interval?:
+    example: 0
+    type: integer
+  begin?:
+    description: seconds
+    example: 0
+    type: integer
+  duration?:
+    description: seconds
+    example: 0
+    type: integer
+  startdate?:
+    description: RFC 3339 date of the first possible day in a cycle
+    type: string
+  enddate?:
+    description: RFC 3339 date of when the cycle does not continue
+    type: string
+  locationId?:
+    type: string
+    description: if cycle happens at a different location than the underlying training
+    example: location/123

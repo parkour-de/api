@@ -2,8 +2,7 @@ package domain
 
 import "time"
 
-// Cycle
-// @description Represent recurring events
+// Cycle represents recurring events
 type Cycle struct {
 	Weekday    int       `json:"weekday,omitempty"`
 	Monthday   int       `json:"monthday,omitempty"`

@@ -26,14 +26,6 @@ type FacebookTokenValidationResponse struct {
 }
 
 // Facebook handles the GET /api/facebook endpoint.
-//
-//	@Summary		Takes the authorization header from the browser and generates an access token for a user
-//	@Description	Request an OAuth token from https://www.facebook.com/v17.0/dialog/oauth, then call this endpoint
-//	@Description	using Authorization: facebook mySuperSecretToken as a header. This endpoint will then make a debug
-//	@Description	call to Facebook Graph API to extract a unique ID that can be attached to a user.
-//	@Tags			authentication
-//	@Success		200	{object}	string
-//	@Router			/api/facebook [get]
 func (h *Handler) Facebook(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return

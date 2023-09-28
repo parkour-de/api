@@ -1,7 +1,6 @@
 package domain
 
-// Page
-// @description Stores information about a page
+// Page stores information about a page
 type Page struct {
 	ID           string            `json:"_id,omitempty" example:"page/123"`
 	Information  map[string]string `json:"information,omitempty"`

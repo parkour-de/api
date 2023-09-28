@@ -9,12 +9,6 @@ import (
 )
 
 // GetPages handles the GET /api/pages endpoint.
-//
-//	@Summary		Get a list of pages
-//	@Description	Returns a list of pages.
-//	@Tags			users
-//	@Success		200	{array}	domain.Page
-//	@Router			/api/pages [get]
 func (h *Handler) GetPages(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return

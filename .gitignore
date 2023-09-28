@@ -16,8 +16,9 @@ assets/
 *.dylib
 bin/
 
-# Artifacts from Swagger generators
-redoc-static.html
+# Generated Artifacts from API documentation
+docs/api.html
+docs/api.json
 
 # Test binary, built with `go test -c`
 *.test

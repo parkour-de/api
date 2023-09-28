@@ -1,0 +1,159 @@
+#%RAML 1.0
+title: DPV API
+description: API to get data about DPV
+version: '1.0'
+baseUri: http://localhost:8080/
+mediaType: application/json
+types:
+  IdResponse: !include types/idResponse.raml
+  Page: !include types/page.raml
+  Location: !include types/location.raml
+  Training: !include types/training.raml
+  TrainingDTO: !include types/trainingDTO.raml
+  TrainingsRequest: !include types/trainingsRequest.raml
+  User: !include types/user.raml
+  Description: !include types/description.raml
+  Descriptions:
+    description: Descriptions using languages, e.g. de-DE as key
+    properties:
+      /.*/: Description
+  Cycle: !include types/cycle.raml
+  Comment: !include types/comment.raml
+  Photo: !include types/photo.raml
+/api:
+  /facebook:
+    get:
+      description: |-
+        Takes the authorization header from the browser and generates an access token for a user
+        Request an OAuth token from https://www.facebook.com/v17.0/dialog/oauth, then call this endpoint
+        using Authorization: facebook mySuperSecretToken as a header. This endpoint will then make a debug
+        call to Facebook Graph API to extract a unique ID that can be attached to a user.
+      responses:
+        '200':
+          description: OK
+  /pages:
+    post:
+      body: Page
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    put:
+      body: Page
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    '/{id}':
+      delete:
+        responses:
+          '200':
+            description: OK
+            body: IdResponse
+      get:
+        responses:
+          '200':
+            description: OK
+            body: Page
+      uriParameters:
+        id:
+          description: id of the item to be retrieved
+          type: string
+  /locations:
+    post:
+      body: Location
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    put:
+      body: Location
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    '/{id}':
+      delete:
+        responses:
+          '200':
+            description: OK
+            body: IdResponse
+      get:
+        responses:
+          '200':
+            description: OK
+            body: Location
+      uriParameters:
+        id:
+          description: id of the item to be retrieved
+          type: string
+  /trainings:
+    get:
+      description: Returns a list of trainings.
+      responses:
+        '200':
+          description: OK
+          body: TrainingDTO[]
+      queryString:
+        type: TrainingsRequest
+    post:
+      body: Training
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    put:
+      body: Training
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    '/{id}':
+      delete:
+        responses:
+          '200':
+            description: OK
+            body: IdResponse
+      get:
+        responses:
+          '200':
+            description: OK
+            body: Training
+      uriParameters:
+        id:
+          description: id of the item to be retrieved
+          type: string
+  /users:
+    get:
+      description: Returns a list of users.
+      responses:
+        '200':
+          description: OK
+          body: User[]
+    post:
+      body: User
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    put:
+      body: User
+      responses:
+        '200':
+          description: OK
+          body: IdResponse
+    '/{id}':
+      delete:
+        responses:
+          '200':
+            description: OK
+            body: IdResponse
+      get:
+        responses:
+          '200':
+            description: OK
+            body: User
+      uriParameters:
+        id:
+          description: id of the item to be retrieved
+          type: string

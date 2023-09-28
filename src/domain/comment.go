@@ -2,8 +2,7 @@ package domain
 
 import "time"
 
-// Comment
-// @description Comments like a guestbook, news feed or blog
+// Comment like a guestbook, news feed or blog
 type Comment struct {
 	Title   string    `json:"title,omitempty" example:"Hey there"`
 	Text    string    `json:"text,omitempty" example:"I have something to say here..."`

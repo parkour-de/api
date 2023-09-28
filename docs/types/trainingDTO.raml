@@ -1,0 +1,10 @@
+#%RAML 1.0 DataType
+properties:
+  training?: Training
+  location?: Location
+  locationId?:
+    type: string
+    description: key to retrieve an entity
+    example: location/123
+  organiserIds?: string[]
+  organisers?: User[]

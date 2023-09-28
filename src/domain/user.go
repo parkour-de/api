@@ -1,7 +1,6 @@
 package domain
 
-// User
-// @description Stores information about a user
+// User stores information about a user
 type User struct {
 	ID           string            `json:"_id,omitempty" example:"user/123"`
 	Name         string            `json:"name,omitempty" example:"John Doe"`

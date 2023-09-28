@@ -2,8 +2,7 @@ package domain
 
 import "time"
 
-// Exception
-// @description Represent exceptions to recurring events
+// Exception to a recurring event
 type Exception struct {
 	Date       time.Time `json:"date,omitempty"`     // RFC 3339 date of when the exception occurs
 	Begin      int       `json:"begin,omitempty"`    // seconds

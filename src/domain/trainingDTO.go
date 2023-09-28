@@ -1,7 +1,6 @@
 package domain
 
-// TrainingDTO
-// @description Enriches Training with some other related nodes such as Location or User
+// TrainingDTO enriches Training with some other related nodes such as Location or User
 type TrainingDTO struct {
 	Training
 	Location     *Location `json:"location,omitempty"`

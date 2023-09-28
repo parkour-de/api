@@ -71,14 +71,24 @@ the build and image creation steps in this way, we can optimize the build proces
 
     docker run -p 8529:8529 -e ARANGO_ROOT_PASSWORD=change-me arangodb/arangodb:3.11.3
 
-## Update Swagger documentation
+## API documentation
 
-    go install github.com/swaggo/swag/cmd/swag@latest
-    swag fmt -g src/cmd/endpoint1/main.go
-    swag init -g src/cmd/endpoint1/main.go
-    npm install @redocly/cli -g
-    redocly build-docs docs/swagger.yaml  
+**Validate RAML files and generate HTML documentation:**
 
-Then, open the file in a browser and click Download to convert the result to OpenAPI 3.0
-This allows the file to be imported in tools like Insomnia.
-Some example arrays in the definition files are not correctly formatted and require manual chanages.
+    npm i -g raml2html
+    raml2html -v -i docs/api.raml -o docs/api.html
+
+**Build OpenAPI 3.0 specification from RAML:**
+
+    npm i -g oas-raml-converter-cli
+    oas-raml-converter-cli
+    Choose the converter 4) RAML 1.0 > OAS 3.0: 4
+    Enter the source path of the file: docs/api.raml
+    Enter the destination path for the file: docs/api.json
+    Are you sure you want to continue (y/n): y
+
+**Interactive RAML documentation:**
+
+Clone and run [API Console](https://github.com/mulesoft/api-console) from Mulesoft as written in the documentation
+and load the demo website for the standalone mode. Choose "Upload an API" in the hamburger menu, choose a .zip file
+created from `/docs/api.raml` (make sure to also include the types folder in it) and enjoy!

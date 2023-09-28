@@ -1,7 +1,6 @@
 package domain
 
-// Training
-// @description Stores information about a training
+// Training stores information about a training
 type Training struct {
 	ID           string            `json:"_id,omitempty" example:"training/123"`
 	Type         string            `json:"type,omitempty" example:"training"` // parkour-training, parkour-jam, meeting, show, competition, slackline

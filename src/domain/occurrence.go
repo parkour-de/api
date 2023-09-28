@@ -2,8 +2,7 @@ package domain
 
 import "time"
 
-// Occurrence
-// @description Automatically generated individual calendar entries based on Cycle and Exception
+// Occurrence is an automatically generated individual calendar entry based on Cycle and Exception
 type Occurrence struct {
 	Date       time.Time `json:"date,omitempty"`     // RFC 3339 date of when it occurs
 	Begin      int       `json:"begin,omitempty"`    // seconds

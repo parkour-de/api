@@ -24,14 +24,6 @@ func NewHandler[T graph.Entity](db graph.DB, em graph.EntityManager[T], prefix s
 }
 
 // Create handles the creation of new entities.
-//
-//	@Tags		crud
-//	@Success	200		{object}	string
-//	@Param		request	body		graph.Entity	true	"item to be created"
-//	@Success	200		{object}	IdResponse
-//	@Router		/api/trainings [post]
-//	@Router		/api/locations [post]
-//	@Router		/api/users [post]
 func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return
@@ -57,14 +49,6 @@ func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams ht
 }
 
 // Read handles the retrieval of entities.
-//
-//	@Tags		crud
-//	@Success	200	{object}	string
-//	@Param		id	path		string	true	"id of the item to be retrieved"
-//	@Success	200	{object}	IdResponse
-//	@Router		/api/trainings/{id} [get]
-//	@Router		/api/locations/{id} [get]
-//	@Router		/api/users/{id} [get]
 func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return
@@ -84,14 +68,6 @@ func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams http
 }
 
 // Update handles the replacement of existing entities.
-//
-//	@Tags		crud
-//	@Success	200		{object}	string
-//	@Param		request	body		graph.Entity	true	"item to be updated"
-//	@Success	200		{object}	IdResponse
-//	@Router		/api/trainings [put]
-//	@Router		/api/locations [put]
-//	@Router		/api/users [put]
 func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return
@@ -117,14 +93,6 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 }
 
 // Delete handles the deletion of entities.
-//
-//	@Tags		crud
-//	@Success	200	{object}	string
-//	@Param		id	path		string	true	"id of the item to be deleted"
-//	@Success	200	{object}	IdResponse
-//	@Router		/api/trainings/{id} [delete]
-//	@Router		/api/locations/{id} [delete]
-//	@Router		/api/users/{id} [delete]
 func (h *Handler[T]) Delete(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return
