@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,16 +13,27 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func Success(w http.ResponseWriter, jsonMsg []byte) {
+func Success(w http.ResponseWriter, r *http.Request, jsonMsg []byte) {
 	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(jsonMsg); err != nil {
 		log.Printf("Error writing response: %v", err)
 	}
+
+	log.Printf(
+		"%s %s %s 200",
+		r.Method,
+		r.RequestURI,
+		r.RemoteAddr,
+	)
 }
 
-func Error(w http.ResponseWriter, err error, code int) {
+func Error(w http.ResponseWriter, r *http.Request, err error, code int) {
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
+	if err == nil {
+		err = fmt.Errorf("nil err")
+	}
+	logErr := err
 	errorMsgJSON, err := json.Marshal(ErrorResponse{
 		err.Error(),
 	})
@@ -32,6 +44,15 @@ func Error(w http.ResponseWriter, err error, code int) {
 			log.Printf("Error writing response: %v", err)
 		}
 	}
+
+	log.Printf(
+		"%s %s %s %d %s",
+		r.Method,
+		r.RequestURI,
+		r.RemoteAddr,
+		code,
+		logErr.Error(),
+	)
 }
 
 func MakeCors(w http.ResponseWriter, r *http.Request) bool {

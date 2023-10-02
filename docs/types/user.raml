@@ -1,9 +1,9 @@
 #%RAML 1.0 DataType
 properties:
-  _id?:
+  _key?:
     type: string
     description: key to retrieve an entity
-    example: user/123
+    example: "123"
   name?:
     type: string
     example: John Doe
@@ -16,6 +16,7 @@ properties:
       association: association
       company: company
   information?:
+    type: object
     description: Extra information as string map
     properties:
       /.*/: string

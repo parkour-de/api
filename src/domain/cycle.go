@@ -54,5 +54,5 @@ StartDate
 EndDate
 Begin
 Duration
-LocationId
+LocationKey
 */

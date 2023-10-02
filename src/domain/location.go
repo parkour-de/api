@@ -1,7 +1,7 @@
 package domain
 
 type Location struct {
-	ID           string            `json:"_id,omitempty" example:"location/123"`
+	Key          string            `json:"_key,omitempty" example:"123"`
 	Lat          float64           `json:"lat,omitempty" example:"53.55"`
 	Lng          float64           `json:"lng,omitempty" example:"9.99"`
 	City         string            `json:"city,omitempty" example:"Hamburg"`
@@ -12,10 +12,10 @@ type Location struct {
 	Comments     []Comment         `json:"comments,omitempty"`
 }
 
-func (l Location) GetID() string {
-	return l.ID
+func (l Location) GetKey() string {
+	return l.Key
 }
 
-func (l *Location) SetID(id string) {
-	l.ID = id
+func (l *Location) SetKey(id string) {
+	l.Key = id
 }

@@ -2,7 +2,7 @@ package domain
 
 // User stores information about a user
 type User struct {
-	ID           string            `json:"_id,omitempty" example:"user/123"`
+	Key          string            `json:"_key,omitempty" example:"123"`
 	Name         string            `json:"name,omitempty" example:"John Doe"`
 	Type         string            `json:"type,omitempty" example:"person"` // person, team, group, association, company
 	Information  map[string]string `json:"information,omitempty"`
@@ -11,10 +11,10 @@ type User struct {
 	Comments     []Comment         `json:"comments,omitempty"`
 }
 
-func (u User) GetID() string {
-	return u.ID
+func (u User) GetKey() string {
+	return u.Key
 }
 
-func (u *User) SetID(id string) {
-	u.ID = id
+func (u *User) SetKey(id string) {
+	u.Key = id
 }

@@ -48,7 +48,6 @@ func NewServer(configPath string) *http.Server {
 
 		w.WriteHeader(http.StatusNoContent)
 	})
-
 	r.GET("/api/facebook", authenticationHandler.Facebook)
 	r.GET("/api/users", queryHandler.GetUsers)
 	r.GET("/api/trainings", queryHandler.GetTrainings)

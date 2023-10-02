@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"context"
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"pkv/api/src/domain"
@@ -12,63 +13,63 @@ type EntityManager[T Entity] struct {
 }
 
 type Entity interface {
-	GetID() string
-	SetID(id string)
+	GetKey() string
+	SetKey(key string)
 }
 
-func (im *EntityManager[T]) Create(item T) error {
-	meta, err := im.Collection.CreateDocument(nil, item)
+func (im *EntityManager[T]) Create(item T, ctx context.Context) error {
+	meta, err := im.Collection.CreateDocument(ctx, item)
 	if err != nil {
 		return fmt.Errorf("could not create item: %w", err)
 	}
-	item.SetID(meta.ID.String())
+	item.SetKey(meta.Key)
 	return nil
 }
 
-func (im *EntityManager[T]) Read(id string) (T, error) {
+func (im *EntityManager[T]) Read(key string, ctx context.Context) (interface{}, error) {
 	item := im.Constructor()
-	meta, err := im.Collection.ReadDocument(nil, id, item)
+	meta, err := im.Collection.ReadDocument(ctx, key, item)
 	if err != nil {
-		return item, fmt.Errorf("could not read item with id %v: %w", id, err)
+		return item, fmt.Errorf("could not read item with key %v: %w", key, err)
 	}
-	item.SetID(meta.ID.String())
+	item.SetKey(meta.Key)
 	return item, nil
 }
 
-func (im *EntityManager[T]) Update(item T) error {
-	_, err := im.Collection.UpdateDocument(nil, item.GetID(), item)
+func (im *EntityManager[T]) Update(item T, ctx context.Context) error {
+	_, err := im.Collection.UpdateDocument(ctx, item.GetKey(), item)
 	if err != nil {
-		return fmt.Errorf("could not update item with id %v: %w", item.GetID(), err)
+		return fmt.Errorf("could not update item with key %v: %w", item.GetKey(), err)
 	}
 	return nil
 }
 
-func (im *EntityManager[T]) Delete(item T) error {
-	_, err := im.Collection.RemoveDocument(nil, item.GetID())
+func (im *EntityManager[T]) Delete(item T, ctx context.Context) error {
+	_, err := im.Collection.RemoveDocument(ctx, item.GetKey())
 	if err != nil {
-		return fmt.Errorf("could not delete item with id %v: %w", item.GetID(), err)
+		return fmt.Errorf("could not delete item with key %v: %w", item.GetKey(), err)
 	}
 	return nil
 }
 
-func (db *Db) ConnectTrainingLocation(training *domain.Training, location *domain.Location) error {
-	if _, err := db.Edges.CreateDocument(nil, domain.Edge{
-		From:  training.ID,
-		To:    location.ID,
+func (db *Db) ConnectTrainingLocation(training *domain.Training, location *domain.Location, ctx context.Context) error {
+	if _, err := db.Edges.CreateDocument(ctx, domain.Edge{
+		From:  "trainings/" + training.Key,
+		To:    "locations/" + location.Key,
 		Label: "happens_at",
 	}); err != nil {
-		return fmt.Errorf("could not connect training %s to location %s: %w", training.ID, location.ID, err)
+		return fmt.Errorf("could not connect training %s to location %s: %w", training.Key, location.Key, err)
 	}
 	return nil
 }
 
-func (db *Db) ConnectUserTraining(user domain.User, training domain.Training) error {
-	if _, err := db.Edges.CreateDocument(nil, domain.Edge{
-		From:  user.ID,
-		To:    training.ID,
+func (db *Db) ConnectUserTraining(user domain.User, training domain.Training, ctx context.Context) error {
+	if _, err := db.Edges.CreateDocument(ctx, domain.Edge{
+		From:  "users/" + user.Key,
+		To:    "trainings/" + training.Key,
 		Label: "organises",
 	}); err != nil {
-		return fmt.Errorf("could not connect user %s to training %s: %w", user.ID, training.ID, err)
+		return fmt.Errorf("could not connect user %s to training %s: %w", user.Key, training.Key, err)
 	}
 	return nil
 }

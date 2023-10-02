@@ -82,7 +82,7 @@ func CreateUser(db *Db, i int) (domain.User, error) {
 	if err != nil {
 		return user, err
 	}
-	err = db.Users.Create(&user)
+	err = db.Users.Create(&user, nil)
 	if err != nil {
 		return user, err
 	}
@@ -102,7 +102,7 @@ func CreateTraining(db *Db, i int) (domain.Training, error) {
 		return training, err
 	}
 	training.Cycles, err = CreateMultiple(db, 2, CreateCycle)
-	err = db.Trainings.Create(&training)
+	err = db.Trainings.Create(&training, nil)
 	if err != nil {
 		return training, err
 	}
@@ -110,7 +110,7 @@ func CreateTraining(db *Db, i int) (domain.Training, error) {
 	if err != nil {
 		return training, err
 	}
-	err = db.ConnectTrainingLocation(&training, &location)
+	err = db.ConnectTrainingLocation(&training, &location, nil)
 	if err != nil {
 		return training, err
 	}
@@ -138,7 +138,7 @@ func CreateLocation(db *Db, i int) (domain.Location, error) {
 	if err != nil {
 		return location, err
 	}
-	err = db.Locations.Create(&location)
+	err = db.Locations.Create(&location, nil)
 	if err != nil {
 		return location, err
 	}

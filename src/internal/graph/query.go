@@ -1,16 +1,17 @@
 package graph
 
 import (
+	"context"
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"pkv/api/src/domain"
 	"strings"
 )
 
-func (db *Db) GetAllUsers() ([]domain.User, error) {
+func (db *Db) GetAllUsers(ctx context.Context) ([]domain.User, error) {
 
 	query := "FOR doc IN users RETURN doc"
-	cursor, err := db.Database.Query(nil, query, nil)
+	cursor, err := db.Database.Query(ctx, query, nil)
 	if err != nil {
 		return nil, fmt.Errorf("query string invalid: %w", err)
 	}
@@ -19,7 +20,7 @@ func (db *Db) GetAllUsers() ([]domain.User, error) {
 	var result []domain.User
 	for {
 		var doc domain.User
-		_, err := cursor.ReadDocument(nil, &doc)
+		_, err := cursor.ReadDocument(ctx, &doc)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
@@ -31,10 +32,10 @@ func (db *Db) GetAllUsers() ([]domain.User, error) {
 	return result, nil
 }
 
-func (db *Db) GetAllPages() ([]domain.Page, error) {
+func (db *Db) GetAllPages(ctx context.Context) ([]domain.Page, error) {
 
 	query := "FOR doc IN pages RETURN doc"
-	cursor, err := db.Database.Query(nil, query, nil)
+	cursor, err := db.Database.Query(ctx, query, nil)
 	if err != nil {
 		return nil, fmt.Errorf("query string invalid: %w", err)
 	}
@@ -43,7 +44,7 @@ func (db *Db) GetAllPages() ([]domain.Page, error) {
 	var result []domain.Page
 	for {
 		var doc domain.Page
-		_, err := cursor.ReadDocument(nil, &doc)
+		_, err := cursor.ReadDocument(ctx, &doc)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
@@ -55,9 +56,9 @@ func (db *Db) GetAllPages() ([]domain.Page, error) {
 	return result, nil
 }
 
-func (db *Db) GetTrainings(options domain.TrainingQueryOptions) ([]domain.TrainingDTO, error) {
+func (db *Db) GetTrainings(options domain.TrainingQueryOptions, ctx context.Context) ([]domain.TrainingDTO, error) {
 	query, bindVars := buildTrainingQuery(options)
-	cursor, err := db.Database.Query(nil, query, bindVars)
+	cursor, err := db.Database.Query(ctx, query, bindVars)
 	if err != nil {
 		return nil, fmt.Errorf("query string invalid: %w", err)
 	}
@@ -66,7 +67,7 @@ func (db *Db) GetTrainings(options domain.TrainingQueryOptions) ([]domain.Traini
 	var result []domain.TrainingDTO
 	for {
 		var doc domain.TrainingDTO
-		_, err := cursor.ReadDocument(nil, &doc)
+		_, err := cursor.ReadDocument(ctx, &doc)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
@@ -98,15 +99,15 @@ func buildTrainingQuery(options domain.TrainingQueryOptions) (string, map[string
 		query += "  FILTER location.city == @city\n"
 		bindVars["city"] = options.City
 	}
-	if options.LocationID != "" {
-		query += "  FILTER @locationID == location._id\n"
-		bindVars["locationID"] = options.LocationID
+	if options.LocationKey != "" {
+		query += "  FILTER @locationKey == location._key\n"
+		bindVars["locationKey"] = options.LocationKey
 	}
 	organiserStr := buildUnsetString("organiser", unsetOrganiser)
 	query += "  LET organisers = (FOR organiser, e IN 1..1 INBOUND training edges FILTER e.label == \"organises\" RETURN " + organiserStr + ")\n"
-	if options.OrganiserID != "" {
-		query += "  FILTER @organiserID IN organisers[*]._id\n"
-		bindVars["organiserID"] = options.OrganiserID
+	if options.OrganiserKey != "" {
+		query += "  FILTER @organiserKey IN organisers[*]._key\n"
+		bindVars["organiserKey"] = options.OrganiserKey
 	}
 
 	trainingStr := buildUnsetString("training", unsetTraining)
@@ -115,11 +116,11 @@ func buildTrainingQuery(options domain.TrainingQueryOptions) (string, map[string
 	if _, ok := includeSet["location"]; ok {
 		sections = append(sections, "location: location")
 	}
-	sections = append(sections, "locationId: location._id")
+	sections = append(sections, "locationKey: location._key")
 	if _, ok := includeSet["organisers"]; ok {
 		sections = append(sections, "organisers: organisers")
 	}
-	sections = append(sections, "organiserIds: organisers[*]._id")
+	sections = append(sections, "organiserKeys: organisers[*]._key")
 	if len(sections) > 0 {
 		query += "    " + strings.Join(sections, ",\n    ") + "\n"
 	}

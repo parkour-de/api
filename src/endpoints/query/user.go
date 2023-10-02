@@ -14,16 +14,16 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request, urlParams htt
 		return
 	}
 	// Extract the include parameter from the URL query
-	users, err := h.db.GetAllUsers()
+	users, err := h.db.GetAllUsers(r.Context())
 	if err != nil {
-		api.Error(w, fmt.Errorf("querying users failed: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("querying users failed: %w", err), 400)
 		return
 	}
 	jsonMsg, err := json.Marshal(users)
 	if err != nil {
-		api.Error(w, fmt.Errorf("querying users failed: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("querying users failed: %w", err), 400)
 		return
 	}
 
-	api.Success(w, jsonMsg)
+	api.Success(w, r, jsonMsg)
 }

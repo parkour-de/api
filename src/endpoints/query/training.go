@@ -18,35 +18,35 @@ func (h *Handler) GetTrainings(w http.ResponseWriter, r *http.Request, urlParams
 	query := r.URL.Query()
 	weekday, err := api.ParseInt(query.Get("weekday"))
 	if err != nil {
-		api.Error(w, fmt.Errorf("invalid weekday: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("invalid weekday: %w", err), 400)
 		return
 	}
 	skip, err := api.ParseInt(query.Get("skip"))
 	if err != nil {
-		api.Error(w, fmt.Errorf("invalid skip: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("invalid skip: %w", err), 400)
 		return
 	}
 	limit, err := api.ParseInt(query.Get("limit"))
 	if err != nil {
-		api.Error(w, fmt.Errorf("invalid limit: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("invalid limit: %w", err), 400)
 		return
 	}
 	queryOptions := domain.TrainingQueryOptions{
-		City:        query.Get("city"),
-		Weekday:     weekday,
-		OrganiserID: query.Get("organiser"),
-		LocationID:  query.Get("location"),
-		Include:     api.MakeSet(query.Get("include")),
-		Skip:        skip,
-		Limit:       limit,
+		City:         query.Get("city"),
+		Weekday:      weekday,
+		OrganiserKey: query.Get("organiser"),
+		LocationKey:  query.Get("location"),
+		Include:      api.MakeSet(query.Get("include")),
+		Skip:         skip,
+		Limit:        limit,
 	}
 
-	trainings, err := h.db.GetTrainings(queryOptions)
+	trainings, err := h.db.GetTrainings(queryOptions, r.Context())
 	jsonMsg, err := json.Marshal(trainings)
 	if err != nil {
-		api.Error(w, fmt.Errorf("querying trainings failed: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("querying trainings failed: %w", err), 400)
 		return
 	}
 
-	api.Success(w, jsonMsg)
+	api.Success(w, r, jsonMsg)
 }

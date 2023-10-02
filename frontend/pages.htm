@@ -66,8 +66,8 @@
                 please.innerText = 'Please choose...'
                 data?.forEach(item => {
                     const option = document.createElement('option')
-                    option.innerText = item._id
-                    option.value = item._id
+                    option.innerText = item._key
+                    option.value = item._key
                     p.append(option)
                 })
                 if (data === null) {
@@ -81,7 +81,7 @@
         }
     }
     async function load(page) {
-        const apiUrl = 'http://localhost:8080/api/'
+        const apiUrl = 'http://localhost:8080/api/page/'
         try {
             const response = await fetch(apiUrl + page, {
                 method: 'GET',

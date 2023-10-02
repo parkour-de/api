@@ -14,16 +14,16 @@ func (h *Handler) GetPages(w http.ResponseWriter, r *http.Request, urlParams htt
 		return
 	}
 	// Extract the include parameter from the URL query
-	pages, err := h.db.GetAllPages()
+	pages, err := h.db.GetAllPages(r.Context())
 	if err != nil {
-		api.Error(w, fmt.Errorf("querying users failed: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("querying users failed: %w", err), 400)
 		return
 	}
 	jsonMsg, err := json.Marshal(pages)
 	if err != nil {
-		api.Error(w, fmt.Errorf("querying users failed: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("querying users failed: %w", err), 400)
 		return
 	}
 
-	api.Success(w, jsonMsg)
+	api.Success(w, r, jsonMsg)
 }

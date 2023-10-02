@@ -1,15 +1,15 @@
 package domain
 
 type Login struct {
-	ID       string `json:"_id,omitempty" example:"training/123"`
+	Key      string `json:"_key,omitempty" example:"123"`
 	Provider string `json:"provider,omitempty" example:"facebook"`
 	Subject  string `json:"subject,omitempty" example:"10150000000001234"`
 }
 
-func (t Login) GetID() string {
-	return t.ID
+func (t Login) GetKey() string {
+	return t.Key
 }
 
-func (t *Login) SetID(id string) {
-	t.ID = id
+func (t *Login) SetKey(id string) {
+	t.Key = id
 }

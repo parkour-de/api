@@ -93,7 +93,7 @@ func TestHandler(t *testing.T) {
 	slice2, err := graphDB.GetTrainings(domain.TrainingQueryOptions{
 		City:    "Hamburg",
 		Weekday: 5,
-	})
+	}, nil)
 	if err != nil {
 		t.Error(err)
 	}

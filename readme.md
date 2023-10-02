@@ -69,7 +69,7 @@ the build and image creation steps in this way, we can optimize the build proces
 
 ## Setting up ArangoDB
 
-    docker run -p 8529:8529 -e ARANGO_ROOT_PASSWORD=change-me arangodb/arangodb:3.11.3
+    docker run -p 8529:8529 -e ARANGO_ROOT_PASSWORD=change-me -v /Users/changeme/path/to/dpv-db:/var/lib/arangodb3 arangodb/arangodb:latest
 
 ## API documentation
 
