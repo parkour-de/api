@@ -26,7 +26,15 @@ func (im *EntityManager[T]) Create(item T, ctx context.Context) error {
 	return nil
 }
 
-func (im *EntityManager[T]) Read(key string, ctx context.Context) (interface{}, error) {
+func (im *EntityManager[T]) Has(key string, ctx context.Context) (bool, error) {
+	exists, err := im.Collection.DocumentExists(ctx, key)
+	if err != nil {
+		return false, fmt.Errorf("could not check for item with key %v: %w", key, err)
+	}
+	return exists, nil
+}
+
+func (im *EntityManager[T]) Read(key string, ctx context.Context) (T, error) {
 	item := im.Constructor()
 	meta, err := im.Collection.ReadDocument(ctx, key, item)
 	if err != nil {

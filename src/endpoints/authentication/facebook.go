@@ -117,11 +117,5 @@ func (h *Handler) Facebook(w http.ResponseWriter, r *http.Request, urlParams htt
 
 	token = token + "." + hash
 
-	jsonMsg, err := json.Marshal(token)
-	if err != nil {
-		api.Error(w, r, fmt.Errorf("converting token failed: %w", err), 400)
-		return
-	}
-
-	api.Success(w, r, jsonMsg)
+	api.SuccessJson(w, r, token)
 }

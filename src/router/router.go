@@ -9,6 +9,7 @@ import (
 	"pkv/api/src/endpoints/authentication"
 	"pkv/api/src/endpoints/crud"
 	"pkv/api/src/endpoints/query"
+	"pkv/api/src/endpoints/user"
 	"pkv/api/src/internal/dpv"
 	"pkv/api/src/internal/graph"
 )
@@ -35,6 +36,7 @@ func NewServer(configPath string) *http.Server {
 	locationCrudHandler := crud.NewHandler[*domain.Location](db, db.Locations, "")
 	userCrudHandler := crud.NewHandler[*domain.User](db, db.Users, "")
 	pageCrudHandler := crud.NewHandler[*domain.Page](db, db.Pages, "")
+	userHandler := user.NewHandler(db, db.Users)
 
 	r := httprouter.New()
 
@@ -53,21 +55,22 @@ func NewServer(configPath string) *http.Server {
 	r.GET("/api/trainings", queryHandler.GetTrainings)
 	r.GET("/api/pages", queryHandler.GetPages)
 	r.POST("/api/trainings", trainingCrudHandler.Create)
-	r.GET("/api/trainings/:id", trainingCrudHandler.Read)
+	r.GET("/api/trainings/:key", trainingCrudHandler.Read)
 	r.PUT("/api/trainings", trainingCrudHandler.Update)
-	r.DELETE("/api/trainings/:id", trainingCrudHandler.Delete)
+	r.DELETE("/api/trainings/:key", trainingCrudHandler.Delete)
 	r.POST("/api/locations", locationCrudHandler.Create)
-	r.GET("/api/locations/:id", locationCrudHandler.Read)
+	r.GET("/api/locations/:key", locationCrudHandler.Read)
 	r.PUT("/api/locations", locationCrudHandler.Update)
-	r.DELETE("/api/locations/:id", locationCrudHandler.Delete)
+	r.DELETE("/api/locations/:key", locationCrudHandler.Delete)
 	r.POST("/api/users", userCrudHandler.Create)
-	r.GET("/api/users/:id", userCrudHandler.Read)
+	r.GET("/api/users/:key", userCrudHandler.Read)
+	r.GET("/api/users/:key/taken", userHandler.Exists)
 	r.PUT("/api/users", userCrudHandler.Update)
-	r.DELETE("/api/users/:id", userCrudHandler.Delete)
+	r.DELETE("/api/users/:key", userCrudHandler.Delete)
 	r.POST("/api/pages", pageCrudHandler.Create)
-	r.GET("/api/pages/:id", pageCrudHandler.Read)
+	r.GET("/api/pages/:key", pageCrudHandler.Read)
 	r.PUT("/api/pages", pageCrudHandler.Update)
-	r.DELETE("/api/pages/:id", pageCrudHandler.Delete)
+	r.DELETE("/api/pages/:key", pageCrudHandler.Delete)
 
 	port := os.Getenv("PORT")
 	if port == "" {

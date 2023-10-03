@@ -1,7 +1,6 @@
 package query
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -19,11 +18,5 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request, urlParams htt
 		api.Error(w, r, fmt.Errorf("querying users failed: %w", err), 400)
 		return
 	}
-	jsonMsg, err := json.Marshal(users)
-	if err != nil {
-		api.Error(w, r, fmt.Errorf("querying users failed: %w", err), 400)
-		return
-	}
-
-	api.Success(w, r, jsonMsg)
+	api.SuccessJson(w, r, users)
 }

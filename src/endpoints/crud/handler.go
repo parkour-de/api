@@ -40,12 +40,7 @@ func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("creating entity failed: %w", err), 400)
 		return
 	}
-	jsonMsg, err := json.Marshal(IdResponse{item.GetKey()})
-	if err != nil {
-		api.Error(w, r, fmt.Errorf("serialising entity failed: %w", err), 400)
-		return
-	}
-	api.Success(w, r, jsonMsg)
+	api.SuccessJson(w, r, IdResponse{item.GetKey()})
 }
 
 // Read handles the retrieval of entities.
@@ -53,18 +48,13 @@ func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams http
 	if api.MakeCors(w, r) {
 		return
 	}
-	id := h.prefix + urlParams.ByName("id")
+	id := h.prefix + urlParams.ByName("key")
 	item, err := h.em.Read(id, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("read request failed: %w", err), 400)
 		return
 	}
-	jsonMsg, err := json.Marshal(item)
-	if err != nil {
-		api.Error(w, r, fmt.Errorf("querying item failed: %w", err), 400)
-		return
-	}
-	api.Success(w, r, jsonMsg)
+	api.SuccessJson(w, r, item)
 }
 
 // Update handles the replacement of existing entities.
@@ -84,12 +74,7 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("updating entity failed: %w", err), 400)
 		return
 	}
-	jsonMsg, err := json.Marshal(IdResponse{item.GetKey()})
-	if err != nil {
-		api.Error(w, r, fmt.Errorf("serialising entity failed: %w", err), 400)
-		return
-	}
-	api.Success(w, r, jsonMsg)
+	api.SuccessJson(w, r, IdResponse{item.GetKey()})
 }
 
 // Delete handles the deletion of entities.
@@ -97,18 +82,13 @@ func (h *Handler[T]) Delete(w http.ResponseWriter, r *http.Request, urlParams ht
 	if api.MakeCors(w, r) {
 		return
 	}
-	id := h.prefix + urlParams.ByName("id")
+	id := h.prefix + urlParams.ByName("key")
 	var item T
 	item.SetKey(id)
 	err := h.em.Delete(item, r.Context())
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("delete request failed: %w", err), 400)
+		api.Error(w, r, fmt.Errorf("deleting entity failed: %w", err), 400)
 		return
 	}
-	jsonMsg, err := json.Marshal(IdResponse{id})
-	if err != nil {
-		api.Error(w, r, fmt.Errorf("deleting item failed: %w", err), 400)
-		return
-	}
-	api.Success(w, r, jsonMsg)
+	api.SuccessJson(w, r, IdResponse{id})
 }

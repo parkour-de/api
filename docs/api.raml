@@ -5,7 +5,7 @@ version: '1.0'
 baseUri: http://localhost:8080/
 mediaType: application/json
 types:
-  IdResponse: !include types/idResponse.raml
+  KeyResponse: !include types/keyResponse.raml
   Page: !include types/page.raml
   Location: !include types/location.raml
   Training: !include types/training.raml
@@ -37,27 +37,27 @@ types:
       responses:
         '200':
           description: OK
-          body: IdResponse
+          body: KeyResponse
     put:
       body: Page
       responses:
         '200':
           description: OK
-          body: IdResponse
-    '/{id}':
+          body: KeyResponse
+    '/{key}':
       delete:
         responses:
           '200':
             description: OK
-            body: IdResponse
+            body: KeyResponse
       get:
         responses:
           '200':
             description: OK
             body: Page
       uriParameters:
-        id:
-          description: id of the item to be retrieved
+        key:
+          description: key of the item to be retrieved
           type: string
   /locations:
     post:
@@ -65,26 +65,26 @@ types:
       responses:
         '200':
           description: OK
-          body: IdResponse
+          body: KeyResponse
     put:
       body: Location
       responses:
         '200':
           description: OK
-          body: IdResponse
-    '/{id}':
+          body: KeyResponse
+    '/{key}':
       delete:
         responses:
           '200':
             description: OK
-            body: IdResponse
+            body: KeyResponse
       get:
         responses:
           '200':
             description: OK
             body: Location
       uriParameters:
-        id:
+        key:
           description: id of the item to be retrieved
           type: string
   /trainings:
@@ -101,27 +101,27 @@ types:
       responses:
         '200':
           description: OK
-          body: IdResponse
+          body: KeyResponse
     put:
       body: Training
       responses:
         '200':
           description: OK
-          body: IdResponse
-    '/{id}':
+          body: KeyResponse
+    '/{key}':
       delete:
         responses:
           '200':
             description: OK
-            body: IdResponse
+            body: KeyResponse
       get:
         responses:
           '200':
             description: OK
             body: Training
       uriParameters:
-        id:
-          description: id of the item to be retrieved
+        key:
+          description: key of the item to be retrieved
           type: string
   /users:
     get:
@@ -135,25 +135,33 @@ types:
       responses:
         '200':
           description: OK
-          body: IdResponse
+          body: KeyResponse
     put:
       body: User
       responses:
         '200':
           description: OK
-          body: IdResponse
-    '/{id}':
+          body: KeyResponse
+    '/{key}':
       delete:
         responses:
           '200':
             description: OK
-            body: IdResponse
+            body: KeyResponse
       get:
         responses:
           '200':
             description: OK
             body: User
+      '/taken':
+        get:
+          responses:
+            '200':
+              description: OK
+              body:
+                type: boolean
+                example: true
       uriParameters:
-        id:
-          description: id of the item to be retrieved
+        key:
+          description: key of the item to be retrieved
           type: string

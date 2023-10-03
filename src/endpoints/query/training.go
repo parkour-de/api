@@ -1,7 +1,6 @@
 package query
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -42,11 +41,9 @@ func (h *Handler) GetTrainings(w http.ResponseWriter, r *http.Request, urlParams
 	}
 
 	trainings, err := h.db.GetTrainings(queryOptions, r.Context())
-	jsonMsg, err := json.Marshal(trainings)
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("querying trainings failed: %w", err), 400)
 		return
 	}
-
-	api.Success(w, r, jsonMsg)
+	api.SuccessJson(w, r, trainings)
 }

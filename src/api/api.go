@@ -13,6 +13,16 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+func SuccessJson(w http.ResponseWriter, r *http.Request, data interface{}) {
+	jsonMsg, err := json.Marshal(data)
+	if err != nil {
+		Error(w, r, fmt.Errorf("serialising response failed: %w", err), 400)
+		return
+	} else {
+		Success(w, r, jsonMsg)
+	}
+}
+
 func Success(w http.ResponseWriter, r *http.Request, jsonMsg []byte) {
 	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(jsonMsg); err != nil {
