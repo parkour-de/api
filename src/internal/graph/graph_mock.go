@@ -2,10 +2,8 @@ package graph
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"pkv/api/src/domain"
-	"pkv/api/src/internal/dpv"
 	"time"
 )
 
@@ -159,22 +157,7 @@ func CreateCycle(db *Db, i int) (domain.Cycle, error) {
 	return cycle, nil
 }
 
-func NewTestDB() *Db {
-	config, err := dpv.NewConfig("../../config.yml")
-	if err != nil {
-		log.Fatal(err)
-	}
-	c, err := Connect(config, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	database, err := GetOrCreateDatabase(c, "dpv", config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db, err := NewDB(database)
-
+func NewTestDB(db *Db) {
 	/*
 		author, err = CreateUser(db, 0)
 		if err != nil {
@@ -203,5 +186,4 @@ func NewTestDB() *Db {
 		fmt.Printf("Create 1000 trainings: %d ms\n", x3.Sub(x2).Milliseconds())
 		fmt.Printf("Create 1000 organisers: %d ms\n", x4.Sub(x3).Milliseconds())
 	*/
-	return db
 }

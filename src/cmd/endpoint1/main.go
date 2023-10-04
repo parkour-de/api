@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	server := router.NewServer("config.yml")
+	server := router.NewServer("config.yml", false)
 	log.Fatal(server.ListenAndServe())
 }

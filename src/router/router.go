@@ -1,8 +1,10 @@
 package router
 
 import (
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"pkv/api/src/domain"
@@ -12,24 +14,43 @@ import (
 	"pkv/api/src/endpoints/user"
 	"pkv/api/src/internal/dpv"
 	"pkv/api/src/internal/graph"
+	"pkv/api/src/internal/security"
+	"time"
 )
 
-func NewServer(configPath string) *http.Server {
+func Init(configPath string, test bool) (*graph.Db, *dpv.Config, error) {
 	var err error
-	dpv.ConfigInstance, err = dpv.NewConfig(configPath)
+	config, err := dpv.NewConfig(configPath)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, fmt.Errorf("could not initialise config instance: %w", err)
 	}
-	c, err := graph.Connect(dpv.ConfigInstance, true)
+	c, err := graph.Connect(config, true)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, fmt.Errorf("could not connect to database server: %w", err)
 	}
-	database, err := graph.GetOrCreateDatabase(c, "dpv", dpv.ConfigInstance)
+	dbname := "dpv"
+	if test {
+		dbname = "test-" + dbname + "-" + security.HashToken(fmt.Sprintf("%s-%x", time.Now().String(), rand.Int()))[0:8]
+		log.Printf("Using database %s\n", dbname)
+	}
+	database, err := graph.GetOrCreateDatabase(c, dbname, config)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, fmt.Errorf("could not use database: %w", err)
 	}
-
 	db, err := graph.NewDB(database)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not initialise database: %w", err)
+	}
+	return db, config, err
+}
+
+func NewServer(configPath string, test bool) *http.Server {
+	db, config, err := Init(configPath, test)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dpv.ConfigInstance = config
+
 	authenticationHandler := authentication.NewHandler(db)
 	queryHandler := query.NewHandler(db)
 	trainingCrudHandler := crud.NewHandler[*domain.Training](db, db.Trainings, "")
@@ -64,7 +85,7 @@ func NewServer(configPath string) *http.Server {
 	r.DELETE("/api/locations/:key", locationCrudHandler.Delete)
 	r.POST("/api/users", userCrudHandler.Create)
 	r.GET("/api/users/:key", userCrudHandler.Read)
-	r.GET("/api/users/:key/taken", userHandler.Exists)
+	r.GET("/api/users/:key/exists", userHandler.Exists)
 	r.PUT("/api/users", userCrudHandler.Update)
 	r.DELETE("/api/users/:key", userCrudHandler.Delete)
 	r.POST("/api/pages", pageCrudHandler.Create)

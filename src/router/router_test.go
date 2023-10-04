@@ -10,7 +10,6 @@ import (
 	"os"
 	"pkv/api/src/domain"
 	"pkv/api/src/endpoints/query"
-	"pkv/api/src/internal/graph"
 	"testing"
 	"time"
 )
@@ -20,7 +19,7 @@ func TestServer(t *testing.T) {
 	os.Setenv("PORT", "8081")
 	defer os.Setenv("PORT", port)
 
-	server := NewServer("../../config.yml")
+	server := NewServer("../../config.yml", true)
 	go func() {
 		err := server.ListenAndServe()
 		if err != http.ErrServerClosed {
@@ -64,7 +63,10 @@ func TestHandler(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	graphDB := graph.NewTestDB()
+	graphDB, _, err := Init("../../config.yml", true)
+	if err != nil {
+		t.Fatal(err)
+	}
 	queryHandler := query.NewHandler(graphDB)
 	handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		queryHandler.GetTrainings(writer, request, httprouter.Params{})
