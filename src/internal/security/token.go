@@ -7,7 +7,10 @@ import (
 )
 
 func HashToken(token string) string {
-	secretKey := dpv.ConfigInstance.Auth.DpvSecretKey
+	secretKey := "not-so-secret-key"
+	if dpv.ConfigInstance != nil {
+		secretKey = dpv.ConfigInstance.Auth.DpvSecretKey
+	}
 	entropy := "f3ctRkFcqdgyXjSAleutn0UDx22/DZ8DlfmLNfHGtl8"
 	innerKey := []byte(secretKey + entropy)
 	outerKey := []byte(secretKey + entropy)
