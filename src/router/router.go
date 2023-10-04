@@ -1,10 +1,8 @@
 package router
 
 import (
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"pkv/api/src/domain"
@@ -14,38 +12,10 @@ import (
 	"pkv/api/src/endpoints/user"
 	"pkv/api/src/internal/dpv"
 	"pkv/api/src/internal/graph"
-	"pkv/api/src/internal/security"
-	"time"
 )
 
-func Init(configPath string, test bool) (*graph.Db, *dpv.Config, error) {
-	var err error
-	config, err := dpv.NewConfig(configPath)
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not initialise config instance: %w", err)
-	}
-	c, err := graph.Connect(config, true)
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not connect to database server: %w", err)
-	}
-	dbname := "dpv"
-	if test {
-		dbname = "test-" + dbname + "-" + security.HashToken(fmt.Sprintf("%s-%x", time.Now().String(), rand.Int()))[0:8]
-		log.Printf("Using database %s\n", dbname)
-	}
-	database, err := graph.GetOrCreateDatabase(c, dbname, config)
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not use database: %w", err)
-	}
-	db, err := graph.NewDB(database)
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not initialise database: %w", err)
-	}
-	return db, config, err
-}
-
 func NewServer(configPath string, test bool) *http.Server {
-	db, config, err := Init(configPath, test)
+	db, config, err := graph.Init(configPath, test)
 	if err != nil {
 		log.Fatal(err)
 	}

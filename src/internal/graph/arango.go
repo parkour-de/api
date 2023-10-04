@@ -4,8 +4,12 @@ import (
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
+	"log"
+	"math/rand"
 	"pkv/api/src/internal/dpv"
+	"pkv/api/src/internal/security"
 	"strings"
+	"time"
 )
 
 func Connect(config *dpv.Config, useRoot bool) (driver.Client, error) {
@@ -89,4 +93,30 @@ func NewEntityManager[T Entity](db driver.Database, name string, edges bool, con
 		return EntityManager[T]{}, fmt.Errorf("could not get or create %s collection: %w", name, err)
 	}
 	return EntityManager[T]{collection, constructor}, nil
+}
+
+func Init(configPath string, test bool) (*Db, *dpv.Config, error) {
+	var err error
+	config, err := dpv.NewConfig(configPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not initialise config instance: %w", err)
+	}
+	c, err := Connect(config, true)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not connect to database server: %w", err)
+	}
+	dbname := "dpv"
+	if test {
+		dbname = "test-" + dbname + "-" + security.HashToken(fmt.Sprintf("%s-%x", time.Now().String(), rand.Int()))[0:8]
+		log.Printf("Using database %s\n", dbname)
+	}
+	database, err := GetOrCreateDatabase(c, dbname, config)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not use database: %w", err)
+	}
+	db, err := NewDB(database)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not initialise database: %w", err)
+	}
+	return db, config, err
 }

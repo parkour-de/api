@@ -8,6 +8,8 @@ types:
   KeyResponse: !include types/keyResponse.raml
   Page: !include types/page.raml
   Location: !include types/location.raml
+  LocationDTO: !include types/locationDTO.raml
+  LocationsRequest: !include types/locationsRequest.raml
   Training: !include types/training.raml
   TrainingDTO: !include types/trainingDTO.raml
   TrainingsRequest: !include types/trainingsRequest.raml
@@ -60,6 +62,14 @@ types:
           description: key of the item to be retrieved
           type: string
   /locations:
+    get:
+      description: Returns a list of locations.
+      responses:
+        '200':
+          description: OK
+          body: LocationDTO[]
+      queryString:
+        type: LocationsRequest
     post:
       body: Location
       responses:

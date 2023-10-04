@@ -10,6 +10,7 @@ import (
 	"os"
 	"pkv/api/src/domain"
 	"pkv/api/src/endpoints/query"
+	"pkv/api/src/internal/graph"
 	"testing"
 	"time"
 )
@@ -63,7 +64,7 @@ func TestHandler(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	graphDB, _, err := Init("../../config.yml", true)
+	graphDB, _, err := graph.Init("../../config.yml", true)
 	if err != nil {
 		t.Fatal(err)
 	}
