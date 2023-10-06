@@ -10,7 +10,7 @@ import (
 )
 
 type Handler[T graph.Entity] struct {
-	db     graph.DB
+	db     *graph.Db
 	em     graph.EntityManager[T]
 	prefix string
 }
@@ -19,7 +19,7 @@ type IdResponse struct {
 	Key string `json:"_key,omitempty" example:"123"`
 }
 
-func NewHandler[T graph.Entity](db graph.DB, em graph.EntityManager[T], prefix string) *Handler[T] {
+func NewHandler[T graph.Entity](db *graph.Db, em graph.EntityManager[T], prefix string) *Handler[T] {
 	return &Handler[T]{db, em, prefix}
 }
 

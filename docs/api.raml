@@ -13,6 +13,8 @@ types:
   Training: !include types/training.raml
   TrainingDTO: !include types/trainingDTO.raml
   TrainingsRequest: !include types/trainingsRequest.raml
+  TotpConfiguration: !include types/totpConfiguration.raml
+  TotpEnableRequest: !include types/totpEnableRequest.raml
   User: !include types/user.raml
   Description: !include types/description.raml
   Descriptions:
@@ -163,7 +165,7 @@ types:
           '200':
             description: OK
             body: User
-      '/taken':
+      '/exists':
         get:
           responses:
             '200':
@@ -171,6 +173,17 @@ types:
               body:
                 type: boolean
                 example: true
+      '/totp':
+        get:
+          responses:
+            '200':
+              description: OK
+              body: TotpConfiguration
+        post:
+          body: TotpEnableRequest
+          responses:
+            '200':
+              description: OK
       uriParameters:
         key:
           description: key of the item to be retrieved

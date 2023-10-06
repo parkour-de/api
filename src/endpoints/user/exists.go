@@ -11,7 +11,7 @@ func (h *Handler) Exists(w http.ResponseWriter, r *http.Request, urlParams httpr
 	if api.MakeCors(w, r) {
 		return
 	}
-	exists, err := h.em.Has(urlParams.ByName("key"), r.Context())
+	exists, err := h.db.Users.Has(urlParams.ByName("key"), r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("check user exists failed: %w", err), http.StatusBadRequest)
 		return

@@ -31,7 +31,7 @@ func TestGetLocations(t *testing.T) {
 	}
 	db, _, err := Init("../../../config.yml", true)
 	if err != nil {
-		t.Errorf("db initialisation failed: %s", err)
+		t.Fatalf("db initialisation failed: %s", err)
 	}
 	locations := []domain.Location{
 		cities["Hamburg"],

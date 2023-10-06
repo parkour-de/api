@@ -108,7 +108,7 @@ func CreateTraining(db *Db, i int) (domain.Training, error) {
 	if err != nil {
 		return training, err
 	}
-	err = db.ConnectTrainingLocation(&training, &location, nil)
+	err = db.TrainingHappensAtLocation(&training, &location, nil)
 	if err != nil {
 		return training, err
 	}

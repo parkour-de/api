@@ -1,12 +1,12 @@
 package graph
 
 import (
-	"context"
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"pkv/api/src/domain"
 )
 
+/*
 // DB is an interface that defines the methods required for a database connection
 type DB interface {
 	ConnectUserTraining(user domain.User, training domain.Training, ctx context.Context) error
@@ -14,7 +14,7 @@ type DB interface {
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	GetAllPages(ctx context.Context) ([]domain.Page, error)
 	GetTrainings(options domain.TrainingQueryOptions, ctx context.Context) ([]domain.TrainingDTO, error)
-}
+}*/
 
 type Db struct {
 	Database       driver.Database

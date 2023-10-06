@@ -94,3 +94,10 @@ func ParseInt(queryValue string) (int, error) {
 	}
 	return strconv.Atoi(queryValue)
 }
+
+func ParseFloat(queryValue string) (float64, error) {
+	if queryValue == "" {
+		return 0, nil
+	}
+	return strconv.ParseFloat(queryValue, 64)
+}

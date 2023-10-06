@@ -3,9 +3,9 @@ package query
 import "pkv/api/src/internal/graph"
 
 type Handler struct {
-	db graph.DB
+	db *graph.Db
 }
 
-func NewHandler(db graph.DB) *Handler {
+func NewHandler(db *graph.Db) *Handler {
 	return &Handler{db: db}
 }

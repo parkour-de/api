@@ -1,0 +1,12 @@
+#%RAML 1.0 DataType
+properties:
+  loginId?:
+    type: string
+    example: "123"
+  secret?:
+    type: string
+    description: base32-encoded string
+  image?:
+    type: string
+    description: base64-encoded PNG image
+    example: data:image/png;base64,iVBORw0K...

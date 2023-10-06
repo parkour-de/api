@@ -23,11 +23,11 @@ func NewServer(configPath string, test bool) *http.Server {
 
 	authenticationHandler := authentication.NewHandler(db)
 	queryHandler := query.NewHandler(db)
+	userHandler := user.NewHandler(db)
 	trainingCrudHandler := crud.NewHandler[*domain.Training](db, db.Trainings, "")
 	locationCrudHandler := crud.NewHandler[*domain.Location](db, db.Locations, "")
 	userCrudHandler := crud.NewHandler[*domain.User](db, db.Users, "")
 	pageCrudHandler := crud.NewHandler[*domain.Page](db, db.Pages, "")
-	userHandler := user.NewHandler(db, db.Users)
 
 	r := httprouter.New()
 
@@ -45,6 +45,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/users", queryHandler.GetUsers)
 	r.GET("/api/trainings", queryHandler.GetTrainings)
 	r.GET("/api/pages", queryHandler.GetPages)
+	r.GET("/api/locations", queryHandler.GetLocations)
 	r.POST("/api/trainings", trainingCrudHandler.Create)
 	r.GET("/api/trainings/:key", trainingCrudHandler.Read)
 	r.PUT("/api/trainings", trainingCrudHandler.Update)
@@ -56,6 +57,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.POST("/api/users", userCrudHandler.Create)
 	r.GET("/api/users/:key", userCrudHandler.Read)
 	r.GET("/api/users/:key/exists", userHandler.Exists)
+	r.GET("/api/users/:key/totp", userHandler.RequestTOTP)
+	r.POST("/api/users/:key/totp", userHandler.EnableTOTP)
 	r.PUT("/api/users", userCrudHandler.Update)
 	r.DELETE("/api/users/:key", userCrudHandler.Delete)
 	r.POST("/api/pages", pageCrudHandler.Create)
