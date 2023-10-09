@@ -1,10 +1,21 @@
 package security
 
 import (
-	"github.com/dvsekhvalnov/jose2go/base64url"
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
 	"golang.org/x/crypto/sha3"
 	"pkv/api/src/internal/dpv"
 )
+
+func MakeNonce() string {
+	buff := make([]byte, 12)
+	_, err := rand.Read(buff)
+	if err != nil {
+		println(fmt.Errorf("random number generation failed: %w", err).Error())
+	}
+	return base64.RawURLEncoding.EncodeToString(buff)
+}
 
 func HashToken(token string) string {
 	secretKey := "not-so-secret-key"
@@ -29,5 +40,20 @@ func HashToken(token string) string {
 	d.Write(outerKey)
 	d.Write(h)
 	d.Read(h)
-	return base64url.Encode(h)
+	return base64.RawURLEncoding.EncodeToString(h)
+}
+
+func IsStrongPassword(password string) bool {
+	// minimum length: 8 characters
+	// contains at least one character that is not a digit
+
+	if len(password) < 8 {
+		return false
+	}
+	for _, c := range password {
+		if c < '0' || c > '9' {
+			return true
+		}
+	}
+	return false
 }

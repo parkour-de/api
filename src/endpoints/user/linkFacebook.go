@@ -1,4 +1,4 @@
-package authentication
+package user
 
 import (
 	"encoding/json"
@@ -8,9 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"pkv/api/src/api"
+	"pkv/api/src/domain"
 	"pkv/api/src/internal/dpv"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -24,27 +23,29 @@ type FacebookTokenValidationResponse struct {
 	} `json:"data"`
 }
 
-// Facebook handles the GET /api/facebook endpoint.
-func (h *Handler) Facebook(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+// LinkFacebook attaches a facebook subject (sub) to a user
+func (h *Handler) LinkFacebook(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	if api.MakeCors(w, r) {
 		return
 	}
-	auth := r.Header.Get("Authorization")
-	if strings.HasPrefix(auth, "facebook ") {
-		tokens := strings.SplitN(auth, " ", 2)
-		if len(tokens) != 2 {
-			api.Error(w, r, fmt.Errorf("authorization header not correctly formatted"), http.StatusBadRequest)
-			return
-		}
-		auth = tokens[1]
-		if len(auth) < 1 {
-			api.Error(w, r, fmt.Errorf("authorization header contains empty token"), http.StatusBadRequest)
-			return
-		}
-	} else {
-		api.Error(w, r, fmt.Errorf("authorization header missing or not correctly prefixed"), http.StatusBadRequest)
+	key := urlParams.ByName("key")
+	user, err := h.db.Users.Read(key, r.Context())
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("read user failed: %w", err), http.StatusBadRequest)
 		return
 	}
+	logins, err := h.db.GetLoginsForUser(key, r.Context())
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("read logins failed: %w", err), http.StatusBadRequest)
+		return
+	}
+	for _, login := range logins {
+		if login.Provider == "facebook" {
+			api.Error(w, r, fmt.Errorf("facebook already connected"), http.StatusBadRequest)
+			return
+		}
+	}
+	auth := r.URL.Query().Get("auth")
 
 	validationURL := dpv.ConfigInstance.Auth.FacebookGraphUrl
 	params := url.Values{}
@@ -108,17 +109,23 @@ func (h *Handler) Facebook(w http.ResponseWriter, r *http.Request, urlParams htt
 		expiry = exp
 	}
 
-	user := "4711"
+	login := domain.Login{
+		Key:      "",
+		Provider: "facebook",
+		Subject:  validationResponse.Data.UserId,
+		Enabled:  true,
+		Created:  time.Now(),
+	}
 
-	token := facebookToken(user, expiry)
+	if err = h.db.Logins.Create(&login, r.Context()); err != nil {
+		api.Error(w, r, fmt.Errorf("create login failed: %w", err), http.StatusBadRequest)
+		return
+	}
 
-	hash := hashUserToken(token)
+	if err = h.db.LoginAuthenticatesUser(login, *user, r.Context()); err != nil {
+		api.Error(w, r, fmt.Errorf("link login to user failed: %w", err), http.StatusBadRequest)
+		return
+	}
 
-	token = token + ":" + hash
-
-	api.SuccessJson(w, r, token)
-}
-
-func facebookToken(user string, expiry int64) string {
-	return "f:" + user + ":" + strconv.FormatInt(expiry, 10)
+	api.SuccessJson(w, r, nil)
 }

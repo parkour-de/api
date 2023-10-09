@@ -59,6 +59,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/users/:key/exists", userHandler.Exists)
 	r.GET("/api/users/:key/totp", userHandler.RequestTOTP)
 	r.POST("/api/users/:key/totp", userHandler.EnableTOTP)
+	r.GET("/api/users/:key/email", userHandler.RequestEmail)
+	r.GET("/api/users/:key/email/:loginKey", userHandler.EnableEmail)
 	r.PUT("/api/users", userCrudHandler.Update)
 	r.DELETE("/api/users/:key", userCrudHandler.Delete)
 	r.POST("/api/pages", pageCrudHandler.Create)

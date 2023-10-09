@@ -15,10 +15,12 @@ type Config struct {
 		Pass string `yaml:"pass"`
 	} `yaml:"db"`
 	Auth struct {
-		DpvSecretKey     string `yaml:"dpv_secret_key"`
-		DpvTokenSeconds  int    `yaml:"dpv_token_seconds"`
-		FacebookGraphUrl string `yaml:"facebook_graph_url"`
-		FacebookAppId    string `yaml:"facebook_app_id"`
+		DpvSecretKey       string `yaml:"dpv_secret_key"`
+		DpvTokenSeconds    int    `yaml:"dpv_token_seconds"`
+		FacebookGraphUrl   string `yaml:"facebook_graph_url"`
+		FacebookAppId      string `yaml:"facebook_app_id"`
+		GoogleClientId     string `yaml:"google_client_id"`
+		GoogleClientSecret string `yaml:"google_client_secret"`
 	} `yaml:"auth"`
 }
 

@@ -40,14 +40,14 @@ func TestTOTP(t *testing.T) {
 				params = httprouter.Params{{"key", "doesnotexist"}}
 				requestTOTP.ServeHTTP(rr, req)
 				expectedContentType := "application/json"
-				log.Printf("Status-Code: %d\n", rr.Code)
-				log.Printf("Content-Type: %s\n", rr.Header().Get("Content-Type"))
-				log.Printf("Body: %s\n", rr.Body.String())
 				if rr.Header().Get("Content-Type") != expectedContentType {
 					t.Errorf("handler returned unexpected content-type: got %v want %v",
 						rr.Header().Get("Content-Type"), expectedContentType)
 				}
 				// TODO: Actually fail the test
+				if rr.Code != http.StatusBadRequest {
+					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				}
 			},
 		},
 		{
@@ -69,9 +69,6 @@ func TestTOTP(t *testing.T) {
 				params = httprouter.Params{{"key", user.Key}}
 				requestTOTP.ServeHTTP(rr, req)
 				expectedContentType := "application/json"
-				log.Printf("Status-Code: %d\n", rr.Code)
-				log.Printf("Content-Type: %s\n", rr.Header().Get("Content-Type"))
-				log.Printf("Body: %s\n", rr.Body.String())
 				if rr.Code != http.StatusOK {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusOK)
 				}
