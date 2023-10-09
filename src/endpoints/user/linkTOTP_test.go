@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"pkv/api/src/domain"
 	"pkv/api/src/internal/graph"
+	"pkv/api/src/service/user"
 	"testing"
 	"time"
 )
@@ -173,7 +174,8 @@ func TestTOTP(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			params = httprouter.Params{}
 			db := tt.setup()
-			h := NewHandler(db)
+			s := user.NewService(db)
+			h := NewHandler(db, s)
 			requestTOTP := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				h.RequestTOTP(writer, request, params)
 			})

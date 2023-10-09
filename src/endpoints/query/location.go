@@ -10,9 +10,6 @@ import (
 
 // GetLocations handles the GET request to /api/locations
 func (h *Handler) GetLocations(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	// Extract the include parameter from the URL query
 	query := r.URL.Query()
 	lat, err := api.ParseFloat(query.Get("lat"))

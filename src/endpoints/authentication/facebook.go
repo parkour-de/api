@@ -1,17 +1,11 @@
 package authentication
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"io"
 	"net/http"
-	"net/url"
 	"pkv/api/src/api"
-	"pkv/api/src/internal/dpv"
-	"strconv"
 	"strings"
-	"time"
 )
 
 type FacebookTokenValidationResponse struct {
@@ -26,9 +20,6 @@ type FacebookTokenValidationResponse struct {
 
 // Facebook handles the GET /api/facebook endpoint.
 func (h *Handler) Facebook(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	auth := r.Header.Get("Authorization")
 	if strings.HasPrefix(auth, "facebook ") {
 		tokens := strings.SplitN(auth, " ", 2)
@@ -46,79 +37,11 @@ func (h *Handler) Facebook(w http.ResponseWriter, r *http.Request, urlParams htt
 		return
 	}
 
-	validationURL := dpv.ConfigInstance.Auth.FacebookGraphUrl
-	params := url.Values{}
-	params.Set("input_token", auth)
-	params.Set("access_token", auth)
-
-	resp, err := http.Get(validationURL + "?" + params.Encode())
+	token, err := h.service.Facebook(auth)
 	if err != nil {
-		fmt.Printf("token validation failed - %s\n", err.Error())
-		api.Error(w, r, fmt.Errorf("token validation failed - check server logs"), http.StatusBadRequest)
+		api.Error(w, r, err, http.StatusBadRequest)
 		return
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("token validation failed - %d\n", resp.StatusCode)
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Printf("could not read associated error message - %s\n", err.Error())
-		} else {
-			fmt.Println(string(bodyBytes))
-		}
-		api.Error(w, r, fmt.Errorf("token validation failed - check server logs"), http.StatusUnauthorized)
-		return
-	}
-
-	// Parse the validation response
-	var validationResponse FacebookTokenValidationResponse
-	if err := json.NewDecoder(resp.Body).Decode(&validationResponse); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !validationResponse.Data.IsValid {
-		api.Error(w, r, fmt.Errorf("facebook says, data is not valid"), http.StatusUnauthorized)
-		return
-	}
-
-	if validationResponse.Data.AppId != dpv.ConfigInstance.Auth.FacebookAppId {
-		api.Error(w, r, fmt.Errorf("facebook says, this token belongs to a different app"), http.StatusUnauthorized)
-		return
-	}
-
-	now := time.Now()
-	iat := int64(validationResponse.Data.IssuedAt)
-	exp := int64(validationResponse.Data.ExpiresAt)
-	unix := now.Unix()
-
-	if iat > unix {
-		api.Error(w, r, fmt.Errorf("facebook says, this token is from the future"), http.StatusUnauthorized)
-		return
-	}
-
-	if exp < unix {
-		api.Error(w, r, fmt.Errorf("facebook says, this token is from the past"), http.StatusUnauthorized)
-		return
-	}
-
-	expiry := unix + 3600
-	if exp < expiry {
-		expiry = exp
-	}
-
-	user := "4711"
-
-	token := facebookToken(user, expiry)
-
-	hash := hashUserToken(token)
-
-	token = token + ":" + hash
 
 	api.SuccessJson(w, r, token)
-}
-
-func facebookToken(user string, expiry int64) string {
-	return "f:" + user + ":" + strconv.FormatInt(expiry, 10)
 }

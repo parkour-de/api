@@ -12,6 +12,7 @@ import (
 	"pkv/api/src/endpoints/user"
 	"pkv/api/src/internal/dpv"
 	"pkv/api/src/internal/graph"
+	user2 "pkv/api/src/service/user"
 )
 
 func NewServer(configPath string, test bool) *http.Server {
@@ -21,9 +22,10 @@ func NewServer(configPath string, test bool) *http.Server {
 	}
 	dpv.ConfigInstance = config
 
-	authenticationHandler := authentication.NewHandler(db)
+	userService := user2.NewService(db)
+	authenticationHandler := authentication.NewHandler(db, userService)
 	queryHandler := query.NewHandler(db)
-	userHandler := user.NewHandler(db)
+	userHandler := user.NewHandler(db, userService)
 	trainingCrudHandler := crud.NewHandler[*domain.Training](db, db.Trainings, "")
 	locationCrudHandler := crud.NewHandler[*domain.Location](db, db.Locations, "")
 	userCrudHandler := crud.NewHandler[*domain.User](db, db.Users, "")

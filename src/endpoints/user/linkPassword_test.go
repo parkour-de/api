@@ -3,11 +3,11 @@ package user
 import (
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"pkv/api/src/domain"
 	"pkv/api/src/internal/graph"
+	"pkv/api/src/service/user"
 	"testing"
 )
 
@@ -32,9 +32,6 @@ func TestPassword(t *testing.T) {
 				params = httprouter.Params{{"key", "doesnotexist"}}
 				linkPassword.ServeHTTP(rr, req)
 				expectedContentType := "application/json"
-				log.Printf("Status-Code: %d\n", rr.Code)
-				log.Printf("Content-Type: %s\n", rr.Header().Get("Content-Type"))
-				log.Printf("Body: %s\n", rr.Body.String())
 				if rr.Header().Get("Content-Type") != expectedContentType {
 					t.Errorf("handler returned unexpected content-type: got %v want %v",
 						rr.Header().Get("Content-Type"), expectedContentType)
@@ -99,7 +96,8 @@ func TestPassword(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := &Handler{db}
+			s := user.NewService(db)
+			h := NewHandler(db, s)
 			linkPassword := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				h.LinkPassword(writer, request, params)
 			})

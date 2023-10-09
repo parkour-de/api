@@ -9,9 +9,6 @@ import (
 
 // GetPages handles the GET /api/pages endpoint.
 func (h *Handler) GetPages(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	// Extract the include parameter from the URL query
 	pages, err := h.db.GetAllPages(r.Context())
 	if err != nil {

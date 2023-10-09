@@ -25,9 +25,6 @@ func NewHandler[T graph.Entity](db *graph.Db, em graph.EntityManager[T], prefix 
 
 // Create handles the creation of new entities.
 func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	var item T
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
@@ -45,9 +42,6 @@ func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams ht
 
 // Read handles the retrieval of entities.
 func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	id := h.prefix + urlParams.ByName("key")
 	item, err := h.em.Read(id, r.Context())
 	if err != nil {
@@ -59,9 +53,6 @@ func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams http
 
 // Update handles the replacement of existing entities.
 func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	var item T
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
@@ -79,9 +70,6 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 
 // Delete handles the deletion of entities.
 func (h *Handler[T]) Delete(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	id := h.prefix + urlParams.ByName("key")
 	var item T
 	item.SetKey(id)

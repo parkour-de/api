@@ -2,12 +2,14 @@ package user
 
 import (
 	"pkv/api/src/internal/graph"
+	"pkv/api/src/service/user"
 )
 
 type Handler struct {
-	db *graph.Db
+	db      *graph.Db
+	service *user.Service
 }
 
-func NewHandler(db *graph.Db) *Handler {
-	return &Handler{db: db}
+func NewHandler(db *graph.Db, service *user.Service) *Handler {
+	return &Handler{db: db, service: service}
 }

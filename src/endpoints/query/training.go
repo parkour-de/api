@@ -10,9 +10,6 @@ import (
 
 // GetTrainings handles the GET /api/trainings endpoint.
 func (h *Handler) GetTrainings(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	if api.MakeCors(w, r) {
-		return
-	}
 	// Extract the include parameter from the URL query
 	query := r.URL.Query()
 	weekday, err := api.ParseInt(query.Get("weekday"))
