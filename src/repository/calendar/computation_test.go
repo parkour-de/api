@@ -31,6 +31,7 @@ func Test_calculateDayInMonth(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := calculateDayInMonth(tt.year, tt.month, tt.monthday, tt.weekday)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("%s\ncalculateDayInMonth(%d, %d, %d, %d) = %v, want %v", tt.name, tt.year, tt.month, tt.monthday, tt.weekday, got, tt.want)

@@ -5,7 +5,7 @@ steps:
     env: ['GOPATH=/go']
   # Run the tests.
   - name: 'gcr.io/cloud-builders/go:alpine-1.21'
-    args: ['test', './...']
+    args: ['test', './...', ' -p', '8']
     env: ['GOPATH=/go']
   - name: 'gcr.io/cloud-builders/go:alpine-1.21'
     args: ['build', '-v', '-o', '/app/bin/endpoint1', './src/cmd/endpoint1']

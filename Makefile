@@ -13,7 +13,7 @@ build:
 	go build -o $(OUT_DIR)/endpoint1 ./src/cmd/endpoint1
 
 test:
-	go test ./...
+	go test ./... -p 8
 
 run:
 	./bin/endpoint1

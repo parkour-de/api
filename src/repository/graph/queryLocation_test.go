@@ -141,6 +141,7 @@ func TestGetLocations(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got, err := db.GetLocations(tt.options, nil)
 			if err != nil {
 				t.Errorf("GetLocations() error = %v", err)

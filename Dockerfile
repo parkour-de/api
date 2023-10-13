@@ -16,7 +16,7 @@ RUN go mod download
 COPY . ./
 
 # Run the tests.
-RUN go test ./...
+RUN go test ./... -p 8
 
 # Build the binary.
 RUN go build -v -o /app/bin/endpoint1 ./src/cmd/endpoint1

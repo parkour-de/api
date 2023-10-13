@@ -96,6 +96,7 @@ func TestPassword(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			s := user.NewService(db)
 			h := NewHandler(db, s)
 			linkPassword := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
