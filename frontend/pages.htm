@@ -37,7 +37,7 @@
     async function bootstrapAll() {
         await bootstrap({
             "descriptions": {
-                "de-DE": {
+                "de": {
                     "title": "Hello World",
                     "text": "I just want to say <b>hello</b> here."
                 }
@@ -101,8 +101,8 @@
                     div.append(dt, dd)
                     p.append(div)
                 }
-                document.getElementById('title').innerText = data.descriptions['de-DE'].title
-                const text = data.descriptions['de-DE'].text
+                document.getElementById('title').innerText = data.descriptions['de'].title
+                const text = data.descriptions['de'].text
                 const textNode = document.getElementById('text')
                 if (data.information?.html === 'true') {
                     textNode.innerHTML = text

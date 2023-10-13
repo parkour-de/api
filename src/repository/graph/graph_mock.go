@@ -22,24 +22,24 @@ func CreateMultiple[T any](db *Db, count int, createFunc func(*Db, int) (T, erro
 }
 
 func CreateDescriptions(text string) domain.Descriptions {
-	german := CreateDescription("de-DE", text, false)
-	english := CreateDescription("en-GB", text, true)
+	german := CreateDescription("de", text, false)
+	english := CreateDescription("en", text, true)
 	return domain.Descriptions{
-		"de-DE": german,
-		"en-GB": english,
+		"de": german,
+		"en": english,
 	}
 }
 
 func CreateDescription(language string, text string, translated bool) domain.Description {
 	switch language {
-	case "de-DE":
+	case "de":
 		return domain.Description{
 			text + " - Eine tolle Sache",
 			"Das wird euch sicher ganz gut gefallen",
 			translated,
 		}
 		break
-	case "en-GB":
+	case "en":
 		return domain.Description{
 			text + " - A cool thing",
 			"That will be super cool",
