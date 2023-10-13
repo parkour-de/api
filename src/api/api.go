@@ -65,18 +65,6 @@ func Error(w http.ResponseWriter, r *http.Request, err error, code int) {
 	)
 }
 
-func MakeCors(w http.ResponseWriter, r *http.Request) bool {
-	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusNoContent)
-		return true
-	}
-	return false
-}
-
 func MakeSet(queryParam string) map[string]struct{} {
 	set := make(map[string]struct{})
 	if queryParam != "" {
