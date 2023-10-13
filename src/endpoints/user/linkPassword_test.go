@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"pkv/api/src/domain"
-	"pkv/api/src/internal/graph"
+	"pkv/api/src/repository/graph"
 	"pkv/api/src/service/user"
 	"testing"
 )

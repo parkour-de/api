@@ -6,8 +6,8 @@ import (
 	"github.com/arangodb/go-driver/http"
 	"log"
 	"math/rand"
-	"pkv/api/src/internal/dpv"
-	"pkv/api/src/internal/security"
+	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/security"
 	"strings"
 	"time"
 )

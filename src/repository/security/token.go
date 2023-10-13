@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"golang.org/x/crypto/sha3"
-	"pkv/api/src/internal/dpv"
+	"pkv/api/src/repository/dpv"
 )
 
 func MakeNonce() string {

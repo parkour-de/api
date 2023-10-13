@@ -1,7 +1,7 @@
 package authentication
 
 import (
-	"pkv/api/src/internal/graph"
+	"pkv/api/src/repository/graph"
 	"pkv/api/src/service/user"
 )
 

@@ -10,8 +10,8 @@ import (
 	"pkv/api/src/endpoints/crud"
 	"pkv/api/src/endpoints/query"
 	"pkv/api/src/endpoints/user"
-	"pkv/api/src/internal/dpv"
-	"pkv/api/src/internal/graph"
+	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/graph"
 	user2 "pkv/api/src/service/user"
 )
 

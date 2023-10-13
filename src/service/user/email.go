@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"pkv/api/src/domain"
-	"pkv/api/src/internal/security"
+	"pkv/api/src/repository/security"
 	"time"
 )
 

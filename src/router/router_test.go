@@ -10,7 +10,7 @@ import (
 	"os"
 	"pkv/api/src/domain"
 	"pkv/api/src/endpoints/query"
-	"pkv/api/src/internal/graph"
+	"pkv/api/src/repository/graph"
 	"testing"
 	"time"
 )

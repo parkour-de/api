@@ -2,8 +2,8 @@ package user
 
 import (
 	"fmt"
-	"pkv/api/src/internal/graph"
-	"pkv/api/src/internal/security"
+	"pkv/api/src/repository/graph"
+	"pkv/api/src/repository/security"
 	"strconv"
 	"strings"
 	"time"

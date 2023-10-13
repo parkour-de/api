@@ -6,7 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"pkv/api/src/api"
-	"pkv/api/src/internal/graph"
+	"pkv/api/src/repository/graph"
 )
 
 type Handler[T graph.Entity] struct {

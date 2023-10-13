@@ -1,6 +1,6 @@
 package query
 
-import "pkv/api/src/internal/graph"
+import "pkv/api/src/repository/graph"
 
 type Handler struct {
 	db *graph.Db

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"pkv/api/src/domain"
-	"pkv/api/src/internal/dpv"
+	"pkv/api/src/repository/dpv"
 	"strconv"
 	"time"
 )
