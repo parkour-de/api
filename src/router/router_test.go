@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -44,7 +43,6 @@ func TestServer(t *testing.T) {
 			resp.Header.Get("Content-Type"), expectedContentType)
 	}
 
-	_, err = io.ReadAll(resp.Body)
 	if err != nil {
 		t.Error(err)
 	}

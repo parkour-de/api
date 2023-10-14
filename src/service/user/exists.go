@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Service) Exists(username string, ctx context.Context) (bool, error) {
-	if err := validateUsername(username); err != nil {
+	if err := ValidateKey(username); err != nil {
 		return false, fmt.Errorf("invalid username: %w", err)
 	}
 
@@ -20,12 +20,19 @@ func (s *Service) Exists(username string, ctx context.Context) (bool, error) {
 	return exists, nil
 }
 
-func validateUsername(username string) error {
+func ValidateCustomKey(username string) error {
+	if matched, _ := regexp.MatchString(`^\d+$`, username); matched {
+		return fmt.Errorf("key cannot only contain digits")
+	}
+	return ValidateKey(username)
+}
+
+func ValidateKey(username string) error {
 	if len(username) < 3 || len(username) > 30 {
 		return fmt.Errorf("username must be between 3 and 30 characters long")
 	}
 	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9_-][a-zA-Z0-9_\-.]{2,29}$`, username); !matched {
-		return fmt.Errorf("username must start with a-z, A-Z, 0-9, _, -, or . but may not start with a period")
+		return fmt.Errorf("key must contain a-z, A-Z, 0-9, _, -, or . but may not start with a period")
 	}
 	return nil
 }

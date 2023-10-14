@@ -63,7 +63,7 @@ func TestGetAssumableUsers(t *testing.T) {
 		t.Fatalf("Link failed: %s", err)
 	}
 
-	assumableUsers, err := db.GetAssumableUsers(users[0].Key, nil)
+	assumableUsers, err := db.GetAdministeredUsers(users[0].Key, nil)
 	if err != nil {
 		t.Fatalf("get assumable users failed: %s", err)
 	}

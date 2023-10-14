@@ -1,10 +1,12 @@
 package router
 
 import (
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"os"
+	"pkv/api/src/api"
 	"pkv/api/src/domain"
 	"pkv/api/src/endpoints/authentication"
 	"pkv/api/src/endpoints/crud"
@@ -69,6 +71,16 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/pages/:key", pageCrudHandler.Read)
 	r.PUT("/api/pages", pageCrudHandler.Update)
 	r.DELETE("/api/pages/:key", pageCrudHandler.Delete)
+	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
+		log.Printf("panic: %+v", err)
+		api.Error(w, r, fmt.Errorf("Whoops! It seems we've stumbled upon a glitch here. In the meantime, consider this a chance to take a breather."), http.StatusInternalServerError)
+	}
+	r.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		api.Error(w, r, fmt.Errorf("Oops, your %v move is impressive, but this method doesn't match the route's rhythm. Let's stick to the right Parkour technique – we've got OPTIONS waiting for you, not this wild %v dance!", r.Method, r.Method), http.StatusMethodNotAllowed)
+	})
+	r.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		api.Error(w, r, fmt.Errorf("Oops, you're performing a daring stunt! But this route seems to be off our servers. Maybe let's stick to known paths for now and avoid tumbling into the broken API!"), http.StatusNotFound)
+	})
 
 	port := os.Getenv("PORT")
 	if port == "" {

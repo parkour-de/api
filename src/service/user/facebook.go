@@ -62,10 +62,10 @@ func (s *Service) LinkFacebook(key string, auth string, ctx context.Context) err
 	return nil
 }
 
-func (s *Service) Facebook(auth string) (string, error) {
+func (s *Service) Facebook(auth string) ([]string, error) {
 	validationResponse, err := s.checkFacebookAuth(auth)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	exp := int64(validationResponse.Data.ExpiresAt)
 	unix := time.Now().Unix()
@@ -75,14 +75,39 @@ func (s *Service) Facebook(auth string) (string, error) {
 		expiry = exp
 	}
 
-	user := "4711"
+	logins, err := s.db.GetLoginsByProvider("facebook", validationResponse.Data.UserId, context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("read logins failed: %w", err)
+	}
+	var foundUsers []domain.User
+	if len(logins) > 0 {
+		for _, login := range logins {
+			users, err := s.db.GetLoginUsers(login.Key, context.Background())
+			if err != nil {
+				return nil, fmt.Errorf("read users failed: %w", err)
+			} else if len(users) > 1 {
+				log.Printf("[Consistency] login %s has more than one user\n", login.Key)
+			} else if len(users) == 0 {
+				log.Printf("[Consistency] login %s has no user\n", login.Key)
+			}
+			foundUsers = append(foundUsers, users...)
+		}
+	} else {
+		return nil, fmt.Errorf("no user exists with this facebook login")
+	}
 
-	token := facebookToken(user, expiry)
-
-	hash := hashUserToken(token)
-
-	token = token + ":" + hash
-	return token, nil
+	var keys []string
+	for _, user := range foundUsers {
+		keys = append(keys, user.Key)
+	}
+	keys = unique(keys)
+	var tokens []string
+	for _, key := range keys {
+		token := facebookToken(key, expiry)
+		hash := hashUserToken(token)
+		token = token + ":" + hash
+	}
+	return tokens, nil
 }
 
 func facebookToken(user string, expiry int64) string {
@@ -140,4 +165,16 @@ func (s *Service) checkFacebookAuth(auth string) (FacebookTokenValidationRespons
 		return FacebookTokenValidationResponse{}, fmt.Errorf("facebook says, this token is from the past")
 	}
 	return validationResponse, nil
+}
+
+func unique[T comparable](sliceList []T) []T {
+	dedupeMap := make(map[T]struct{})
+	var list []T
+	for _, slice := range sliceList {
+		if _, exists := dedupeMap[slice]; !exists {
+			dedupeMap[slice] = struct{}{}
+			list = append(list, slice)
+		}
+	}
+	return list
 }

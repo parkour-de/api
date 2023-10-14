@@ -3,11 +3,15 @@ Welcome to the User Authentication API! This API provides endpoints for user reg
 
 ## User Registration
 - `GET /api/users/{key}/exist`: Check if a username is already taken (boolean response).
+- `POST /api/users/{key}/claim`: Claim a username that is taken but has never been used.
 - `POST /api/users/{key}/create`: Create a new user and receive a 30-minute session token.
 - Valid usernames must match this regex: `^[a-zA-Z0-9_-][a-zA-Z0-9_\-.]{2,29}$`
   - The first character must be alphanumeric (a-z, A-Z, 0-9), an underscore, or a hyphen.
   - The remaining characters must be alphanumeric, an underscore, a hyphen, or a period.
   - The username must be between 3 and 30 characters long.
+  - The username must not only contain digits.
+  - If an empty username is provided, a random sequence of digits will be used.
+    And you'll have to memorize it.
 ## Authentication Methods
 **Choose from Various Methods:** You can set up various authentication methods:
 - **Facebook:** `GET /api/users/{key}/facebook?auth={token}`
