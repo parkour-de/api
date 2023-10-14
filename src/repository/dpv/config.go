@@ -6,6 +6,11 @@ import (
 	"os"
 )
 
+type Language struct {
+	Key  string `yaml:"key"`
+	Name string `yaml:"name"`
+	Icon string `yaml:"icon"`
+}
 type Config struct {
 	DB struct {
 		Host string `yaml:"host"`
@@ -22,6 +27,10 @@ type Config struct {
 		GoogleClientId     string `yaml:"google_client_id"`
 		GoogleClientSecret string `yaml:"google_client_secret"`
 	} `yaml:"auth"`
+	Settings struct {
+		Languages []Language `yaml:"languages"`
+		UserTypes []string   `yaml:"user_types"`
+	} `yaml:"settings"`
 }
 
 var ConfigInstance *Config

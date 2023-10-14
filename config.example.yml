@@ -15,3 +15,58 @@ auth:
   google_client_secret: GOCSBX-abcdefghijklmnopqrstuvwxyz
   deepl_key: 12345678-1234-1234-1234-123456789012:fz
   deepl_url: https://api-free.deepl.com/v2/translate
+settings:
+  languages:
+    - key: "de"
+      name: Deutsch
+      icon: 🇩🇪
+    - key: "en"
+      name: English
+      icon: 🇬🇧
+    - key: "zh"
+      name: 中文
+      icon: 🇨🇳
+    - key: "ru"
+      name: Русский
+      icon: 🇷🇺
+    - key: "es"
+      name: Español
+      icon: 🇪🇸
+    - key: "fr"
+      name: Français
+      icon: 🇫🇷
+    - key: "it"
+      name: Italiano
+      icon: 🇮🇹
+    - key: "nl"
+      name: Nederlands
+      icon: 🇳🇱
+    - key: "ja"
+      name: 日本語
+      icon: 🇯🇵
+    - key: "pt"
+      name: Português
+      icon: 🇵🇹
+    - key: "pl"
+      name: Polski
+      icon: 🇵🇱
+    - key: "sv"
+      name: Svenska
+      icon: 🇸🇪
+    - key: "no"
+      name: Norsk
+      icon: 🇳🇴
+    - key: "fi"
+      name: Suomi
+      icon: 🇫🇮
+  user_types:
+    - user
+    - athlete
+    - coach
+    - team
+    - group
+    - association
+    - freelancer
+    - company
+    - school
+    - government
