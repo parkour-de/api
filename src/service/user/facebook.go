@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
-	"strconv"
 	"time"
 )
 
@@ -103,15 +102,11 @@ func (s *Service) Facebook(auth string) ([]string, error) {
 	keys = unique(keys)
 	var tokens []string
 	for _, key := range keys {
-		token := facebookToken(key, expiry)
+		token := userToken("f", key, expiry)
 		hash := hashUserToken(token)
 		token = token + ":" + hash
 	}
 	return tokens, nil
-}
-
-func facebookToken(user string, expiry int64) string {
-	return "f:" + user + ":" + strconv.FormatInt(expiry, 10)
 }
 
 func (s *Service) checkFacebookAuth(auth string) (FacebookTokenValidationResponse, error) {

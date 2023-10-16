@@ -25,6 +25,11 @@ func NewHandler[T graph.Entity](db *graph.Db, em graph.EntityManager[T], prefix 
 
 // Create handles the creation of new entities.
 func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	_, err := api.RequireAdmin(r, h.db)
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("cannot perform CREATE operation: %w", err), 400)
+		return
+	}
 	var item T
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
@@ -32,7 +37,7 @@ func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("decoding request body failed: %w", err), 400)
 		return
 	}
-	err := h.em.Create(item, r.Context())
+	err = h.em.Create(item, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("creating entity failed: %w", err), 400)
 		return
@@ -42,6 +47,11 @@ func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams ht
 
 // Read handles the retrieval of entities.
 func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	_, err := api.RequireAdmin(r, h.db)
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("cannot perform READ operation: %w", err), 400)
+		return
+	}
 	id := h.prefix + urlParams.ByName("key")
 	item, err := h.em.Read(id, r.Context())
 	if err != nil {
@@ -53,6 +63,11 @@ func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams http
 
 // Update handles the replacement of existing entities.
 func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	_, err := api.RequireAdmin(r, h.db)
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("cannot perform UPDATE operation: %w", err), 400)
+		return
+	}
 	var item T
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
@@ -60,7 +75,7 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("decoding request body failed: %w", err), 400)
 		return
 	}
-	err := h.em.Update(item, r.Context())
+	err = h.em.Update(item, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("updating entity failed: %w", err), 400)
 		return
@@ -70,10 +85,15 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 
 // Delete handles the deletion of entities.
 func (h *Handler[T]) Delete(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	_, err := api.RequireAdmin(r, h.db)
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("cannot perform DELETE operation: %w", err), 400)
+		return
+	}
 	id := h.prefix + urlParams.ByName("key")
 	var item T
 	item.SetKey(id)
-	err := h.em.Delete(item, r.Context())
+	err = h.em.Delete(item, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("deleting entity failed: %w", err), 400)
 		return

@@ -5,12 +5,62 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"pkv/api/src/domain"
+	"pkv/api/src/repository/graph"
+	"pkv/api/src/service/user"
 	"strconv"
 	"strings"
 )
 
 type ErrorResponse struct {
 	Message string `json:"message"`
+}
+
+func CheckAuth(r *http.Request) (string, string, error) {
+	auth := r.Header.Get("Authorization")
+	format, auth, found := strings.Cut(auth, " ")
+	if !found {
+		return "", "", fmt.Errorf("authorization header missing")
+	}
+	if format != "user" {
+		return "", "", fmt.Errorf("authorization header needs to start with 'user'")
+	}
+	key, method, err := user.ValidateUserToken(auth)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid token: %w", err)
+	}
+	return key, method, nil
+}
+
+func Authenticated(r *http.Request) (string, error) {
+	key, method, err := CheckAuth(r)
+	if err != nil {
+		return "", err
+	}
+	if method == "a" {
+		return "", fmt.Errorf("your temporary login is expiring soon, please add a login method to your account first")
+	}
+	return key, nil
+}
+
+func IsAdmin(user domain.User) bool {
+	admin, ok := user.Information["admin"]
+	return ok && admin == "true"
+}
+
+func RequireAdmin(r *http.Request, db *graph.Db) (*domain.User, error) {
+	key, err := Authenticated(r)
+	if err != nil {
+		return nil, fmt.Errorf("authentication failed: %w", err)
+	}
+	user, err := db.Users.Read(key, r.Context())
+	if err != nil {
+		return nil, fmt.Errorf("reading current user failed: %w", err)
+	}
+	if !IsAdmin(*user) {
+		return nil, fmt.Errorf("you are not an administrator")
+	}
+	return user, nil
 }
 
 func SuccessJson(w http.ResponseWriter, r *http.Request, data interface{}) {

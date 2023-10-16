@@ -31,6 +31,7 @@ type Config struct {
 		Languages []Language `yaml:"languages"`
 		UserTypes []string   `yaml:"user_types"`
 	} `yaml:"settings"`
+	Path string
 }
 
 var ConfigInstance *Config
@@ -50,6 +51,6 @@ func NewConfig(configPath string) (*Config, error) {
 	if err := d.Decode(&config); err != nil {
 		return nil, fmt.Errorf("could not decode config file: %w", err)
 	}
-
+	config.Path = configPath[:len(configPath)-len("config.yml")]
 	return config, nil
 }
