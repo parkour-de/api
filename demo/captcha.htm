@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        :root {
+            --body-width: calc(100vw);
+            --body-height: calc(90vh);
+            --padding-top: calc(10vh);
+            --max-image: min(var(--body-width), var(--body-height));
+            --pixel-size: calc(var(--max-image) / 320);
+            --circle-size: calc(var(--pixel-size) * 70);
+            --circle-margin: calc(var(--pixel-size) * -35);
+            --circle-border: calc(var(--pixel-size) * 5);
+            --image-left: calc((var(--body-width) - var(--max-image)) / 2);
+            --image-top: calc((var(--body-height) - var(--max-image)) / 2);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .image-container {
+            position: absolute;
+            top: 10vh;
+            left: 0;
+            width: 100vw;
+            height: 90vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #captcha-image {
+            width: var(--max-image);
+            height: var(--max-image);
+        }
+
+        .undo-container {
+            position: absolute;
+            top: calc(var(--image-top) + var(--padding-top) - 10vh);
+            left: 0;
+            width: 100vw;
+            height: 10vh;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .undo-container button, .undo-container div {
+            width: calc(var(--pixel-size) * 32);
+            height: 10vh;
+            font-size: calc(var(--pixel-size) * 32);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .undo-container button {
+            width: calc(var(--pixel-size) * 48);
+        }
+
+        .circle {
+            position: absolute;
+            top: calc(var(--image-top) + var(--pixel-size) * var(--y));
+            left: calc(var(--image-left) + var(--pixel-size) * var(--x));
+            width: var(--circle-size);
+            height: var(--circle-size);
+            margin-top: var(--circle-margin);
+            margin-left: var(--circle-margin);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(255,0,0,1) 10%, rgba(255,255,0,1) 20%, rgba(0,255,0,1) 30%, rgba(0,0,0,.5) 40%, rgba(0,0,0,0) 66%);
+            pointer-events: none;
+        }
+        .green {
+            background-color: #40C040;
+        }
+
+        .div {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4vh;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div class="image-container">
+    <img id="captcha-image" src="captcha.jpg">
+</div>
+<div class="undo-container">
+    <button id="undo-button" disabled="disabled">↩️</button>
+    <!--Tippe auf die Buchstaben in der richtigen Reihenfolge, um das Wort PARKOUR zu bilden.-->
+    <div>P</div>
+    <div>A</div>
+    <div>R</div>
+    <div>K</div>
+    <div>O</div>
+    <div>U</div>
+    <div>R</div>
+    <button id="submit-button" disabled="disabled">✅</button>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const image = document.getElementById("captcha-image");
+        const undoButton = document.getElementById("undo-button");
+        const submitButton = document.getElementById("submit-button");
+
+        const circles = [];
+
+        image.addEventListener("click", function(event) {
+            if (circles.length >= 7) {
+                return;
+            }
+            const rect = image.getBoundingClientRect();
+            const scaleX = image.naturalWidth / image.width;
+            const scaleY = image.naturalHeight / image.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+
+            const circle = document.createElement("div");
+            circle.classList.add("circle");
+            circle.style.setProperty('--x', x);
+            circle.style.setProperty('--y', y);
+            image.parentNode.appendChild(circle);
+
+            circles.push({ x, y });
+            undoButton.parentNode.querySelectorAll("div")[circles.length - 1].classList.add("green")
+            if (circles.length > 0) {
+                undoButton.disabled = false;
+            }
+            if (circles.length === 7) {
+                submitButton.disabled = false;
+            }
+        });
+
+        undoButton.addEventListener("click", function() {
+            const div = document.body.querySelector(".div");
+            if (div) {
+                document.body.removeChild(div);
+                for (let i = 0; i < 7; i++) {
+                    removeOne();
+                }
+            } else {
+                removeOne();
+            }
+        });
+
+        function removeOne() {
+            if (circles.length <= 0) {
+                return;
+            }
+            const lastCircle = image.parentNode.lastChild;
+            image.parentNode.removeChild(lastCircle);
+            undoButton.parentNode.querySelectorAll("div")[circles.length - 1].classList.remove("green")
+            circles.pop();
+            if (circles.length <= 0) {
+                undoButton.disabled = true;
+            }
+            if (circles.length !== 7) {
+                submitButton.disabled = true;
+            }
+        }
+
+        submitButton.addEventListener("click", function() {
+            const distance1 = computeDistance(circles, letters);
+            // swap letters[2] and letters[6]:
+            [letters[2], letters[6]] = [letters[6], letters[2]];
+            const distance2 = computeDistance(circles, letters);
+            const distance = Math.min(distance1, distance2);
+            console.log(distance);
+            const div = document.createElement("div");
+            div.classList.add("div");
+            div.innerText = `Accuracy = ${Math.round(distance)}\nLower values are better\nMaximum score = 600`;
+            document.body.append(div)
+            submitButton.disabled = true;
+        });
+        const letters = [{x: 56, y: 86}, {x: 191, y: 221}, {x: 285, y: 287}, {x: 246, y: 241}, {x: 126, y: 266}, {x: 231, y: 106}, {x: 279, y: 150}];
+
+        function computeDistance(points1, points2) {
+            let distances = [];
+            for (let i = 0; i < points1.length; i++) {
+                const x = points1[i].x - points2[i].x;
+                const y = points1[i].y - points2[i].y;
+                const distance = x*x + y*y;
+                distances.push(distance);
+            }
+            return distances.reduce((a, b) => a + b, 0) / distances.length;
+        }
+    });
+
+</script>
+</body>
+</html>
