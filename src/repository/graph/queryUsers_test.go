@@ -2,6 +2,7 @@ package graph
 
 import (
 	"pkv/api/src/domain"
+	"slices"
 	"testing"
 )
 
@@ -76,16 +77,8 @@ func TestGetAssumableUsers(t *testing.T) {
 	}
 	// compare with users[0:3] ignoring order
 	for _, user := range users[0:3] {
-		if !contains(assumableUserKeys, user.Key) {
+		if !slices.Contains(assumableUserKeys, user.Key) {
 			t.Fatalf("expected %s to be assumable, got %v", user.Key, assumableUserKeys)
 		}
 	}
-}
-func contains(slice []string, element string) bool {
-	for _, e := range slice {
-		if e == element {
-			return true
-		}
-	}
-	return false
 }
