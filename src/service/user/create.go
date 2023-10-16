@@ -22,6 +22,9 @@ func (s *Service) Create(key string, name string, userType string, ctx context.C
 	if !slices.Contains(dpv.ConfigInstance.Settings.UserTypes, userType) {
 		return "", fmt.Errorf("invalid user type %v, choose one of the following: %+v", userType, dpv.ConfigInstance.Settings.UserTypes)
 	}
+	if userType == "administrator" {
+		return "", fmt.Errorf("cannot create administrator account")
+	}
 	user := domain.User{
 		Key:  key,
 		Name: name,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"pkv/api/src/domain"
+	"pkv/api/src/service"
 	"time"
 )
 
@@ -12,12 +13,8 @@ func (s *Service) AddComment(key string, author string, title string, text strin
 	if err != nil {
 		return fmt.Errorf("read user failed: %w", err)
 	}
-	comment := domain.Comment{
-		Title:   title,
-		Text:    text,
-		Author:  author,
-		Created: time.Now(),
-	}
+	title = service.SanitizeHTML(title)
+	text = service.SanitizeHTML(text)
 	if title == "" {
 		return fmt.Errorf("title cannot be empty")
 	}
@@ -29,6 +26,12 @@ func (s *Service) AddComment(key string, author string, title string, text strin
 	}
 	if len(text) > 10000 {
 		return fmt.Errorf("text cannot be longer than 10000 characters")
+	}
+	comment := domain.Comment{
+		Title:   title,
+		Text:    text,
+		Author:  author,
+		Created: time.Now(),
 	}
 	for _, c := range user.Comments {
 		if c.Title == title {
@@ -47,6 +50,8 @@ func (s *Service) EditComment(key string, author string, oldTitle string, title 
 	if err != nil {
 		return fmt.Errorf("read user failed: %w", err)
 	}
+	title = service.SanitizeHTML(title)
+	text = service.SanitizeHTML(text)
 	if title == "" {
 		return fmt.Errorf("title cannot be empty")
 	}

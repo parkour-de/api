@@ -9,6 +9,7 @@ import (
 	"pkv/api/src/repository/graph"
 	"pkv/api/src/service/user"
 	"testing"
+	"time"
 )
 
 func TestPassword(t *testing.T) {
@@ -16,20 +17,20 @@ func TestPassword(t *testing.T) {
 	if err != nil {
 		t.Fatalf("db initialisation failed: %s", err)
 	}
-	var params httprouter.Params
 	tests := []struct {
 		name string
-		code func(*graph.Db, http.HandlerFunc, http.HandlerFunc)
+		code func(*graph.Db, http.HandlerFunc, http.HandlerFunc, *httprouter.Params)
 	}{
 		{
 			"fail if user does not exist",
-			func(db *graph.Db, linkPassword http.HandlerFunc, verifyPassword http.HandlerFunc) {
+			func(db *graph.Db, linkPassword http.HandlerFunc, verifyPassword http.HandlerFunc, params *httprouter.Params) {
 				req, err := http.NewRequest("GET", "/", nil)
 				if err != nil {
 					t.Fatalf("request creation failed: %s", err)
 				}
+				loginAs("doesnotexist", req)
 				rr := httptest.NewRecorder()
-				params = httprouter.Params{{"key", "doesnotexist"}}
+				*params = httprouter.Params{{"key", "doesnotexist"}}
 				linkPassword.ServeHTTP(rr, req)
 				expectedContentType := "application/json"
 				if rr.Header().Get("Content-Type") != expectedContentType {
@@ -40,40 +41,40 @@ func TestPassword(t *testing.T) {
 		},
 		{
 			"happy path",
-			func(db *graph.Db, linkPassword http.HandlerFunc, verifyPassword http.HandlerFunc) {
+			func(db *graph.Db, linkPassword http.HandlerFunc, verifyPassword http.HandlerFunc, params *httprouter.Params) {
 				user := domain.User{}
 				err := db.Users.Create(&user, nil)
 				if err != nil {
 					t.Fatalf("user creation failed: %s", err)
 				}
-				params = httprouter.Params{{"key", user.Key}}
+				*params = httprouter.Params{{"key", user.Key}}
 				// attempt to set up no password
-				rr := callLinkPassword(linkPassword, "/", t)
+				rr := callLinkPassword(linkPassword, user.Key, "/", t)
 				if rr.Code != http.StatusBadRequest {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
 				}
 				// attempt to set up empty password
-				rr = callLinkPassword(linkPassword, "/?password=", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/?password=", t)
 				if rr.Code != http.StatusBadRequest {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
 				}
 				// attempt to set up simple password
-				rr = callLinkPassword(linkPassword, "/?password=123456", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/?password=123456", t)
 				if rr.Code != http.StatusBadRequest {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
 				}
 				// attempt to set up a normal password
-				rr = callLinkPassword(linkPassword, "/?password=Tr0ub4dor%263", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/?password=Tr0ub4dor%263", t)
 				if rr.Code != http.StatusOK {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusOK)
 				}
 				// attempt to set up another password
-				rr = callLinkPassword(linkPassword, "/?password=Tr0ub4dor%264", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/?password=Tr0ub4dor%264", t)
 				if rr.Code != http.StatusBadRequest {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
 				}
 				// attempt to verify the password
-				rr = callVerifyPassword(verifyPassword, "/?password=Tr0ub4dor%263", t)
+				rr = callVerifyPassword(verifyPassword, user.Key, "/?password=Tr0ub4dor%263", t)
 				var data bool
 				err = json.Unmarshal(rr.Body.Bytes(), &data)
 				if err != nil {
@@ -83,7 +84,7 @@ func TestPassword(t *testing.T) {
 					t.Errorf("handler returned unexpected data: got %v want %v", data, true)
 				}
 				// attempt to verify another password
-				rr = callVerifyPassword(verifyPassword, "/?password=Tr0ub4dor%264", t)
+				rr = callVerifyPassword(verifyPassword, user.Key, "/?password=Tr0ub4dor%264", t)
 				err = json.Unmarshal(rr.Body.Bytes(), &data)
 				if err != nil {
 					t.Fatalf("json decoding failed: %s", err)
@@ -96,6 +97,7 @@ func TestPassword(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var params httprouter.Params
 			t.Parallel()
 			s := user.NewService(db)
 			h := NewHandler(db, s)
@@ -105,13 +107,14 @@ func TestPassword(t *testing.T) {
 			verifyPassword := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				h.VerifyPassword(writer, request, params)
 			})
-			tt.code(db, linkPassword, verifyPassword)
+			tt.code(db, linkPassword, verifyPassword, &params)
 		})
 	}
 }
 
-func callLinkPassword(linkPassword http.HandlerFunc, url string, t *testing.T) *httptest.ResponseRecorder {
+func callLinkPassword(linkPassword http.HandlerFunc, user, url string, t *testing.T) *httptest.ResponseRecorder {
 	req, err := http.NewRequest("GET", url, nil)
+	loginAs(user, req)
 	if err != nil {
 		t.Fatalf("request creation failed: %s", err)
 	}
@@ -128,11 +131,12 @@ func callLinkPassword(linkPassword http.HandlerFunc, url string, t *testing.T) *
 	return rr
 }
 
-func callVerifyPassword(verifyPassword http.HandlerFunc, url string, t *testing.T) *httptest.ResponseRecorder {
+func callVerifyPassword(verifyPassword http.HandlerFunc, user, url string, t *testing.T) *httptest.ResponseRecorder {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("request creation failed: %s", err)
 	}
+	loginAs(user, req)
 	rr := httptest.NewRecorder()
 	verifyPassword.ServeHTTP(rr, req)
 	expectedContentType := "application/json"
@@ -144,4 +148,8 @@ func callVerifyPassword(verifyPassword http.HandlerFunc, url string, t *testing.
 			rr.Header().Get("Content-Type"), expectedContentType)
 	}
 	return rr
+}
+
+func loginAs(key string, r *http.Request) {
+	r.Header.Set("Authorization", "user "+user.HashedUserToken("@", key, time.Now().Add(time.Minute*5).Unix()))
 }

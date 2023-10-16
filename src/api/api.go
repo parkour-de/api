@@ -44,11 +44,48 @@ func Authenticated(r *http.Request) (string, error) {
 }
 
 func IsAdmin(user domain.User) bool {
-	admin, ok := user.Information["admin"]
-	return ok && admin == "true"
+	return user.Type == "administrator"
 }
 
-func RequireAdmin(r *http.Request, db *graph.Db) (*domain.User, error) {
+func RequireSameUser(key string, r *http.Request) error {
+	user, _, err := CheckAuth(r)
+	if err != nil {
+		return err
+	}
+	if key != user {
+		return fmt.Errorf("you are logged in as %s, but you are trying to access %s", user, key)
+	}
+	return nil
+}
+
+func RequireUserAdmin(key string, r *http.Request, db *graph.Db) (string, string, error) {
+	user, err := Authenticated(r)
+	if key == "" {
+		key = user
+	}
+	if err != nil {
+		return "", "", err
+	}
+	if key != user {
+		users, err := db.GetAdministeredUsers(user, r.Context())
+		if err != nil {
+			return "", "", fmt.Errorf("cannot get list of administered users: %w", err)
+		}
+		found := false
+		for _, u := range users {
+			if u.Key == key {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return "", "", fmt.Errorf("user %s is not administered by %s", key, user)
+		}
+	}
+	return key, user, nil
+}
+
+func RequireGlobalAdmin(r *http.Request, db *graph.Db) (*domain.User, error) {
 	key, err := Authenticated(r)
 	if err != nil {
 		return nil, fmt.Errorf("authentication failed: %w", err)

@@ -24,6 +24,9 @@ func (s *Service) Update(key string, name string, userType string, ctx context.C
 	if !slices.Contains(dpv.ConfigInstance.Settings.UserTypes, userType) {
 		return fmt.Errorf("invalid user type %v, choose one of the following: %+v", userType, dpv.ConfigInstance.Settings.UserTypes)
 	}
+	if userType == "administrator" && userType != user.Type {
+		return fmt.Errorf("cannot update to administrator account")
+	}
 	user.Name = name
 	user.Type = userType
 	if err := s.db.Users.Update(user, ctx); err != nil {

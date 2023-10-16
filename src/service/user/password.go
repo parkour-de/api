@@ -74,9 +74,7 @@ func (s *Service) Password(key, password string, ctx context.Context) (string, e
 	unix := time.Now().Unix()
 	expiry := unix + 3600
 
-	token := userToken("p", key, expiry)
-	hash := hashUserToken(token)
-	token = token + ":" + hash
+	token := HashedUserToken("p", key, expiry)
 	return token, nil
 }
 

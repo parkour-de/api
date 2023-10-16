@@ -12,7 +12,7 @@ func (h *Handler) Exists(w http.ResponseWriter, r *http.Request, urlParams httpr
 	// Delegate to the service for checking if the user exists
 	exists, err := h.service.Exists(username, r.Context())
 	if err != nil {
-		api.Error(w, r, err, http.StatusBadRequest)
+		api.Error(w, r, err, 400)
 		return
 	}
 

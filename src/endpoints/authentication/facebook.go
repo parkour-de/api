@@ -23,21 +23,21 @@ func (h *Handler) Facebook(w http.ResponseWriter, r *http.Request, urlParams htt
 	auth := r.Header.Get("Authorization")
 	format, auth, found := strings.Cut(auth, " ")
 	if !found {
-		api.Error(w, r, fmt.Errorf("authorization header not correctly formatted"), http.StatusBadRequest)
+		api.Error(w, r, fmt.Errorf("authorization header not correctly formatted"), 400)
 		return
 	}
 	if format != "facebook" {
-		api.Error(w, r, fmt.Errorf("authorization header needs to start with 'facebook'"), http.StatusBadRequest)
+		api.Error(w, r, fmt.Errorf("authorization header needs to start with 'facebook'"), 400)
 		return
 	}
 	if len(auth) < 1 {
-		api.Error(w, r, fmt.Errorf("authorization header contains empty token"), http.StatusBadRequest)
+		api.Error(w, r, fmt.Errorf("authorization header contains empty token"), 400)
 		return
 	}
 
 	tokens, err := h.service.Facebook(auth)
 	if err != nil {
-		api.Error(w, r, err, http.StatusBadRequest)
+		api.Error(w, r, err, 400)
 		return
 	}
 

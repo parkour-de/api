@@ -17,12 +17,17 @@ func NewService(db *graph.Db) *Service {
 	return &Service{db: db}
 }
 
-func userToken(provider string, user string, expiry int64) string {
+func UserToken(provider string, user string, expiry int64) string {
 	return provider + ":" + user + ":" + strconv.FormatInt(expiry, 10)
 }
 
-func hashUserToken(token string) string {
+func HashUserToken(token string) string {
 	return security.HashToken(":user_authenticated::" + token)
+}
+
+func HashedUserToken(provider string, user string, expiry int64) string {
+	token := UserToken(provider, user, expiry)
+	return token + ":" + HashUserToken(token)
 }
 
 func ValidateUserToken(token string) (string, string, error) {

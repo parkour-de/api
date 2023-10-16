@@ -102,9 +102,8 @@ func (s *Service) Facebook(auth string) ([]string, error) {
 	keys = unique(keys)
 	var tokens []string
 	for _, key := range keys {
-		token := userToken("f", key, expiry)
-		hash := hashUserToken(token)
-		token = token + ":" + hash
+		token := HashedUserToken("f", key, expiry)
+		tokens = append(tokens, token)
 	}
 	return tokens, nil
 }

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"pkv/api/src/api"
@@ -11,10 +12,18 @@ import (
 
 func (h *Handler) RequestEmail(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	key := urlParams.ByName("key")
-	email := r.URL.Query().Get("email")
-	err := h.service.RequestEmail(key, email, r.Context())
+	user, _, err := api.CheckAuth(r)
 	if err != nil {
-		api.Error(w, r, err, http.StatusBadRequest)
+		api.Error(w, r, err, 400)
+		return
+	}
+	if user != key {
+		api.Error(w, r, fmt.Errorf("you cannot modify a different user"), 400)
+		return
+	}
+	email := r.URL.Query().Get("email")
+	if err := h.service.RequestEmail(key, email, r.Context()); err != nil {
+		api.Error(w, r, err, 400)
 		return
 	}
 
@@ -23,15 +32,23 @@ func (h *Handler) RequestEmail(w http.ResponseWriter, r *http.Request, urlParams
 
 // EnableEmail enables the email login for the user
 func (h *Handler) EnableEmail(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	_ = urlParams.ByName("key")
+	key := urlParams.ByName("key")
+	user, _, err := api.CheckAuth(r)
+	if err != nil {
+		api.Error(w, r, err, 400)
+		return
+	}
+	if user != key {
+		api.Error(w, r, fmt.Errorf("you cannot modify a different user"), 400)
+		return
+	}
 	loginId := urlParams.ByName("login")
 	code := r.URL.Query().Get("code")
 
 	// TODO check if authenticated user is the same as the user in the url
 
-	err := h.service.EnableEmail(loginId, code, r.Context())
-	if err != nil {
-		api.Error(w, r, err, http.StatusBadRequest)
+	if err := h.service.EnableEmail(loginId, code, r.Context()); err != nil {
+		api.Error(w, r, err, 400)
 		return
 	}
 

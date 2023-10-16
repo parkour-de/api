@@ -20,25 +20,25 @@ func TestTOTP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("db initialisation failed: %s", err)
 	}
-	var params httprouter.Params
 
 	tests := []struct {
 		name  string
 		setup func() *graph.Db
-		code  func(*graph.Db, http.HandlerFunc, http.HandlerFunc)
+		code  func(*graph.Db, http.HandlerFunc, http.HandlerFunc, *httprouter.Params)
 	}{
 		{
 			"fail if user does not exist",
 			func() *graph.Db {
 				return db
 			},
-			func(db *graph.Db, requestTOTP http.HandlerFunc, enableTOTP http.HandlerFunc) {
+			func(db *graph.Db, requestTOTP http.HandlerFunc, enableTOTP http.HandlerFunc, params *httprouter.Params) {
 				req, err := http.NewRequest("GET", "/", nil)
+				loginAs("doesnotexist", req)
 				if err != nil {
 					t.Fatalf("request creation failed: %s", err)
 				}
 				rr := httptest.NewRecorder()
-				params = httprouter.Params{{"key", "doesnotexist"}}
+				*params = httprouter.Params{{"key", "doesnotexist"}}
 				requestTOTP.ServeHTTP(rr, req)
 				expectedContentType := "application/json"
 				if rr.Header().Get("Content-Type") != expectedContentType {
@@ -56,7 +56,7 @@ func TestTOTP(t *testing.T) {
 			func() *graph.Db {
 				return db
 			},
-			func(db *graph.Db, requestTOTP http.HandlerFunc, enableTOTP http.HandlerFunc) {
+			func(db *graph.Db, requestTOTP http.HandlerFunc, enableTOTP http.HandlerFunc, params *httprouter.Params) {
 				user := domain.User{}
 				err := db.Users.Create(&user, nil)
 				if err != nil {
@@ -66,8 +66,9 @@ func TestTOTP(t *testing.T) {
 				if err != nil {
 					t.Fatalf("request creation failed: %s", err)
 				}
+				loginAs(user.Key, req)
 				rr := httptest.NewRecorder()
-				params = httprouter.Params{{"key", user.Key}}
+				*params = httprouter.Params{{"key", user.Key}}
 				requestTOTP.ServeHTTP(rr, req)
 				expectedContentType := "application/json"
 				if rr.Code != http.StatusOK {
@@ -119,6 +120,7 @@ func TestTOTP(t *testing.T) {
 				if err != nil {
 					t.Fatalf("request creation failed: %s", err)
 				}
+				loginAs(user.Key, req)
 				rr = httptest.NewRecorder()
 				enableTOTP.ServeHTTP(rr, req)
 				log.Printf("Status-Code: %d\n", rr.Code)
@@ -142,6 +144,7 @@ func TestTOTP(t *testing.T) {
 				if err != nil {
 					t.Fatalf("request creation failed: %s", err)
 				}
+				loginAs(user.Key, req)
 				rr = httptest.NewRecorder()
 				enableTOTP.ServeHTTP(rr, req)
 				log.Printf("Status-Code: %d\n", rr.Code)
@@ -161,6 +164,7 @@ func TestTOTP(t *testing.T) {
 				if err != nil {
 					t.Fatalf("request creation failed: %s", err)
 				}
+				loginAs(user.Key, req)
 				rr = httptest.NewRecorder()
 				enableTOTP.ServeHTTP(rr, req)
 				log.Printf("Status-Code: %d\n", rr.Code)
@@ -173,7 +177,7 @@ func TestTOTP(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			params = httprouter.Params{}
+			params := httprouter.Params{}
 			db := tt.setup()
 			s := user.NewService(db)
 			h := NewHandler(db, s)
@@ -183,7 +187,7 @@ func TestTOTP(t *testing.T) {
 			enableTOTP := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				h.EnableTOTP(writer, request, params)
 			})
-			tt.code(db, requestTOTP, enableTOTP)
+			tt.code(db, requestTOTP, enableTOTP, &params)
 		})
 	}
 }
