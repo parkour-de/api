@@ -31,8 +31,8 @@ jobs:
       run: docker run -d -p 8529:8529 -e ARANGO_ROOT_PASSWORD=change-me-together-thick-music-moon --name arango-db arangodb/arangodb:3.11.3
 
     # database may not immediately be available
-    - name: Sleep for 12 seconds
-      run: sleep 12s
+    - name: Sleep for 10 seconds
+      run: sleep 10s
       shell: bash
 
     - name: Test
