@@ -26,8 +26,8 @@ func TestExists(t *testing.T) {
 			func(db *graph.Db, exists http.HandlerFunc) {
 				params = httprouter.Params{{"key", "x"}}
 				rr := callExists(exists, "/", t)
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 			},
 		},

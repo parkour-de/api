@@ -2,11 +2,11 @@
 Welcome to the User Authentication API! This API provides endpoints for user registration, login, and authentication management. Here's how you can use it:
 
 ## User Registration
-- `GET /api/users/{key}/exist`: Check if a username is already taken (boolean response).
+- `GET /api/users/{key}/exists`: Check if a username is already taken (boolean response).
 - `POST /api/users/{key}/claim`: Claim a username that is taken but has never been used.
 - `POST /api/users/{key}/create`: Create a new user and receive a 30-minute session token.
-- Valid usernames must match this regex: `^[a-zA-Z0-9_-][a-zA-Z0-9_\-.]{2,29}$`
-  - The first character must be alphanumeric (a-z, A-Z, 0-9), an underscore, or a hyphen.
+- Valid usernames must match this regex: `^[a-z0-9_-][a-z0-9_\-.]{2,29}$`
+  - The first character must be alphanumeric (a-z, 0-9), an underscore, or a hyphen.
   - The remaining characters must be alphanumeric, an underscore, a hyphen, or a period.
   - The username must be between 3 and 30 characters long.
   - The username must not only contain digits.

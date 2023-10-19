@@ -50,18 +50,18 @@ func TestPassword(t *testing.T) {
 				*params = httprouter.Params{{"key", user.Key}}
 				// attempt to set up no password
 				rr := callLinkPassword(linkPassword, user.Key, "/", t)
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 				// attempt to set up empty password
 				rr = callLinkPassword(linkPassword, user.Key, "/?password=", t)
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 				// attempt to set up simple password
 				rr = callLinkPassword(linkPassword, user.Key, "/?password=123456", t)
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 				// attempt to set up a normal password
 				rr = callLinkPassword(linkPassword, user.Key, "/?password=Tr0ub4dor%263", t)
@@ -70,8 +70,8 @@ func TestPassword(t *testing.T) {
 				}
 				// attempt to set up another password
 				rr = callLinkPassword(linkPassword, user.Key, "/?password=Tr0ub4dor%264", t)
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 				// attempt to verify the password
 				rr = callVerifyPassword(verifyPassword, user.Key, "/?password=Tr0ub4dor%263", t)

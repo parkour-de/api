@@ -13,6 +13,9 @@ func (s *Service) Create(key string, name string, userType string, ctx context.C
 	if err := ValidateCustomKey(key); err != nil {
 		return "", fmt.Errorf("invalid username: %w", err)
 	}
+	if name == "" {
+		name = key
+	}
 	if len(name) > 100 {
 		return "", fmt.Errorf("name cannot be longer than 100 characters")
 	}

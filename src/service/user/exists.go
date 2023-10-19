@@ -31,8 +31,8 @@ func ValidateKey(username string) error {
 	if len(username) < 3 || len(username) > 30 {
 		return fmt.Errorf("username must be between 3 and 30 characters long")
 	}
-	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9_-][a-zA-Z0-9_\-.]{2,29}$`, username); !matched {
-		return fmt.Errorf("key must contain a-z, A-Z, 0-9, _, -, or . but may not start with a period")
+	if matched, _ := regexp.MatchString(`^[a-z0-9_-][a-z0-9_\-.]{2,29}$`, username); !matched {
+		return fmt.Errorf("key must contain a-z, 0-9, _, -, or . but may not start with a period")
 	}
 	return nil
 }

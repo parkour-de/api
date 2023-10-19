@@ -46,8 +46,8 @@ func TestTOTP(t *testing.T) {
 						rr.Header().Get("Content-Type"), expectedContentType)
 				}
 				// TODO: Actually fail the test
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 			},
 		},
@@ -124,8 +124,8 @@ func TestTOTP(t *testing.T) {
 				rr = httptest.NewRecorder()
 				enableTOTP.ServeHTTP(rr, req)
 				log.Printf("Status-Code: %d\n", rr.Code)
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("with the wrong code, handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("with the wrong code, handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 
 				code, err := totp.GenerateCode(secret, time.Now())
@@ -168,8 +168,8 @@ func TestTOTP(t *testing.T) {
 				rr = httptest.NewRecorder()
 				enableTOTP.ServeHTTP(rr, req)
 				log.Printf("Status-Code: %d\n", rr.Code)
-				if rr.Code != http.StatusBadRequest {
-					t.Errorf("with the repeated activation, handler returned unexpected status code: got %v want %v", rr.Code, http.StatusBadRequest)
+				if rr.Code != 400 {
+					t.Errorf("with the repeated activation, handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 			},
 		},
