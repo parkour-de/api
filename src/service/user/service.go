@@ -44,7 +44,7 @@ func ValidateUserToken(token string) (string, string, error) {
 	if unix > expiry {
 		return "", "", fmt.Errorf("token expired")
 	}
-	hash := security.HashToken(":user_authenticated::" + tokens[0] + ":" + tokens[1] + ":" + tokens[2])
+	hash := HashUserToken(tokens[0] + ":" + tokens[1] + ":" + tokens[2])
 	if hash != tokens[3] {
 		return "", "", fmt.Errorf("token invalid")
 	}

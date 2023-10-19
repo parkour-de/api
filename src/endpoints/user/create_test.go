@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"net/http/httptest"
@@ -42,9 +43,11 @@ func TestCreate(t *testing.T) {
 	if rr.Code != 200 {
 		t.Errorf("should have accepted username: got %v want %v", rr.Code, 200)
 	}
-	body := rr.Body.String()
-	t.Logf("body: %s", body)
-	key, method, err := user.ValidateUserToken(body)
+	var token string
+	if err := json.Unmarshal(rr.Body.Bytes(), &token); err != nil {
+		t.Errorf("json unmarshal failed: %s", err)
+	}
+	key, method, err := user.ValidateUserToken(token)
 	if err != nil {
 		t.Errorf("should have returned a valid token: %s", err)
 	}
