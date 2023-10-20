@@ -42,6 +42,8 @@ func (h *Handler) GetLocations(w http.ResponseWriter, r *http.Request, urlParams
 		Lng:         lng,
 		MaxDistance: maxDistance,
 		Type:        query.Get("type"),
+		Text:        query.Get("text"),
+		Language:    query.Get("language"),
 		Include:     api.MakeSet(query.Get("include")),
 		Skip:        skip,
 		Limit:       limit,
@@ -53,4 +55,14 @@ func (h *Handler) GetLocations(w http.ResponseWriter, r *http.Request, urlParams
 		return
 	}
 	api.SuccessJson(w, r, locations)
+}
+
+func (h *Handler) GetLocation(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	key := urlParams.ByName("key")
+	item, err := h.db.Locations.Read(key, r.Context())
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("read request failed: %w", err), 400)
+		return
+	}
+	api.SuccessJson(w, r, item)
 }

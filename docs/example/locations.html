@@ -12,8 +12,8 @@
         <input type="text" id="lat" name="lat" placeholder="53.551086">
         <label for="lng">Longitude</label>
         <input type="text" id="lng" name="lng" placeholder="9.993682">
-        <label for="distance">Max. Distance (Meters)</label>
-        <input type="text" id="distance" name="distance" placeholder="1000">
+        <label for="maxDistance">Max. Distance (Meters)</label>
+        <input type="text" id="maxDistance" name="maxDistance" value="10000000" placeholder="10000000">
         <label for="type">Type</label>
         <select id="type" name="type">
             <option value="">(any)</option>
@@ -75,7 +75,7 @@
     <script>
         const url = 'http://localhost:8080/api/locations'
         function generateQuerystring() {
-            return ['lat', 'lng', 'distance', 'type', 'text', 'language']
+            return ['lat', 'lng', 'maxDistance', 'type', 'text', 'language']
                 .map(param => {
                     const value = document.querySelector(`#${param}`).value;
                     return value ? `${param}=${value.trim()}` : null;
@@ -98,7 +98,7 @@
             const tr = document.createElement('tr')
             const url = "./location.html#" + location._key
             tr.append(
-                ...['_key', 'type', 'descriptions'].map(prop => td(location[prop], url))
+                ...['_key', 'lat', 'lng', 'distance', 'type', 'descriptions'].map(prop => td(location[prop], url))
             )
             return tr
         }

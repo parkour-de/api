@@ -31,6 +31,9 @@ func (h *Handler) GetTrainings(w http.ResponseWriter, r *http.Request, urlParams
 		Weekday:      weekday,
 		OrganiserKey: query.Get("organiser"),
 		LocationKey:  query.Get("location"),
+		Type:         query.Get("type"),
+		Text:         query.Get("text"),
+		Language:     query.Get("language"),
 		Include:      api.MakeSet(query.Get("include")),
 		Skip:         skip,
 		Limit:        limit,
@@ -42,4 +45,14 @@ func (h *Handler) GetTrainings(w http.ResponseWriter, r *http.Request, urlParams
 		return
 	}
 	api.SuccessJson(w, r, trainings)
+}
+
+func (h *Handler) GetTraining(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	key := urlParams.ByName("key")
+	item, err := h.db.Trainings.Read(key, r.Context())
+	if err != nil {
+		api.Error(w, r, fmt.Errorf("read request failed: %w", err), 400)
+		return
+	}
+	api.SuccessJson(w, r, item)
 }

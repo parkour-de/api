@@ -6,6 +6,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"math"
 	"pkv/api/src/domain"
+	"pkv/api/src/repository/dpv"
 )
 
 func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Context) ([]domain.LocationDTO, error) {
@@ -33,11 +34,29 @@ func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Cont
 
 func buildLocationQuery(options domain.LocationQueryOptions) (string, map[string]interface{}) {
 	includeSet := options.Include
-	query := "FOR location IN locations"
+	var query string
 	bindVars := map[string]interface{}{
 		"lat":         options.Lat,
 		"lng":         options.Lng,
 		"maxDistance": options.MaxDistance,
+	}
+	if options.Text != "" {
+		lang := options.Language
+		valid := false
+		for _, language := range dpv.ConfigInstance.Settings.Languages {
+			if language.Key == lang {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			lang = "en"
+		}
+		query += "FOR location IN `locations-descriptions`\n"
+		query += fmt.Sprintf(`  SEARCH ANALYZER(TOKENS(@text, "text_%s") ALL == location.descriptions.%s.text, "text_%s")`, lang, lang, lang)
+		bindVars["text"] = options.Text
+	} else {
+		query += "FOR location IN locations\n"
 	}
 	if options.Type != "" {
 		query += "\n  FILTER location.type == @type"

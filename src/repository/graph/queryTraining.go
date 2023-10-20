@@ -6,6 +6,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"math"
 	"pkv/api/src/domain"
+	"pkv/api/src/repository/dpv"
 	"strings"
 )
 
@@ -48,8 +49,26 @@ func buildAllTrainingsQuery() (string, map[string]interface{}) {
 
 func buildTrainingQuery(options domain.TrainingQueryOptions) (string, map[string]interface{}) {
 	includeSet := options.Include
-	query := "FOR training IN trainings\n"
+	var query string
 	bindVars := make(map[string]interface{})
+	if options.Text != "" {
+		lang := options.Language
+		valid := false
+		for _, language := range dpv.ConfigInstance.Settings.Languages {
+			if language.Key == lang {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			lang = "en"
+		}
+		query += "FOR training IN `trainings-descriptions`\n"
+		query += fmt.Sprintf(`  SEARCH ANALYZER(TOKENS(@text, "text_%s") ALL == training.descriptions.%s.text, "text_%s")`, lang, lang, lang)
+		bindVars["text"] = options.Text
+	} else {
+		query += "FOR training IN trainings\n"
+	}
 	if options.Weekday != 0 {
 		query += "  FILTER training.cycles[? ANY FILTER CURRENT.weekday == @weekday]\n"
 		bindVars["weekday"] = options.Weekday

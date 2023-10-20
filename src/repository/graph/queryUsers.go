@@ -56,8 +56,8 @@ func buildAllUsersQuery() (string, map[string]interface{}) {
 
 func buildUserQuery(options domain.UserQueryOptions) (string, map[string]interface{}) {
 	includeSet := options.Include
-	bindVars := make(map[string]interface{})
 	var query string
+	bindVars := make(map[string]interface{})
 	if options.Text != "" {
 		lang := options.Language
 		valid := false

@@ -6,6 +6,7 @@ type TrainingQueryOptions struct {
 	Weekday      int
 	OrganiserKey string
 	LocationKey  string
+	Type         string
 	Text         string
 	Language     string
 	Include      map[string]struct{}
