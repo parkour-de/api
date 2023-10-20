@@ -16,6 +16,7 @@ types:
   TotpConfiguration: !include types/totpConfiguration.raml
   TotpEnableRequest: !include types/totpEnableRequest.raml
   User: !include types/user.raml
+  UsersRequest: !include types/usersRequest.raml
   Description: !include types/description.raml
   Descriptions:
     description: Descriptions using languages, e.g. de as key
@@ -149,6 +150,12 @@ types:
         '200':
           description: OK
   /pages:
+    get:
+      description: Returns a list of pages.
+      responses:
+        '200':
+          description: OK
+          body: Page[]
   /locations:
     get:
       description: Returns a list of locations.
@@ -174,6 +181,8 @@ types:
         '200':
           description: OK
           body: User[]
+      queryString:
+        type: UsersRequest
     '/{key}':
       '/exists':
         get:
@@ -183,6 +192,35 @@ types:
               body:
                 type: boolean
                 example: true
+      '/claim':
+        post:
+          responses:
+            '200':
+              description: OK
+      '/facebook':
+        get:
+          responses:
+            '200':
+              description: OK
+              body:
+                type: string
+                example: "f:johndoe:1700000000:eyI_In0"
+          queryString:
+            properties:
+              auth:
+                description: Facebook auth token
+                type: string
+      '/password':
+        get:
+          responses:
+            '200':
+              description: OK
+              body:
+                type: string
+                example: "p:johndoe:1700000000:eyI_In0"
+          queryString:
+            properties:
+              password: string
       '/totp':
         get:
           responses:
@@ -194,6 +232,30 @@ types:
           responses:
             '200':
               description: OK
+      '/{email}':
+        get:
+          responses:
+            '200':
+              description: OK
+        uriParameters:
+          email:
+            description: email to be configured
+            type: string
+        '/{login}':
+          get:
+            responses:
+              '200':
+                description: OK
+                body:
+                  type: string
+                  example: "e:johndoe:1700000000:eyI_In0"
+            queryString:
+              properties:
+                code: string
+          uriParameters:
+            login:
+              description: login to be configured
+              type: string
       uriParameters:
         key:
           description: key of the item to be retrieved

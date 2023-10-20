@@ -52,5 +52,7 @@ func (h *Handler) EnableEmail(w http.ResponseWriter, r *http.Request, urlParams 
 		return
 	}
 
+	// TODO reward a token for the user
+
 	api.SuccessJson(w, r, nil)
 }

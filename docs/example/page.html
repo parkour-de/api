@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pages</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Page</h1>
+    <div id="page"></div>
+    <script>
+        // get the location hash without the leading #:
+        const hash = window.location.hash.substring(1)
+        const url = 'http://localhost:8080/api/pages/' + hash
+        function renderPage(pages) {
+            const panel = document.querySelector('#page')
+            panel.innerHTML = ''
+            panel.innerHTML = JSON.stringify(pages, null, 2)
+        }
+        function fetchPage() {
+            fetch(url)
+                .then(response => response.json())
+                .then(page => renderPage(page))
+        }
+        fetchPage()
+    </script>
+</body>
+</html>

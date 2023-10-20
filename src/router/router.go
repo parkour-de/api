@@ -28,10 +28,10 @@ func NewServer(configPath string, test bool) *http.Server {
 	authenticationHandler := authentication.NewHandler(db, userService)
 	queryHandler := query.NewHandler(db)
 	userHandler := user.NewHandler(db, userService)
-	trainingCrudHandler := crud.NewHandler[*domain.Training](db, db.Trainings, "")
-	locationCrudHandler := crud.NewHandler[*domain.Location](db, db.Locations, "")
-	userCrudHandler := crud.NewHandler[*domain.User](db, db.Users, "")
-	pageCrudHandler := crud.NewHandler[*domain.Page](db, db.Pages, "")
+	trainingCrudHandler := crud.NewHandler[*domain.Training](db, db.Trainings)
+	locationCrudHandler := crud.NewHandler[*domain.Location](db, db.Locations)
+	userCrudHandler := crud.NewHandler[*domain.User](db, db.Users)
+	pageCrudHandler := crud.NewHandler[*domain.Page](db, db.Pages)
 
 	r := httprouter.New()
 
@@ -71,6 +71,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/trainings", queryHandler.GetTrainings)
 	r.GET("/api/pages", queryHandler.GetPages)
 	r.GET("/api/locations", queryHandler.GetLocations)
+	r.GET("/api/users/:key", userHandler.Read)
 	r.POST("/api/users/:key", userHandler.Create)
 	r.GET("/api/users/:key/exists", userHandler.Exists)
 	r.POST("/api/users/:key/claim", userHandler.Claim)
@@ -79,7 +80,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/users/:key/totp", userHandler.RequestTOTP)
 	r.POST("/api/users/:key/totp", userHandler.EnableTOTP)
 	r.GET("/api/users/:key/email", userHandler.RequestEmail)
-	r.GET("/api/users/:key/email/:loginKey", userHandler.EnableEmail)
+	r.GET("/api/users/:key/email/:login", userHandler.EnableEmail)
 
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)

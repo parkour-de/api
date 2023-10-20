@@ -80,11 +80,69 @@ func GetOrCreateCollection(db driver.Database, name string, edges bool) (driver.
 		if edges {
 			return db.CreateCollection(nil, name, &driver.CreateCollectionOptions{Type: driver.CollectionTypeEdge})
 		} else {
-			return db.CreateCollection(nil, name, nil)
+			return db.CreateCollection(nil, name, &driver.CreateCollectionOptions{
+				ComputedValues: []driver.ComputedValue{
+					{
+						Name:       "created",
+						Expression: "RETURN DATE_ISO8601(DATE_NOW())",
+						Overwrite:  true,
+						ComputeOn:  []driver.ComputeOn{driver.ComputeOnInsert},
+					},
+					{
+						Name:       "modified",
+						Expression: "RETURN DATE_ISO8601(DATE_NOW())",
+						Overwrite:  true,
+						ComputeOn:  []driver.ComputeOn{driver.ComputeOnInsert, driver.ComputeOnReplace, driver.ComputeOnUpdate},
+					},
+				},
+				Type: driver.CollectionTypeDocument,
+			})
 		}
 	} else {
 		return db.Collection(nil, name)
 	}
+}
+
+var fields map[string]driver.ArangoSearchElementProperties
+
+func FieldsForAllLanguages(config *dpv.Config) map[string]driver.ArangoSearchElementProperties {
+	if fields == nil {
+		fields = make(map[string]driver.ArangoSearchElementProperties)
+		for _, language := range config.Settings.Languages {
+			fields[language.Key] = driver.ArangoSearchElementProperties{
+				Fields: map[string]driver.ArangoSearchElementProperties{
+					"text": {
+						Analyzers: []string{"text_" + language.Key},
+					},
+				},
+			}
+		}
+	}
+	return fields
+}
+
+func CreateViewIfNotExists(db driver.Database, config *dpv.Config, name string) error {
+	ok, err := db.ViewExists(nil, name+"-descriptions")
+	if err != nil {
+		return fmt.Errorf("could not check if view for collection %v exists: %w", name, err)
+	}
+	if !ok {
+		_, err := db.CreateArangoSearchView(nil, name+"-descriptions", &driver.ArangoSearchViewProperties{
+			Links: map[string]driver.ArangoSearchElementProperties{
+				"users": {
+					Fields: map[string]driver.ArangoSearchElementProperties{
+						"descriptions": {
+							Fields: FieldsForAllLanguages(config),
+						},
+					},
+				},
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("could not create view for collection %v: %w", name, err)
+		}
+	}
+	return nil
 }
 
 func NewEntityManager[T Entity](db driver.Database, name string, edges bool, constructor func() T) (EntityManager[T], error) {
@@ -114,9 +172,23 @@ func Init(configPath string, test bool) (*Db, *dpv.Config, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not use database: %w", err)
 	}
-	db, err := NewDB(database)
+	db, err := NewDB(database, config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not initialise database: %w", err)
+	}
+	if !test {
+		collection, err := db.Database.Collection(nil, "users")
+		if err != nil {
+			return nil, nil, fmt.Errorf("could not get users collection: %w", err)
+		}
+		count, err := collection.Count(nil)
+		if err != nil {
+			return nil, nil, fmt.Errorf("could not count users: %w", err)
+		}
+		if count == 0 {
+			log.Println("Creating sample data")
+			SampleData(db)
+		}
 	}
 	return db, config, err
 }

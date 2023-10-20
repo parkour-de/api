@@ -41,15 +41,9 @@ settings:
     - key: "nl"
       name: Nederlands
       icon: 🇳🇱
-    - key: "ja"
-      name: 日本語
-      icon: 🇯🇵
     - key: "pt"
       name: Português
       icon: 🇵🇹
-    - key: "pl"
-      name: Polski
-      icon: 🇵🇱
     - key: "sv"
       name: Svenska
       icon: 🇸🇪

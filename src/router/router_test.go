@@ -91,7 +91,7 @@ func TestHandler(t *testing.T) {
 	}*/
 
 	x1 := time.Now()
-	slice2, err := graphDB.GetTrainings(domain.TrainingQueryOptions{
+	slice2, err := graphDB.GetFilteredTrainings(domain.TrainingQueryOptions{
 		City:    "Hamburg",
 		Weekday: 5,
 	}, nil)

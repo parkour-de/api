@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Users</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>User</h1>
+    <div id="user"></div>
+    <script>
+        // get the location hash without the leading #:
+        const hash = window.location.hash.substring(1)
+        const url = 'http://localhost:8080/api/users/' + hash
+        function renderUser(users) {
+            const panel = document.querySelector('#user')
+            panel.innerHTML = ''
+            panel.innerHTML = JSON.stringify(users, null, 2)
+        }
+        function fetchUser() {
+            fetch(url)
+                .then(response => response.json())
+                .then(user => renderUser(user))
+        }
+        fetchUser()
+    </script>
+</body>
+</html>

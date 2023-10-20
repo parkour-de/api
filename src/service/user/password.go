@@ -13,32 +13,32 @@ import (
 	"time"
 )
 
-func (s *Service) LinkPassword(key, password string, ctx context.Context) error {
+func (s *Service) LinkPassword(key, password string, ctx context.Context) (string, error) {
 	// Check password length
 	if len(password) < 8 {
-		return fmt.Errorf("password too short")
+		return "", fmt.Errorf("password too short")
 	}
 
 	// Check password strength
 	if !security.IsStrongPassword(password) {
-		return fmt.Errorf("password too weak")
+		return "", fmt.Errorf("password too weak")
 	}
 
 	// Check if the user exists
 	_, err := s.db.Users.Read(key, ctx)
 	if err != nil {
-		return fmt.Errorf("read user failed: %w", err)
+		return "", fmt.Errorf("read user failed: %w", err)
 	}
 
 	// Check if the user already has a password login
 	logins, err := s.db.GetLoginsForUser(key, ctx)
 	if err != nil {
-		return fmt.Errorf("read logins failed: %w", err)
+		return "", fmt.Errorf("read logins failed: %w", err)
 	}
 
 	for _, login := range logins {
 		if login.Provider == "password" {
-			return fmt.Errorf("password already set")
+			return "", fmt.Errorf("password already set")
 		}
 	}
 
@@ -53,14 +53,17 @@ func (s *Service) LinkPassword(key, password string, ctx context.Context) error 
 	log.Println("pwd: " + password)
 	log.Println("sub: " + login.Subject)
 	if err := s.db.Logins.Create(&login, ctx); err != nil {
-		return fmt.Errorf("create login failed: %w", err)
+		return "", fmt.Errorf("create login failed: %w", err)
 	}
 
 	if err := s.db.LoginAuthenticatesUser(login, domain.User{Key: key}, ctx); err != nil {
-		return fmt.Errorf("link login to user failed: %w", err)
+		return "", fmt.Errorf("link login to user failed: %w", err)
 	}
 
-	return nil
+	unix := time.Now().Unix()
+	expiry := unix + 3600
+	token := HashedUserToken("p", key, expiry)
+	return token, nil
 }
 
 func (s *Service) Password(key, password string, ctx context.Context) (string, error) {

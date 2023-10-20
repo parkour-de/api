@@ -6,17 +6,17 @@ properties:
     type: integer
     minimum: 0
     maximum: 7
-  city?:
-    description: City name
-    example: Hamburg
+  key?:
+    description: User key
+    example: john.doe_123
     type: string
-  organiser?:
-    description: Return only trainings that match provided Organiser ID
-    example: "135"
+  name?:
+    description: User name
+    example: John Doe
     type: string
-  location?:
-    description: Return only trainings that match provided Location ID
-    example: "246"
+  type?:
+    description: User type
+    example: athlete
     type: string
   text?:
     description: Text to search for
@@ -26,8 +26,8 @@ properties:
     description: Language of the text to search for
     example: en
   include?:
-    description: 'comma-separated list of sections to include. Choose from: cycles,photos,comments,location,location_photos,location_comments,organisers,organiser_photos,organiser_comments'
-    example: cycles,photos,comments,location,organisers
+    description: 'comma-separated list of sections to include. Choose from: photos,comments'
+    example: photos,comments
     type: string
   skip?:
     description: skip over this many results

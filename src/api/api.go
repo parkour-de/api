@@ -112,6 +112,7 @@ func SuccessJson(w http.ResponseWriter, r *http.Request, data interface{}) {
 
 func Success(w http.ResponseWriter, r *http.Request, jsonMsg []byte) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if _, err := w.Write(jsonMsg); err != nil {
 		log.Printf("Error writing response: %v", err)
 	}
@@ -125,8 +126,9 @@ func Success(w http.ResponseWriter, r *http.Request, jsonMsg []byte) {
 }
 
 func Error(w http.ResponseWriter, r *http.Request, err error, code int) {
-	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(code)
 	if err == nil {
 		err = fmt.Errorf("nil err")
 	}

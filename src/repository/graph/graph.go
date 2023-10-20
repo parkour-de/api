@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"pkv/api/src/domain"
+	"pkv/api/src/repository/dpv"
 )
 
 /*
@@ -27,7 +28,7 @@ type Db struct {
 	LocationsIndex driver.Index
 }
 
-func NewDB(database driver.Database) (*Db, error) {
+func NewDB(database driver.Database, config *dpv.Config) (*Db, error) {
 	trainings, err := NewEntityManager[*domain.Training](database, "trainings", false, func() *domain.Training { return new(domain.Training) })
 	if err != nil {
 		return nil, err
@@ -55,6 +56,18 @@ func NewDB(database driver.Database) (*Db, error) {
 	locationsIndex, _, err := locations.Collection.EnsureGeoIndex(nil, []string{"lat", "lng"}, nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not ensure geo index for locations: %w", err)
+	}
+	if err := CreateViewIfNotExists(database, config, "trainings"); err != nil {
+		return nil, fmt.Errorf("could not create view: %w", err)
+	}
+	if err := CreateViewIfNotExists(database, config, "locations"); err != nil {
+		return nil, fmt.Errorf("could not create view: %w", err)
+	}
+	if err := CreateViewIfNotExists(database, config, "users"); err != nil {
+		return nil, fmt.Errorf("could not create view: %w", err)
+	}
+	if err := CreateViewIfNotExists(database, config, "pages"); err != nil {
+		return nil, fmt.Errorf("could not create view: %w", err)
 	}
 	return &Db{
 		database,

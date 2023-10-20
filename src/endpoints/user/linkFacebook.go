@@ -20,10 +20,11 @@ func (h *Handler) LinkFacebook(w http.ResponseWriter, r *http.Request, urlParams
 		return
 	}
 	auth := r.URL.Query().Get("auth")
-	if err = h.service.LinkFacebook(key, auth, r.Context()); err != nil {
+	token, err := h.service.LinkFacebook(key, auth, r.Context())
+	if err != nil {
 		api.Error(w, r, err, 400)
 		return
 	}
 
-	api.SuccessJson(w, r, nil)
+	api.SuccessJson(w, r, token)
 }

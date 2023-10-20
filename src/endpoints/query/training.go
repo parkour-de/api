@@ -10,7 +10,6 @@ import (
 
 // GetTrainings handles the GET /api/trainings endpoint.
 func (h *Handler) GetTrainings(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	// Extract the include parameter from the URL query
 	query := r.URL.Query()
 	weekday, err := api.ParseInt(query.Get("weekday"))
 	if err != nil {
@@ -37,7 +36,7 @@ func (h *Handler) GetTrainings(w http.ResponseWriter, r *http.Request, urlParams
 		Limit:        limit,
 	}
 
-	trainings, err := h.db.GetTrainings(queryOptions, r.Context())
+	trainings, err := h.db.GetFilteredTrainings(queryOptions, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("querying trainings failed: %w", err), 400)
 		return

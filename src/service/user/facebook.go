@@ -23,24 +23,24 @@ type FacebookTokenValidationResponse struct {
 	} `json:"data"`
 }
 
-func (s *Service) LinkFacebook(key string, auth string, ctx context.Context) error {
+func (s *Service) LinkFacebook(key string, auth string, ctx context.Context) (string, error) {
 	user, err := s.db.Users.Read(key, ctx)
 	if err != nil {
-		return fmt.Errorf("read user failed: %w", err)
+		return "", fmt.Errorf("read user failed: %w", err)
 	}
 	logins, err := s.db.GetLoginsForUser(key, ctx)
 	if err != nil {
-		return fmt.Errorf("read logins failed: %w", err)
+		return "", fmt.Errorf("read logins failed: %w", err)
 	}
 	for _, login := range logins {
 		if login.Provider == "facebook" {
-			return fmt.Errorf("facebook already connected")
+			return "", fmt.Errorf("facebook already connected")
 		}
 	}
 
 	validationResponse, err := s.checkFacebookAuth(auth)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	login := domain.Login{
@@ -52,13 +52,24 @@ func (s *Service) LinkFacebook(key string, auth string, ctx context.Context) err
 	}
 
 	if err = s.db.Logins.Create(&login, ctx); err != nil {
-		return fmt.Errorf("create login failed: %w", err)
+		return "", fmt.Errorf("create login failed: %w", err)
 	}
 
 	if err = s.db.LoginAuthenticatesUser(login, *user, ctx); err != nil {
-		return fmt.Errorf("link login to user failed: %w", err)
+		return "", fmt.Errorf("link login to user failed: %w", err)
 	}
-	return nil
+
+	exp := int64(validationResponse.Data.ExpiresAt)
+	unix := time.Now().Unix()
+
+	expiry := unix + 3600
+	if exp < expiry {
+		expiry = exp
+	}
+
+	token := HashedUserToken("f", key, expiry)
+
+	return token, nil
 }
 
 func (s *Service) Facebook(auth string) ([]string, error) {

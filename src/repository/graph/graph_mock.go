@@ -2,6 +2,7 @@ package graph
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"pkv/api/src/domain"
 	"time"
@@ -155,6 +156,98 @@ func CreateCycle(db *Db, i int) (domain.Cycle, error) {
 	cycle := domain.Cycle{}
 	cycle.Weekday = rand.Intn(7) + 1
 	return cycle, nil
+}
+
+func SampleData(db *Db) {
+	admin := domain.User{
+		Key:  "admin",
+		Name: "Admin",
+		Type: "administrator",
+	}
+	if err := db.Users.Create(&admin, nil); err != nil {
+		log.Fatal(err)
+	}
+	dpv := domain.User{
+		Key:  "dpv",
+		Name: "Deutscher Parkour Verband",
+		Type: "association",
+		Descriptions: map[string]domain.Description{
+			"de": {
+				Title: "Deutscher Parkour Verband",
+				Text:  "Der Deutsche Parkour Verband e.V. (DPV) ist der Dachverband für Parkour und Freerunning in Deutschland. Er wurde 2024 gegründet und vertritt die Interessen der Parkour- und Freerunning-Szene in Deutschland. Der DPV ist zudem Mitglied im Deutschen Olympischen Sportbund (DOSB).",
+			},
+			"en": {
+				Title: "German Parkour Association",
+				Text:  "The German Parkour Association (DPV) is the umbrella organization for parkour and freerunning in Germany. It was founded in 2024 and represents the interests of the parkour and freerunning scene in Germany. The DPV is also a member of the German Olympic Sports Confederation (DOSB).",
+			},
+		},
+		Comments: []domain.Comment{
+			{
+				"Endlich!",
+				"Das hat lange gedauert",
+				"admin",
+				time.Now(),
+			},
+		},
+	}
+	if err := db.Users.Create(&dpv, nil); err != nil {
+		log.Fatal(err)
+	}
+	if err := db.UserAdministersUser(admin, dpv, nil); err != nil {
+		log.Fatal(err)
+	}
+	berlin := domain.Location{
+		Key:  "berlin",
+		City: "Berlin",
+		Lat:  52.52,
+		Lng:  13.40,
+		Type: "office",
+	}
+	if err := db.Locations.Create(&berlin, nil); err != nil {
+		log.Fatal(err)
+	}
+	meeting := domain.Training{
+		Key:  "berlin-meeting-november-2023",
+		Type: "meeting",
+		Descriptions: map[string]domain.Description{
+			"de": {
+				Title: "Berlin Meeting November 2023",
+				Text:  "Das Berlin Meeting ist ein monatliches Treffen der Parkour- und Freerunning-Szene in Deutschland. Es findet jeden Monat statt und wird vom DPV organisiert.",
+			},
+			"en": {
+				Title: "Berlin Meeting November 2023",
+				Text:  "The Berlin Meeting is a monthly meeting of the parkour and freerunning scene in Germany. It takes place every month and is organized by the DPV.",
+			},
+		},
+	}
+	if err := db.Trainings.Create(&meeting, nil); err != nil {
+		log.Fatal(err)
+	}
+	if err := db.TrainingHappensAtLocation(&meeting, &berlin, nil); err != nil {
+		log.Fatal(err)
+	}
+	if err := db.UserOrganisesTraining(dpv, meeting, nil); err != nil {
+		log.Fatal(err)
+	}
+	page := domain.Page{
+		Key: "satzung",
+		Descriptions: map[string]domain.Description{
+			"de": {
+				Title: "Satzung",
+				Text:  "Die Satzung des Deutschen Parkour Verbandes e.V.",
+			},
+			"en": {
+				Title: "Articles of Association",
+				Text:  "The articles of association of the German Parkour Association e.V.",
+			},
+		},
+	}
+	if err := db.Pages.Create(&page, nil); err != nil {
+		log.Fatal(err)
+	}
+	if err := db.UserOwnsPage(dpv, page, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func NewTestDB(db *Db) {

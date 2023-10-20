@@ -9,8 +9,16 @@ import (
 	"strings"
 )
 
-func (db *Db) GetTrainings(options domain.TrainingQueryOptions, ctx context.Context) ([]domain.TrainingDTO, error) {
-	query, bindVars := buildTrainingQuery(options)
+func (db *Db) GetAllTrainings(ctx context.Context) ([]domain.TrainingDTO, error) {
+	return db.GetTrainings(buildAllTrainingsQuery, ctx)
+}
+
+func (db *Db) GetFilteredTrainings(options domain.TrainingQueryOptions, ctx context.Context) ([]domain.TrainingDTO, error) {
+	return db.GetTrainings(func() (string, map[string]interface{}) { return buildTrainingQuery(options) }, ctx)
+}
+
+func (db *Db) GetTrainings(queryBuilder QueryBuilder, ctx context.Context) ([]domain.TrainingDTO, error) {
+	query, bindVars := queryBuilder()
 	cursor, err := db.Database.Query(ctx, query, bindVars)
 	if err != nil {
 		return nil, fmt.Errorf("query string invalid: %w", err)
@@ -30,6 +38,12 @@ func (db *Db) GetTrainings(options domain.TrainingQueryOptions, ctx context.Cont
 	}
 
 	return result, nil
+}
+
+func buildAllTrainingsQuery() (string, map[string]interface{}) {
+	query := "FOR doc IN trainings RETURN doc"
+	var bindVars map[string]interface{}
+	return query, bindVars
 }
 
 func buildTrainingQuery(options domain.TrainingQueryOptions) (string, map[string]interface{}) {

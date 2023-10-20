@@ -1,9 +1,14 @@
 #%RAML 1.0 DataType
 properties:
-
   key?:
     type: string
     example: "123"
+  created?:
+    description: RFC 3339 date
+    type: string
+  modified?:
+    description: RFC 3339 date
+    type: string
   provider?:
     type: string
     example: facebook
@@ -13,6 +18,3 @@ properties:
   enabled?:
     type: boolean
     example: true
-  created?:
-    description: RFC 3339 date
-    type: string

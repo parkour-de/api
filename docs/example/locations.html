@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Locations</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Locations</h1>
+    <a href="./index.html">Back</a>
+    <form>
+        <label for="lat">Latitude</label>
+        <input type="text" id="lat" name="lat" placeholder="53.551086">
+        <label for="lng">Longitude</label>
+        <input type="text" id="lng" name="lng" placeholder="9.993682">
+        <label for="distance">Max. Distance (Meters)</label>
+        <input type="text" id="distance" name="distance" placeholder="1000">
+        <label for="type">Type</label>
+        <select id="type" name="type">
+            <option value="">(any)</option>
+            <option value="spot">Spot</option>
+            <option value="gym">Gym</option>
+            <option value="parkour-gym">Parkour Gym</option>
+            <option value="office">Office</option>
+            <option value="public-transport">Public Transport</option>
+        </select>
+        <label for="text">Text</label>
+        <input type="text" id="text" name="text" placeholder="Text">
+        <label for="language">Language</label>
+        <select id="language" name="language">
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="nl">🇳🇱 Nederlands</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="sv">🇸🇪 Svenska</option>
+            <option value="no">🇳🇴 Norsk</option>
+            <option value="fi">🇫🇮 Suomi</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Lat</th>
+                <th>Lng</th>
+                <th>Distance</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>53.551086</td>
+                <td>9.993682</td>
+                <td>0</td>
+                <td>spot</td>
+                <td>Lorem</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>53.551086</td>
+                <td>9.993682</td>
+                <td>0</td>
+                <td>gym</td>
+                <td>Ipsum</td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        const url = 'http://localhost:8080/api/locations'
+        function generateQuerystring() {
+            return ['lat', 'lng', 'distance', 'type', 'text', 'language']
+                .map(param => {
+                    const value = document.querySelector(`#${param}`).value;
+                    return value ? `${param}=${value.trim()}` : null;
+                })
+                .filter(param => param !== null)
+                .join('&')
+        }
+        function td(text, url) {
+            const td = document.createElement('td')
+            if (url) {
+                const a = document.createElement('a')
+                a.href = url
+                a.textContent = text
+                td.appendChild(a)
+            } else
+                td.textContent = text
+            return td
+        }
+        function generateRow(location) {
+            const tr = document.createElement('tr')
+            const url = "./location.html#" + location._key
+            tr.append(
+                ...['_key', 'type', 'descriptions'].map(prop => td(location[prop], url))
+            )
+            return tr
+        }
+        function generateRows(locations) {
+            return (locations || []).map(location => generateRow(location))
+        }
+        function renderLocations(locations) {
+            const tbody = document.querySelector('table > tbody')
+            tbody.innerHTML = ''
+            generateRows(locations).forEach(row => tbody.appendChild(row))
+        }
+        function fetchLocations() {
+            fetch(`${url}?${(generateQuerystring())}`)
+                .then(response => response.json())
+                .then(locations => renderLocations(locations))
+        }
+        const form = document.querySelector("form")
+        form.addEventListener("submit", event => {
+            event.preventDefault()
+            fetchLocations()
+        })
+    </script>
+</body>
+</html>

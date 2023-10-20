@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trainings</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Training</h1>
+    <div id="training"></div>
+    <script>
+        // get the location hash without the leading #:
+        const hash = window.location.hash.substring(1)
+        const url = 'http://localhost:8080/api/trainings/' + hash
+        function renderTraining(trainings) {
+            const panel = document.querySelector('#training')
+            panel.innerHTML = ''
+            panel.innerHTML = JSON.stringify(trainings, null, 2)
+        }
+        function fetchTraining() {
+            fetch(url)
+                .then(response => response.json())
+                .then(training => renderTraining(training))
+        }
+        fetchTraining()
+    </script>
+</body>
+</html>

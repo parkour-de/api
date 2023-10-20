@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Users</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Users</h1>
+    <a href="./index.html">Back</a>
+    <form>
+        <label for="key">Key</label>
+        <input type="text" id="key" name="key" placeholder="Key">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Name">
+        <label for="type">Type</label>
+        <select id="type" name="type">
+            <option value="">(any)</option>
+            <option value="user">User</option>
+            <option value="athlete">Athlete</option>
+            <option value="coach">Coach</option>
+            <option value="team">Team</option>
+            <option value="group">Group</option>
+            <option value="association">Association</option>
+            <option value="freelancer">Freelancer</option>
+            <option value="company">Company</option>
+            <option value="school">School</option>
+            <option value="government">Government</option>
+            <option value="robot">Robot</option>
+            <option value="administrator">Administrator</option>
+        </select>
+        <label for="text">Text</label>
+        <input type="text" id="text" name="text" placeholder="Text">
+        <label for="language">Language</label>
+        <select id="language" name="language">
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="nl">🇳🇱 Nederlands</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="sv">🇸🇪 Svenska</option>
+            <option value="no">🇳🇴 Norsk</option>
+            <option value="fi">🇫🇮 Suomi</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Name</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>John Doe</td>
+                <td>user</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Jane Doe</td>
+                <td>athlete</td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        const url = 'http://localhost:8080/api/users'
+        function generateQuerystring() {
+            return ['key', 'name', 'type', 'text', 'language']
+                .map(param => {
+                    const value = document.querySelector(`#${param}`).value;
+                    return value ? `${param}=${value.trim()}` : null;
+                })
+                .filter(param => param !== null)
+                .join('&')
+        }
+        function td(text, url) {
+            const td = document.createElement('td')
+            if (url) {
+                const a = document.createElement('a')
+                a.href = url
+                a.textContent = text
+                td.appendChild(a)
+            } else
+                td.textContent = text
+            return td
+        }
+        function generateRow(user) {
+            const tr = document.createElement('tr')
+            const url = "./user.html#" + user._key
+            tr.append(
+                ...['_key', 'name', 'type'].map(prop => td(user[prop], url))
+            )
+            return tr
+        }
+        function generateRows(users) {
+            return (users || []).map(user => generateRow(user))
+        }
+        function renderUsers(users) {
+            const tbody = document.querySelector('table > tbody')
+            tbody.innerHTML = ''
+            generateRows(users).forEach(row => tbody.appendChild(row))
+        }
+        function fetchUsers() {
+            fetch(`${url}?${(generateQuerystring())}`)
+                .then(response => response.json())
+                .then(users => renderUsers(users))
+        }
+        const form = document.querySelector("form")
+        form.addEventListener("submit", event => {
+            event.preventDefault()
+            fetchUsers()
+        })
+    </script>
+</body>
+</html>

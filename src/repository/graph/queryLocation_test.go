@@ -4,6 +4,7 @@ import (
 	"pkv/api/src/domain"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestGetLocations(t *testing.T) {
@@ -146,6 +147,14 @@ func TestGetLocations(t *testing.T) {
 			if err != nil {
 				t.Errorf("GetLocations() error = %v", err)
 				return
+			}
+			for i := range got {
+				got[i].Created = time.Time{}
+				got[i].Modified = time.Time{}
+			}
+			for i := range tt.want {
+				tt.want[i].Created = time.Time{}
+				tt.want[i].Modified = time.Time{}
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetLocations()\n  got = %v,\n  want  %v", got, tt.want)

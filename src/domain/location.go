@@ -1,7 +1,11 @@
 package domain
 
+import "time"
+
 type Location struct {
 	Key          string            `json:"_key,omitempty" example:"123"`
+	Created      time.Time         `json:"created,omitempty"`  // RFC 3339 date
+	Modified     time.Time         `json:"modified,omitempty"` // RFC 3339 date
 	Lat          float64           `json:"lat,omitempty" example:"53.55"`
 	Lng          float64           `json:"lng,omitempty" example:"9.99"`
 	City         string            `json:"city,omitempty" example:"Hamburg"`

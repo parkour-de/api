@@ -20,12 +20,13 @@ func (h *Handler) LinkPassword(w http.ResponseWriter, r *http.Request, urlParams
 	}
 	password := r.URL.Query().Get("password")
 
-	if err = h.service.LinkPassword(key, password, r.Context()); err != nil {
+	token, err := h.service.LinkPassword(key, password, r.Context())
+	if err != nil {
 		api.Error(w, r, err, 400)
 		return
 	}
 
-	api.SuccessJson(w, r, nil)
+	api.SuccessJson(w, r, token)
 }
 
 func (h *Handler) VerifyPassword(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {

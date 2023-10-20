@@ -10,17 +10,16 @@ import (
 )
 
 type Handler[T graph.Entity] struct {
-	db     *graph.Db
-	em     graph.EntityManager[T]
-	prefix string
+	db *graph.Db
+	em graph.EntityManager[T]
 }
 
-type IdResponse struct {
+type KeyResponse struct {
 	Key string `json:"_key,omitempty" example:"123"`
 }
 
-func NewHandler[T graph.Entity](db *graph.Db, em graph.EntityManager[T], prefix string) *Handler[T] {
-	return &Handler[T]{db, em, prefix}
+func NewHandler[T graph.Entity](db *graph.Db, em graph.EntityManager[T]) *Handler[T] {
+	return &Handler[T]{db, em}
 }
 
 // Create handles the creation of new entities.
@@ -42,7 +41,7 @@ func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("creating entity failed: %w", err), 400)
 		return
 	}
-	api.SuccessJson(w, r, IdResponse{item.GetKey()})
+	api.SuccessJson(w, r, KeyResponse{item.GetKey()})
 }
 
 // Read handles the retrieval of entities.
@@ -52,8 +51,8 @@ func (h *Handler[T]) Read(w http.ResponseWriter, r *http.Request, urlParams http
 		api.Error(w, r, fmt.Errorf("cannot perform READ operation: %w", err), 400)
 		return
 	}
-	id := h.prefix + urlParams.ByName("key")
-	item, err := h.em.Read(id, r.Context())
+	key := urlParams.ByName("key")
+	item, err := h.em.Read(key, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("read request failed: %w", err), 400)
 		return
@@ -80,7 +79,7 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("updating entity failed: %w", err), 400)
 		return
 	}
-	api.SuccessJson(w, r, IdResponse{item.GetKey()})
+	api.SuccessJson(w, r, KeyResponse{item.GetKey()})
 }
 
 // Delete handles the deletion of entities.
@@ -90,13 +89,13 @@ func (h *Handler[T]) Delete(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("cannot perform DELETE operation: %w", err), 400)
 		return
 	}
-	id := h.prefix + urlParams.ByName("key")
+	key := urlParams.ByName("key")
 	var item T
-	item.SetKey(id)
+	item.SetKey(key)
 	err = h.em.Delete(item, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("deleting entity failed: %w", err), 400)
 		return
 	}
-	api.SuccessJson(w, r, IdResponse{id})
+	api.SuccessJson(w, r, KeyResponse{key})
 }

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trainings</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Trainings</h1>
+    <a href="./index.html">Back</a>
+    <form>
+        <label for="weekday">Day of Week</label>
+        <select id="weekday" name="weekday">
+            <option value="">(any)</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+            <option value="7">Sunday</option>
+        </select>
+        <label for="organiser">Organiser-ID</label>
+        <input type="text" id="organiser" name="organiser" placeholder="Organiser">
+        <label for="location">Location-ID</label>
+        <input type="text" id="location" name="location" placeholder="Location">
+        <label for="type">Type</label>
+        <select id="type" name="type">
+            <option value="">(any)</option>
+            <option value="parkour-training">Training</option>
+            <option value="parkour-jam">Jam</option>
+            <option value="meeting">Meeting</option>
+            <option value="show">Show</option>
+            <option value="competition">Competition</option>
+            <option value="slackline">Slackline</option>
+            <option value="tour">Tour</option>
+        </select>
+        <label for="text">Text</label>
+        <input type="text" id="text" name="text" placeholder="Text">
+        <label for="language">Language</label>
+        <select id="language" name="language">
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="nl">🇳🇱 Nederlands</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="sv">🇸🇪 Svenska</option>
+            <option value="no">🇳🇴 Norsk</option>
+            <option value="fi">🇫🇮 Suomi</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>parkour-training</td>
+                <td>Lorem</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>parkour-jam</td>
+                <td>Ipsum</td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        const url = 'http://localhost:8080/api/trainings'
+        function generateQuerystring() {
+            return ['weekday', 'organiser', 'location', 'type', 'text', 'language']
+                .map(param => {
+                    const value = document.querySelector(`#${param}`).value;
+                    return value ? `${param}=${value.trim()}` : null;
+                })
+                .filter(param => param !== null)
+                .join('&')
+        }
+        function td(text, url) {
+            const td = document.createElement('td')
+            if (url) {
+                const a = document.createElement('a')
+                a.href = url
+                a.textContent = text
+                td.appendChild(a)
+            } else
+                td.textContent = text
+            return td
+        }
+        function generateRow(training) {
+            const tr = document.createElement('tr')
+            const url = "./training.html#" + training._key
+            tr.append(
+                ...['_key', 'type', 'descriptions'].map(prop => td(training[prop], url))
+            )
+            return tr
+        }
+        function generateRows(trainings) {
+            return (trainings || []).map(training => generateRow(training))
+        }
+        function renderTrainings(trainings) {
+            const tbody = document.querySelector('table > tbody')
+            tbody.innerHTML = ''
+            generateRows(trainings).forEach(row => tbody.appendChild(row))
+        }
+        function fetchTrainings() {
+            fetch(`${url}?${(generateQuerystring())}`)
+                .then(response => response.json())
+                .then(trainings => renderTrainings(trainings))
+        }
+        const form = document.querySelector("form")
+        form.addEventListener("submit", event => {
+            event.preventDefault()
+            fetchTrainings()
+        })
+    </script>
+</body>
+</html>

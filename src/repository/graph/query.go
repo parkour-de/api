@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+type QueryBuilder func() (string, map[string]interface{})
+
 func buildUnsetParts(includeSet map[string]struct{}, prefix string) []string {
 	var unsetParts []string
 	if _, ok := includeSet[prefix+"photos"]; !ok {

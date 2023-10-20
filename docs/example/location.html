@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Locations</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Location</h1>
+    <div id="location"></div>
+    <script>
+        // get the location hash without the leading #:
+        const hash = window.location.hash.substring(1)
+        const url = 'http://localhost:8080/api/locations/' + hash
+        function renderLocation(locations) {
+            const panel = document.querySelector('#location')
+            panel.innerHTML = ''
+            panel.innerHTML = JSON.stringify(locations, null, 2)
+        }
+        function fetchLocation() {
+            fetch(url)
+                .then(response => response.json())
+                .then(location => renderLocation(location))
+        }
+        fetchLocation()
+    </script>
+</body>
+</html>
