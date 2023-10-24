@@ -29,6 +29,8 @@ This API comes with a variety of features, including:
 This project is set up for Google Cloud Build, as it can build,test the Golang application and push the
 resulting Docker image to Google Container Registry.
 
+You can type the `make` command to find all possible targets. Some examples are shown below:
+
 ## Local Testing
 To build and test the application locally, run the following command:
 
@@ -73,19 +75,9 @@ the build and image creation steps in this way, we can optimize the build proces
 
 ## API documentation
 
-**Validate RAML files and generate HTML documentation:**
+**Validate RAML files and generate HTML documentation and JSON file:**
 
-    npm i -g raml2html
-    raml2html -v -i docs/api.raml -o docs/api.html
-
-**Build OpenAPI 3.0 specification from RAML:**
-
-    npm i -g oas-raml-converter-cli
-    oas-raml-converter-cli
-    Choose the converter 4) RAML 1.0 > OAS 3.0: 4
-    Enter the source path of the file: docs/api.raml
-    Enter the destination path for the file: docs/api.json
-    Are you sure you want to continue (y/n): y
+    make raml
 
 **Interactive RAML documentation:**
 
