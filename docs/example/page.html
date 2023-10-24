@@ -10,7 +10,7 @@
     <script>
         // get the location hash without the leading #:
         const hash = window.location.hash.substring(1)
-        const url = 'http://localhost:8080/api/pages/' + hash
+        const url = 'http://localhost:8080/api/page/' + hash
         function renderPage(pages) {
             const panel = document.querySelector('#page')
             panel.innerHTML = ''

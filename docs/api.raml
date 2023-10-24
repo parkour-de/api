@@ -36,7 +36,7 @@ types:
             type: string
             example: "42"
   /admin:
-    /pages:
+    /page:
       post:
         body: Page
         responses:
@@ -64,7 +64,7 @@ types:
           key:
             description: key of the item to be retrieved
             type: string
-    /locations:
+    /location:
       post:
         body: Location
         responses:
@@ -92,7 +92,7 @@ types:
           key:
             description: id of the item to be retrieved
             type: string
-    /trainings:
+    /training:
       post:
         body: Training
         responses:
@@ -120,7 +120,7 @@ types:
           key:
             description: key of the item to be retrieved
             type: string
-    /users:
+    /user:
       post:
         body: User
         responses:
@@ -158,14 +158,14 @@ types:
       responses:
         '200':
           description: OK
-  /pages:
+  /page:
     get:
       description: Returns a list of pages.
       responses:
         '200':
           description: OK
           body: Page[]
-  /locations:
+  /location:
     get:
       description: Returns a list of locations.
       responses:
@@ -174,7 +174,7 @@ types:
           body: LocationDTO[]
       queryString:
         type: LocationsRequest
-  /trainings:
+  /training:
     get:
       description: Returns a list of trainings.
       responses:
@@ -183,7 +183,7 @@ types:
           body: TrainingDTO[]
       queryString:
         type: TrainingsRequest
-  /users:
+  /user:
     get:
       description: Returns a list of users.
       responses:
@@ -241,15 +241,16 @@ types:
           responses:
             '200':
               description: OK
-      '/{email}':
+      '/email':
         get:
           responses:
             '200':
               description: OK
-        uriParameters:
-          email:
-            description: email to be configured
-            type: string
+          queryString:
+            properties:
+              email:
+                description: email to be configured
+                type: string
         '/{login}':
           get:
             responses:
@@ -265,6 +266,38 @@ types:
             login:
               description: login to be configured
               type: string
+      '/comment':
+        post:
+          body: Comment
+          responses:
+            '200':
+              description: OK
+              body: KeyResponse
+        put:
+          body: Comment
+          responses:
+            '200':
+              description: OK
+              body: KeyResponse
+          queryString:
+            properties:
+              title:
+                description: title of the comment to be edited
+                type: string
+        '/{key}':
+          delete:
+            responses:
+              '200':
+                description: OK
+                body: KeyResponse
+            queryString:
+              properties:
+                title:
+                  description: title of the comment to be deleted
+                  type: string
+                author:
+                  description: author of the comment to be deleted
+                  type: string
       uriParameters:
         key:
           description: key of the item to be retrieved
