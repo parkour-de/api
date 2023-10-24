@@ -106,12 +106,12 @@ func SuccessJson(w http.ResponseWriter, r *http.Request, data interface{}) {
 		Error(w, r, fmt.Errorf("serialising response failed: %w", err), 400)
 		return
 	} else {
+		w.Header().Set("Content-Type", "application/json")
 		Success(w, r, jsonMsg)
 	}
 }
 
 func Success(w http.ResponseWriter, r *http.Request, jsonMsg []byte) {
-	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if _, err := w.Write(jsonMsg); err != nil {
 		log.Printf("Error writing response: %v", err)

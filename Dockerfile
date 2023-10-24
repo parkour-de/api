@@ -19,7 +19,8 @@ COPY . ./
 RUN go test ./... -p 8
 
 # Build the binary.
-RUN go build -v -o /app/bin/endpoint1 ./src/cmd/endpoint1
+ARG VERSION
+RUN go build -v -o /app/bin/endpoint1 -ldflags "-X main.version=${VERSION}" ./src/cmd/endpoint1
 
 FROM alpine:latest
 

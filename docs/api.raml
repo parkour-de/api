@@ -26,6 +26,15 @@ types:
   Comment: !include types/comment.raml
   Photo: !include types/photo.raml
 /api:
+  /version:
+    get:
+      description: Returns the version of the API - the only endpoint that does not use JSON-formatted response, i.e. no quotes around version string
+      responses:
+        '200':
+          description: OK
+          body:
+            type: string
+            example: "42"
   /admin:
     /pages:
       post:

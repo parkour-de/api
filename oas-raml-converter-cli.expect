@@ -1,0 +1,7 @@
+#!/usr/bin/expect
+spawn oas-raml-converter-cli
+expect "Enter now" { send "4\r" }
+expect "Enter the source path of the file" { send "docs/api.raml\r" }
+expect "Enter the destination path for the file" { send "docs/api.json\r" }
+expect "Are you sure you want to continue" { send "y\r" }
+interact

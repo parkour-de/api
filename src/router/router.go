@@ -46,6 +46,8 @@ func NewServer(configPath string, test bool) *http.Server {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
+	r.GET("/api/version", Version)
+
 	r.POST("/api/admin/trainings", trainingCrudHandler.Create)
 	r.GET("/api/admin/trainings/:key", trainingCrudHandler.Read)
 	r.PUT("/api/admin/trainings", trainingCrudHandler.Update)
@@ -107,4 +109,9 @@ func NewServer(configPath string, test bool) *http.Server {
 		Addr:    addr,
 		Handler: r,
 	}
+}
+
+func Version(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	// the only endpoint that does not use JSON-formatted response, i.e. no quotes around version string
+	api.Success(w, r, []byte(dpv.ConfigInstance.Settings.Version))
 }

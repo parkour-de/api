@@ -28,6 +28,7 @@ type Config struct {
 		GoogleClientSecret string `yaml:"google_client_secret"`
 	} `yaml:"auth"`
 	Settings struct {
+		Version   string
 		Languages []Language `yaml:"languages"`
 		UserTypes []string   `yaml:"user_types"`
 	} `yaml:"settings"`
