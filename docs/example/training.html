@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Training</h1>
-    <div id="training"></div>
+    <pre><div id="training"></div></pre>
     <script>
         // get the location hash without the leading #:
         const hash = window.location.hash.substring(1)
@@ -14,7 +14,7 @@
         function renderTraining(trainings) {
             const panel = document.querySelector('#training')
             panel.innerHTML = ''
-            panel.innerHTML = JSON.stringify(trainings, null, 2)
+            panel.innerHTML = JSON.stringify(trainings, null, 2).replace('\n', '<br />')
         }
         function fetchTraining() {
             fetch(url)

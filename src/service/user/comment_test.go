@@ -3,6 +3,7 @@ package user
 import (
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/graph"
+	"strings"
 	"testing"
 )
 
@@ -55,8 +56,11 @@ func TestComments(t *testing.T) {
 	if puser.Comments[1].Title != "title3" {
 		t.Fatalf("wrong comment title: %s", puser.Comments[0].Title)
 	}
-	if puser.Comments[1].Text != "text3" {
+	if puser.Comments[1].Text != "# title3\n\ntext3" {
 		t.Fatalf("wrong comment text: %s", puser.Comments[0].Text)
+	}
+	if !strings.Contains(puser.Comments[1].Render, "<h1 id=\"title3-1\">title3</h1>\n\n<p>text3</p>") {
+		t.Fatalf("wrong comment render: %s", puser.Comments[0].Text)
 	}
 	if puser.Comments[1].Author != "author" {
 		t.Fatalf("wrong comment author: %s", puser.Comments[0].Author)
@@ -79,7 +83,10 @@ func TestComments(t *testing.T) {
 	if puser.Comments[0].Title != "title" {
 		t.Fatalf("wrong comment title: %s", puser.Comments[0].Title)
 	}
-	if puser.Comments[0].Text != "text" {
+	if puser.Comments[0].Text != "# title\n\ntext" {
+		t.Fatalf("wrong comment text: %s", puser.Comments[0].Text)
+	}
+	if !strings.Contains(puser.Comments[0].Render, "<h1 id=\"title\">title</h1>\n\n<p>text</p>") {
 		t.Fatalf("wrong comment text: %s", puser.Comments[0].Text)
 	}
 }

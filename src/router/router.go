@@ -68,7 +68,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.PUT("/api/admin/page", pageCrudHandler.Update)
 	r.DELETE("/api/admin/page/:key", pageCrudHandler.Delete)
 
-	r.GET("/api/facebook", authenticationHandler.Facebook)
+	r.GET("/api/login/facebook", authenticationHandler.Facebook)
+
 	r.GET("/api/training", queryHandler.GetTrainings)
 	r.GET("/api/training/:key", queryHandler.GetTraining)
 	r.GET("/api/page", queryHandler.GetPages)
@@ -87,9 +88,9 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/user/:key/email", userHandler.RequestEmail)
 	r.GET("/api/user/:key/email/:login", userHandler.EnableEmail)
 
-	r.POST("/api/user/:key/comment", userCrudHandler.Create)
-	r.PUT("/api/user/:key/comment", userCrudHandler.Update)
-	r.DELETE("/api/user/:key/comment", userCrudHandler.Delete)
+	r.POST("/api/user/:key/comment", userHandler.AddComment)
+	r.PUT("/api/user/:key/comment", userHandler.EditComment)
+	r.DELETE("/api/user/:key/comment", userHandler.DeleteComment)
 
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)

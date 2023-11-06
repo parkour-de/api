@@ -2,7 +2,7 @@
 title: DPV API
 description: API to get data about DPV
 version: '1.0'
-baseUri: http://localhost:8080/
+baseUri: http://localhost:8080/api/
 mediaType: application/json
 types:
   KeyResponse: !include types/keyResponse.raml
@@ -25,129 +25,129 @@ types:
   Cycle: !include types/cycle.raml
   Comment: !include types/comment.raml
   Photo: !include types/photo.raml
-/api:
-  /version:
-    get:
-      description: Returns the version of the API - the only endpoint that does not use JSON-formatted response, i.e. no quotes around version string
+/version:
+  get:
+    description: Returns the version of the API - the only endpoint that does not use JSON-formatted response, i.e. no quotes around version string
+    responses:
+      '200':
+        description: OK
+        body:
+          type: string
+          example: "42"
+/admin:
+  /page:
+    post:
+      body: Page
       responses:
         '200':
           description: OK
-          body:
-            type: string
-            example: "42"
-  /admin:
-    /page:
-      post:
-        body: Page
+          body: KeyResponse
+    put:
+      body: Page
+      responses:
+        '200':
+          description: OK
+          body: KeyResponse
+    /{key}:
+      delete:
         responses:
           '200':
             description: OK
             body: KeyResponse
-      put:
-        body: Page
+      get:
+        responses:
+          '200':
+            description: OK
+            body: Page
+      uriParameters:
+        key:
+          description: key of the item to be retrieved
+          type: string
+  /location:
+    post:
+      body: Location
+      responses:
+        '200':
+          description: OK
+          body: KeyResponse
+    put:
+      body: Location
+      responses:
+        '200':
+          description: OK
+          body: KeyResponse
+    /{key}:
+      delete:
         responses:
           '200':
             description: OK
             body: KeyResponse
-      '/{key}':
-        delete:
-          responses:
-            '200':
-              description: OK
-              body: KeyResponse
-        get:
-          responses:
-            '200':
-              description: OK
-              body: Page
-        uriParameters:
-          key:
-            description: key of the item to be retrieved
-            type: string
-    /location:
-      post:
-        body: Location
+      get:
+        responses:
+          '200':
+            description: OK
+            body: Location
+      uriParameters:
+        key:
+          description: id of the item to be retrieved
+          type: string
+  /training:
+    post:
+      body: Training
+      responses:
+        '200':
+          description: OK
+          body: KeyResponse
+    put:
+      body: Training
+      responses:
+        '200':
+          description: OK
+          body: KeyResponse
+    /{key}:
+      delete:
         responses:
           '200':
             description: OK
             body: KeyResponse
-      put:
-        body: Location
+      get:
+        responses:
+          '200':
+            description: OK
+            body: Training
+      uriParameters:
+        key:
+          description: key of the item to be retrieved
+          type: string
+  /user:
+    post:
+      body: User
+      responses:
+        '200':
+          description: OK
+          body: KeyResponse
+    put:
+      body: User
+      responses:
+        '200':
+          description: OK
+          body: KeyResponse
+    /{key}:
+      delete:
         responses:
           '200':
             description: OK
             body: KeyResponse
-      '/{key}':
-        delete:
-          responses:
-            '200':
-              description: OK
-              body: KeyResponse
-        get:
-          responses:
-            '200':
-              description: OK
-              body: Location
-        uriParameters:
-          key:
-            description: id of the item to be retrieved
-            type: string
-    /training:
-      post:
-        body: Training
+      get:
         responses:
           '200':
             description: OK
-            body: KeyResponse
-      put:
-        body: Training
-        responses:
-          '200':
-            description: OK
-            body: KeyResponse
-      '/{key}':
-        delete:
-          responses:
-            '200':
-              description: OK
-              body: KeyResponse
-        get:
-          responses:
-            '200':
-              description: OK
-              body: Training
-        uriParameters:
-          key:
-            description: key of the item to be retrieved
-            type: string
-    /user:
-      post:
-        body: User
-        responses:
-          '200':
-            description: OK
-            body: KeyResponse
-      put:
-        body: User
-        responses:
-          '200':
-            description: OK
-            body: KeyResponse
-      '/{key}':
-        delete:
-          responses:
-            '200':
-              description: OK
-              body: KeyResponse
-        get:
-          responses:
-            '200':
-              description: OK
-              body: User
-        uriParameters:
-          key:
-            description: key of the item to be retrieved
-            type: string
+            body: User
+      uriParameters:
+        key:
+          description: key of the item to be retrieved
+          type: string
+/login:
   /facebook:
     get:
       description: |-
@@ -158,123 +158,153 @@ types:
       responses:
         '200':
           description: OK
-  /page:
-    get:
-      description: Returns a list of pages.
-      responses:
-        '200':
-          description: OK
-          body: Page[]
-  /location:
-    get:
-      description: Returns a list of locations.
-      responses:
-        '200':
-          description: OK
-          body: LocationDTO[]
-      queryString:
-        type: LocationsRequest
-  /training:
-    get:
-      description: Returns a list of trainings.
-      responses:
-        '200':
-          description: OK
-          body: TrainingDTO[]
-      queryString:
-        type: TrainingsRequest
-  /user:
-    get:
-      description: Returns a list of users.
-      responses:
-        '200':
-          description: OK
-          body: User[]
-      queryString:
-        type: UsersRequest
-    '/{key}':
-      '/exists':
-        get:
-          responses:
-            '200':
-              description: OK
-              body:
-                type: boolean
-                example: true
-      '/claim':
-        post:
-          responses:
-            '200':
-              description: OK
-      '/facebook':
-        get:
-          responses:
-            '200':
-              description: OK
-              body:
-                type: string
-                example: "f:johndoe:1700000000:eyI_In0"
-          queryString:
-            properties:
-              auth:
-                description: Facebook auth token
-                type: string
-      '/password':
-        get:
-          responses:
-            '200':
-              description: OK
-              body:
-                type: string
-                example: "p:johndoe:1700000000:eyI_In0"
-          queryString:
-            properties:
-              password: string
-      '/totp':
-        get:
-          responses:
-            '200':
-              description: OK
-              body: TotpConfiguration
-        post:
-          body: TotpEnableRequest
-          responses:
-            '200':
-              description: OK
-      '/email':
-        get:
-          responses:
-            '200':
-              description: OK
-          queryString:
-            properties:
-              email:
-                description: email to be configured
-                type: string
-        '/{login}':
-          get:
-            responses:
-              '200':
-                description: OK
-                body:
-                  type: string
-                  example: "e:johndoe:1700000000:eyI_In0"
-            queryString:
-              properties:
-                code: string
-          uriParameters:
-            login:
-              description: login to be configured
+/page:
+  get:
+    description: Returns a list of pages.
+    responses:
+      '200':
+        description: OK
+        body: Page[]
+/location:
+  get:
+    description: Returns a list of locations.
+    responses:
+      '200':
+        description: OK
+        body: LocationDTO[]
+    queryString:
+      type: LocationsRequest
+/training:
+  get:
+    description: Returns a list of trainings.
+    responses:
+      '200':
+        description: OK
+        body: TrainingDTO[]
+    queryString:
+      type: TrainingsRequest
+/user:
+  get:
+    description: Returns a list of users.
+    responses:
+      '200':
+        description: OK
+        body: User[]
+    queryString:
+      type: UsersRequest
+  /{key}:
+    /exists:
+      get:
+        description: Returns true if the user exists.
+        responses:
+          '200':
+            description: OK
+            body:
+              type: boolean
+              example: true
+    /claim:
+      post:
+        description: Claims a user. This can be done 30 minutes after the user's creation, when the user has not provided any login information.
+        responses:
+          '200':
+            description: OK
+    /facebook:
+      get:
+        description: |-
+          Takes the authorization header from the browser and generates an access token for a user
+          Request an OAuth token from https://www.facebook.com/v17.0/dialog/oauth, then call this endpoint
+          using a Querystring auth containing the Facebook token. This endpoint will then make a debug
+          call to Facebook Graph API to extract a unique ID that can be attached to a user.
+          Unlike the /api/login/facebook endpoint, this one links Facebook to an existing user.
+          A valid login token is still returned, to replace an older one.
+        responses:
+          '200':
+            description: OK
+            body:
               type: string
-      '/comment':
-        post:
-          body: Comment
+              example: "f:johndoe:1700000000:eyI_In0"
+        queryString:
+          properties:
+            auth:
+              description: Facebook auth token
+              type: string
+    /password:
+      get:
+        description: Links a password to a user, so the user can log in using a password. It also returns a new login token.
+        responses:
+          '200':
+            description: OK
+            body:
+              type: string
+              example: "p:johndoe:1700000000:eyI_In0"
+        queryString:
+          properties:
+            password: string
+    /totp:
+      get:
+        description: Links a TOTP to a user, but with active set to false.
+        responses:
+          '200':
+            description: OK
+            body: TotpConfiguration
+      post:
+        description: Enables a TOTP for a user, if the correct code is provided.
+        body: TotpEnableRequest
+        responses:
+          '200':
+            description: OK
+    /email:
+      get:
+        description: Links an email to a user, so the user can log in using an email (similar to "forgot password" on other websites), but with active set to false.
+        responses:
+          '200':
+            description: OK
+        queryString:
+          properties:
+            email:
+              description: email to be configured
+              type: string
+      /{login}:
+        description: Enables a linked email for a user, if the correct code is provided. It also returns a new login token.
+        get:
           responses:
             '200':
               description: OK
-              body: KeyResponse
-        put:
-          body: Comment
+              body:
+                type: string
+                example: "e:johndoe:1700000000:eyI_In0"
+          queryString:
+            properties:
+              code: string
+        uriParameters:
+          login:
+            description: login to be configured
+            type: string
+    /comment:
+      post:
+        description: Adds a comment to this user's page. The comment title has to be unique.
+        body: Comment
+        responses:
+          '200':
+            description: OK
+            body: KeyResponse
+      put:
+        description: |-
+          Edits a comment on this user's page. The previous title has to be provided,
+          and the author in the request body has to match the author of the comment.
+        body: Comment
+        responses:
+          '200':
+            description: OK
+            body: KeyResponse
+        queryString:
+          properties:
+            title:
+              description: title of the comment to be edited
+              type: string
+      /{key}:
+        delete:
+          description: Deletes a comment on this user's page. The title and author has to be provided.
           responses:
             '200':
               description: OK
@@ -282,23 +312,12 @@ types:
           queryString:
             properties:
               title:
-                description: title of the comment to be edited
+                description: title of the comment to be deleted
                 type: string
-        '/{key}':
-          delete:
-            responses:
-              '200':
-                description: OK
-                body: KeyResponse
-            queryString:
-              properties:
-                title:
-                  description: title of the comment to be deleted
-                  type: string
-                author:
-                  description: author of the comment to be deleted
-                  type: string
-      uriParameters:
-        key:
-          description: key of the item to be retrieved
-          type: string
+              author:
+                description: author of the comment to be deleted
+                type: string
+    uriParameters:
+      key:
+        description: key of the item to be retrieved
+        type: string

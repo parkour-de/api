@@ -26,6 +26,8 @@ type Config struct {
 		FacebookAppId      string `yaml:"facebook_app_id"`
 		GoogleClientId     string `yaml:"google_client_id"`
 		GoogleClientSecret string `yaml:"google_client_secret"`
+		DeepLKey           string `yaml:"deepl_key"`
+		DeepLUrl           string `yaml:"deepl_url"`
 	} `yaml:"auth"`
 	Settings struct {
 		Version   string

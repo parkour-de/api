@@ -82,11 +82,12 @@ func (db *Db) UserOrganisesTraining(user domain.User, training domain.Training, 
 	return nil
 }
 
-func (db *Db) UserOwnsPage(user domain.User, page domain.Page, ctx context.Context) error {
+func (db *Db) UserOwnsPage(user domain.User, page domain.Page, priority int, ctx context.Context) error {
 	if _, err := db.Edges.CreateDocument(ctx, domain.Edge{
-		From:  "users/" + user.Key,
-		To:    "pages/" + page.Key,
-		Label: "owns",
+		From:     "users/" + user.Key,
+		To:       "pages/" + page.Key,
+		Label:    "owns",
+		Priority: priority,
 	}); err != nil {
 		return fmt.Errorf("could not build 'owns' connection from user %s to page %s: %w", user.Key, page.Key, err)
 	}

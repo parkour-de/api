@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Page</h1>
-    <div id="page"></div>
+    <pre><div id="page"></div></pre>
     <script>
         // get the location hash without the leading #:
         const hash = window.location.hash.substring(1)
@@ -14,7 +14,7 @@
         function renderPage(pages) {
             const panel = document.querySelector('#page')
             panel.innerHTML = ''
-            panel.innerHTML = JSON.stringify(pages, null, 2)
+            panel.innerHTML = JSON.stringify(pages, null, 2).replace('\n', '<br />')
         }
         function fetchPage() {
             fetch(url)

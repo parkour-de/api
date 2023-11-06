@@ -37,12 +37,14 @@ func CreateDescription(language string, text string, translated bool) domain.Des
 		return domain.Description{
 			text + " - Eine tolle Sache",
 			"Das wird euch sicher ganz gut gefallen",
+			"Das wird euch sicher ganz gut gefallen",
 			translated,
 		}
 		break
 	case "en":
 		return domain.Description{
 			text + " - A cool thing",
+			"That will be super cool",
 			"That will be super cool",
 			translated,
 		}
@@ -59,12 +61,15 @@ func CreateComments(_db *Db, count int) ([]domain.Comment, error) {
 }
 
 func CreateComment() domain.Comment {
-	return domain.Comment{
+	comment := domain.Comment{
 		[]string{"Geil", "Super", "Klasse", "Wahnsinn"}[rand.Intn(4)],
 		[]string{"Da muss ich unbedingt hin", "Immer wieder schön hier", "Ich liebe es einfach", "Kann ich nicht genug von"}[rand.Intn(4)],
+		"",
 		"admin",
 		time.Now(),
 	}
+	comment.Render = comment.Text
+	return comment
 }
 
 func CreateUser(db *Db, i int) (domain.User, error) {
@@ -167,23 +172,29 @@ func SampleData(db *Db) {
 	if err := db.Users.Create(&admin, nil); err != nil {
 		log.Fatal(err)
 	}
+	textDe := "Der Deutsche Parkour Verband e.V. (DPV) ist der Dachverband für Parkour und Freerunning in Deutschland. Er wurde 2024 gegründet und vertritt die Interessen der Parkour- und Freerunning-Szene in Deutschland. Der DPV ist zudem Mitglied im Deutschen Olympischen Sportbund (DOSB)."
+	textEn := "The German Parkour Association (DPV) is the umbrella organization for parkour and freerunning in Germany. It was founded in 2024 and represents the interests of the parkour and freerunning scene in Germany. The DPV is also a member of the German Olympic Sports Confederation (DOSB)."
 	dpv := domain.User{
 		Key:  "dpv",
 		Name: "Deutscher Parkour Verband",
 		Type: "association",
 		Descriptions: map[string]domain.Description{
 			"de": {
-				Title: "Deutscher Parkour Verband",
-				Text:  "Der Deutsche Parkour Verband e.V. (DPV) ist der Dachverband für Parkour und Freerunning in Deutschland. Er wurde 2024 gegründet und vertritt die Interessen der Parkour- und Freerunning-Szene in Deutschland. Der DPV ist zudem Mitglied im Deutschen Olympischen Sportbund (DOSB).",
+				Title:  "Deutscher Parkour Verband",
+				Text:   textDe,
+				Render: textDe,
 			},
 			"en": {
-				Title: "German Parkour Association",
-				Text:  "The German Parkour Association (DPV) is the umbrella organization for parkour and freerunning in Germany. It was founded in 2024 and represents the interests of the parkour and freerunning scene in Germany. The DPV is also a member of the German Olympic Sports Confederation (DOSB).",
+				Title:      "German Parkour Association",
+				Text:       textEn,
+				Render:     textEn,
+				Translated: true,
 			},
 		},
 		Comments: []domain.Comment{
 			{
 				"Endlich!",
+				"Das hat lange gedauert",
 				"Das hat lange gedauert",
 				"admin",
 				time.Now(),
@@ -206,17 +217,22 @@ func SampleData(db *Db) {
 	if err := db.Locations.Create(&berlin, nil); err != nil {
 		log.Fatal(err)
 	}
+	textDe = "Das Berlin Meeting ist ein monatliches Treffen der Parkour- und Freerunning-Szene in Deutschland. Es findet jeden Monat statt und wird vom DPV organisiert."
+	textEn = "The Berlin Meeting is a monthly meeting of the parkour and freerunning scene in Germany. It takes place every month and is organized by the DPV."
 	meeting := domain.Training{
 		Key:  "berlin-meeting-november-2023",
 		Type: "meeting",
 		Descriptions: map[string]domain.Description{
 			"de": {
-				Title: "Berlin Meeting November 2023",
-				Text:  "Das Berlin Meeting ist ein monatliches Treffen der Parkour- und Freerunning-Szene in Deutschland. Es findet jeden Monat statt und wird vom DPV organisiert.",
+				Title:  "Berlin Meeting November 2023",
+				Text:   textDe,
+				Render: textDe,
 			},
 			"en": {
-				Title: "Berlin Meeting November 2023",
-				Text:  "The Berlin Meeting is a monthly meeting of the parkour and freerunning scene in Germany. It takes place every month and is organized by the DPV.",
+				Title:      "Berlin Meeting November 2023",
+				Text:       textEn,
+				Render:     textEn,
+				Translated: true,
 			},
 		},
 	}
@@ -229,23 +245,28 @@ func SampleData(db *Db) {
 	if err := db.UserOrganisesTraining(dpv, meeting, nil); err != nil {
 		log.Fatal(err)
 	}
+	textDe = "Die Satzung des Deutschen Parkour Verbandes e.V."
+	textEn = "The articles of association of the German Parkour Association e.V."
 	page := domain.Page{
 		Key: "satzung",
 		Descriptions: map[string]domain.Description{
 			"de": {
-				Title: "Satzung",
-				Text:  "Die Satzung des Deutschen Parkour Verbandes e.V.",
+				Title:  "Satzung",
+				Text:   textDe,
+				Render: textDe,
 			},
 			"en": {
-				Title: "Articles of Association",
-				Text:  "The articles of association of the German Parkour Association e.V.",
+				Title:      "Articles of Association",
+				Text:       textEn,
+				Render:     textEn,
+				Translated: true,
 			},
 		},
 	}
 	if err := db.Pages.Create(&page, nil); err != nil {
 		log.Fatal(err)
 	}
-	if err := db.UserOwnsPage(dpv, page, nil); err != nil {
+	if err := db.UserOwnsPage(dpv, page, 0, nil); err != nil {
 		log.Fatal(err)
 	}
 }

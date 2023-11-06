@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"pkv/api/src/domain"
-	"pkv/api/src/service"
+	description "pkv/api/src/service/descripion"
 	"time"
 )
 
@@ -13,8 +13,9 @@ func (s *Service) AddComment(key string, author string, title string, text strin
 	if err != nil {
 		return fmt.Errorf("read user failed: %w", err)
 	}
-	title = service.SanitizeHTML(title)
-	text = service.SanitizeHTML(text)
+	text = description.FixTitle(title, text)
+	title = description.GetTitle(text)
+	render := description.Render([]byte(text))
 	if title == "" {
 		return fmt.Errorf("title cannot be empty")
 	}
@@ -30,6 +31,7 @@ func (s *Service) AddComment(key string, author string, title string, text strin
 	comment := domain.Comment{
 		Title:   title,
 		Text:    text,
+		Render:  render,
 		Author:  author,
 		Created: time.Now(),
 	}
@@ -50,8 +52,9 @@ func (s *Service) EditComment(key string, author string, oldTitle string, title 
 	if err != nil {
 		return fmt.Errorf("read user failed: %w", err)
 	}
-	title = service.SanitizeHTML(title)
-	text = service.SanitizeHTML(text)
+	text = description.FixTitle(title, text)
+	title = description.GetTitle(text)
+	render := description.Render([]byte(text))
 	if title == "" {
 		return fmt.Errorf("title cannot be empty")
 	}
@@ -80,6 +83,7 @@ func (s *Service) EditComment(key string, author string, oldTitle string, title 
 	}
 	comment.Title = title
 	comment.Text = text
+	comment.Render = render
 	if err = s.db.Users.Update(user, ctx); err != nil {
 		return fmt.Errorf("update user failed: %w", err)
 	}
