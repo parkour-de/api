@@ -42,6 +42,13 @@ This will compile the application and run the unit tests. To run the application
 make run
 ```
 This will start the HTTP server at http://localhost:8080.
+By setting the environment variable `PORT`, you can start the server on a different port.
+If you provide `UNIX` as an environment variable, it will instead listen on a Unix socket.
+See examples below:
+```sh
+PORT=8080 make run
+UNIX=/tmp/dpv.sock make run
+```
 
 If you prefer to run the application inside a Docker container, you can use the following command instead:
 ```sh
