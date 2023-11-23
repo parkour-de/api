@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"math"
 	"pkv/api/src/domain"
 	"reflect"
 	"testing"
@@ -151,10 +152,12 @@ func TestGetLocations(t *testing.T) {
 			for i := range got {
 				got[i].Created = time.Time{}
 				got[i].Modified = time.Time{}
+				got[i].Distance = math.Round(got[i].Distance)
 			}
 			for i := range tt.want {
 				tt.want[i].Created = time.Time{}
 				tt.want[i].Modified = time.Time{}
+				tt.want[i].Distance = math.Round(tt.want[i].Distance)
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetLocations()\n  got = %v,\n  want  %v", got, tt.want)

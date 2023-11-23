@@ -28,7 +28,9 @@ func TranslateDocument(text, srcLang, destLang string, ctx context.Context) (str
 		return "", fmt.Errorf("creating DeepL request failed: %w", err)
 	}
 	req.Header.Add("User-Agent", "dpv-api")
-	req = req.WithContext(ctx)
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("DeepL request failed: %w", err)
