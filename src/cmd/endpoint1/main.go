@@ -21,7 +21,8 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		log.Println("\nShutting down server...")
+		println()
+		log.Println("Shutting down server...")
 
 		err := server.Shutdown(context.Background())
 		if err != nil {
