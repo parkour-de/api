@@ -21,9 +21,12 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		log.Println("Shutting down server...")
+		log.Println("\nShutting down server...")
 
-		server.Shutdown(context.Background())
+		err := server.Shutdown(context.Background())
+		if err != nil {
+			log.Printf("Server stopped: %s", err.Error())
+		}
 
 		if socketPath != "" {
 			os.Remove(socketPath)
@@ -36,6 +39,9 @@ func main() {
 		listener, err := net.Listen("unix", socketPath)
 		if err != nil {
 			log.Fatal(err)
+		}
+		if err = os.Chmod(socketPath, 0666); err != nil {
+			log.Printf("Could not change permissions to 0666 on unix:%s", socketPath)
 		}
 		log.Printf("Listening on unix:%s", socketPath)
 		log.Fatal(server.Serve(listener))
