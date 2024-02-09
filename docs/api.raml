@@ -25,6 +25,7 @@ types:
   Cycle: !include types/cycle.raml
   Comment: !include types/comment.raml
   Photo: !include types/photo.raml
+  ChangeMailPasswordRequest: !include types/changeMailPasswordRequest.raml
 /version:
   get:
     description: Returns the version of the API - the only endpoint that does not use JSON-formatted response, i.e. no quotes around version string
@@ -321,3 +322,15 @@ types:
       key:
         description: key of the item to be retrieved
         type: string
+/server/mail:
+  post:
+    description: Allows a user to change their mail password.
+    body:
+      application/json:
+        type: ChangeMailPasswordRequest
+        description: The details needed to change a user's mail password.
+    responses:
+      '200':
+        body:
+          application/json:
+            description: Password changed successfully.
