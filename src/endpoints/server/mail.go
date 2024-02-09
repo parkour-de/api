@@ -24,7 +24,7 @@ func (h *Handler) ChangeMailPassword(w http.ResponseWriter, r *http.Request, url
 	}
 	err := h.service.ChangeMailPassword(item.Email, item.OldPassword, item.NewPassword, r.Context())
 	if err != nil {
-		api.Error(w, r, err.Error(), 400)
+		api.Error(w, r, err, 400)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
