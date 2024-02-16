@@ -24,6 +24,7 @@ func (h *Handler) AddUsernameToWhitelist(w http.ResponseWriter, r *http.Request,
 	}
 	if item.Secret != dpv.ConfigInstance.Auth.MinecraftInviteKey {
 		api.Error(w, r, fmt.Errorf("provided invite key is not correct"), 401)
+		return
 	}
 	err := h.service.AddUsernameToWhitelist(item.Username, r.Context())
 	if err != nil {
