@@ -16,7 +16,7 @@ type whitelistEntry struct {
 }
 
 func (s *Service) AddUsernameToWhitelist(username string, ctx context.Context) error {
-	matched, err := regexp.MatchString(`[A-Z0-9_]{3,16}`, username)
+	matched, err := regexp.MatchString(`[A-Za-z0-9_]{3,16}`, username)
 	if err != nil {
 		return fmt.Errorf("could not validate minecraft username: %w", err)
 	}
