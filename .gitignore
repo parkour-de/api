@@ -1,6 +1,7 @@
 # Config files (passwords)
 config.yml
-words*.txt
+words1.txt
+words2.txt
 
 # Test files containing secrets
 frontend/facebook.htm

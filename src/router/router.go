@@ -97,6 +97,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.DELETE("/api/user/:key/comment", userHandler.DeleteComment)
 
 	r.POST("/api/server/mail", serverHandler.ChangeMailPassword)
+	r.POST("/api/server/minecraft/whitelist", serverHandler.AddUsernameToWhitelist)
 
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)

@@ -28,6 +28,7 @@ type Config struct {
 		GoogleClientSecret string `yaml:"google_client_secret"`
 		DeepLKey           string `yaml:"deepl_key"`
 		DeepLUrl           string `yaml:"deepl_url"`
+		MinecraftInviteKey string `yaml:"minecraft_invite_key"`
 	} `yaml:"auth"`
 	Settings struct {
 		Version   string
