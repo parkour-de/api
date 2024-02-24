@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"os"
+	"os/exec"
 	"pkv/api/src/repository/security"
 	"strings"
 )
@@ -50,7 +51,7 @@ func (s *Service) ChangeMailPassword(email string, oldpassword string, newpasswo
 		return fmt.Errorf("password too weak (contains only numbers)")
 	}
 
-	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(newpassword), bcrypt.DefaultCost)
+	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(newpassword), 6)
 	if err != nil {
 		return fmt.Errorf("cannot create the new password")
 	}
@@ -60,5 +61,21 @@ func (s *Service) ChangeMailPassword(email string, oldpassword string, newpasswo
 		return fmt.Errorf("cannot save the new password")
 	}
 
+	services := []string{"dovecot2.service", "postfix-setup.service", "postfix.service"}
+	for _, service := range services {
+		if err := restartService(service); err != nil {
+			return fmt.Errorf("the password has been changed successfully, but the mail server could not be restarted - you may still have to use the old password, or you can try restarting it again by typing in your new password in all three password fields: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func restartService(serviceName string) error {
+	cmd := exec.Command("doas", "-u", "root", "/run/current-system/sw/bin/systemctl", "restart", serviceName)
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to restart %s: %w", serviceName, err)
+	}
 	return nil
 }
