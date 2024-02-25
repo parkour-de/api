@@ -72,7 +72,7 @@ func (s *Service) ChangeMailPassword(email string, oldpassword string, newpasswo
 }
 
 func restartService(serviceName string) error {
-	cmd := exec.Command("doas", "-u", "root", "/run/current-system/sw/bin/systemctl", "restart", serviceName)
+	cmd := exec.Command("/run/wrappers/bin/doas", "-u", "root", "/run/current-system/sw/bin/systemctl", "restart", serviceName)
 	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to restart %s: %w", serviceName, err)
