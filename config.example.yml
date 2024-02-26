@@ -16,6 +16,13 @@ auth:
   deepl_key: 12345678-1234-1234-1234-123456789012:fz
   deepl_url: https://api-free.deepl.com/v2/translate
   minecraft_invite_key: minecraft-is-full-of-joy
+server:
+  words1: words1.example.txt
+  words2: words2.example.txt
+  img_url: /obj/dpv/img
+  tmp_url: /obj/dpv/tmp
+  img_path: /var/www/8bj/obj/dpv/img
+  tmp_path: /var/www/8bj/obj/dpv/tmp
 settings:
   languages:
     - key: "de"

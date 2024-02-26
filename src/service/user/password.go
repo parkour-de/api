@@ -129,14 +129,14 @@ func Suggest() (string, error) {
 	randomSeparator := string(sep[rand.Intn(len(sep))])
 	var err error
 	if words1 == "" {
-		words1, err = loadWords(dpv.ConfigInstance.Path + "words1.txt")
+		words1, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words1)
 		if err != nil {
 			return "", fmt.Errorf("load words failed: %w", err)
 		}
 	}
 	words1list := strings.Split(words1, " ")
 	if words2 == "" {
-		words2, err = loadWords(dpv.ConfigInstance.Path + "words2.txt")
+		words2, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words2)
 		if err != nil {
 			return "", fmt.Errorf("load words failed: %w", err)
 		}
