@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"context"
 	"math"
 	"pkv/api/src/domain"
 	"reflect"
@@ -42,7 +43,7 @@ func TestGetLocations(t *testing.T) {
 		cities["Bremen"],
 	}
 	for i := range locations {
-		err := db.Locations.Create(&locations[i], nil)
+		err := db.Locations.Create(&locations[i], context.Background())
 		if err != nil {
 			t.Errorf("initialisation failed: %s", err)
 		}
@@ -144,7 +145,7 @@ func TestGetLocations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := db.GetLocations(tt.options, nil)
+			got, err := db.GetLocations(tt.options, context.Background())
 			if err != nil {
 				t.Errorf("GetLocations() error = %v", err)
 				return

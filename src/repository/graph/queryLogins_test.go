@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"context"
 	"pkv/api/src/domain"
 	"testing"
 )
@@ -11,7 +12,7 @@ func TestGetLoginsForUser(t *testing.T) {
 		t.Fatalf("db initialisation failed: %s", err)
 	}
 	user := domain.User{}
-	err = db.Users.Create(&user, nil)
+	err = db.Users.Create(&user, context.Background())
 	if err != nil {
 		t.Fatalf("user creation failed: %s", err)
 	}
@@ -25,23 +26,23 @@ func TestGetLoginsForUser(t *testing.T) {
 		Subject:  "do not reveal",
 		Enabled:  false,
 	}
-	err = db.Logins.Create(&login1, nil)
+	err = db.Logins.Create(&login1, context.Background())
 	if err != nil {
 		t.Fatalf("login creation failed: %s", err)
 	}
-	err = db.Logins.Create(&login2, nil)
+	err = db.Logins.Create(&login2, context.Background())
 	if err != nil {
 		t.Fatalf("login creation failed: %s", err)
 	}
-	err = db.LoginAuthenticatesUser(login1, user, nil)
+	err = db.LoginAuthenticatesUser(login1, user, context.Background())
 	if err != nil {
 		t.Fatalf("linking login to user failed: %s", err)
 	}
-	err = db.LoginAuthenticatesUser(login2, user, nil)
+	err = db.LoginAuthenticatesUser(login2, user, context.Background())
 	if err != nil {
 		t.Fatalf("linking login to user failed: %s", err)
 	}
-	logins, err := db.GetLoginsForUser(user.Key, nil)
+	logins, err := db.GetLoginsForUser(user.Key, context.Background())
 	if err != nil {
 		t.Fatalf("get logins for user failed: %s", err)
 	}

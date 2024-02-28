@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -43,7 +44,7 @@ func TestPassword(t *testing.T) {
 			"happy path",
 			func(db *graph.Db, linkPassword http.HandlerFunc, verifyPassword http.HandlerFunc, params *httprouter.Params) {
 				user := domain.User{}
-				err := db.Users.Create(&user, nil)
+				err := db.Users.Create(&user, context.Background())
 				if err != nil {
 					t.Fatalf("user creation failed: %s", err)
 				}

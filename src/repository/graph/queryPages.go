@@ -3,7 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
-	"github.com/arangodb/go-driver"
+	"github.com/arangodb/go-driver/v2/arangodb/shared"
 	"pkv/api/src/domain"
 )
 
@@ -20,7 +20,7 @@ func (db *Db) GetAllPages(ctx context.Context) ([]domain.Page, error) {
 	for {
 		var doc domain.Page
 		_, err := cursor.ReadDocument(ctx, &doc)
-		if driver.IsNoMoreDocuments(err) {
+		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			return nil, fmt.Errorf("obtaining documents failed: %w", err)

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -53,7 +54,7 @@ func TestExists(t *testing.T) {
 			"exists returns true",
 			func(db *graph.Db, exists http.HandlerFunc) {
 				user := domain.User{}
-				err := db.Users.Create(&user, nil)
+				err := db.Users.Create(&user, context.Background())
 				if err != nil {
 					t.Fatalf("user creation failed: %s", err)
 				}

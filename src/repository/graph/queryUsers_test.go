@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"context"
 	"pkv/api/src/domain"
 	"slices"
 	"testing"
@@ -21,42 +22,42 @@ func TestGetAssumableUsers(t *testing.T) {
 		{Key: "decoy3"},
 	}
 	for _, user := range users {
-		err = db.Users.Create(&user, nil)
+		err = db.Users.Create(&user, context.Background())
 		if err != nil {
 			t.Fatalf("user creation failed: %s", err)
 		}
 	}
-	err = db.UserAdministersUser(users[0], users[1], nil)
+	err = db.UserAdministersUser(users[0], users[1], context.Background())
 	if err != nil {
 		t.Fatalf("linking user to user failed: %s", err)
 	}
-	err = db.UserAdministersUser(users[1], users[2], nil)
+	err = db.UserAdministersUser(users[1], users[2], context.Background())
 	if err != nil {
 		t.Fatalf("linking user to user failed: %s", err)
 	}
-	err = db.UserAdministersUser(users[1], users[3], nil)
+	err = db.UserAdministersUser(users[1], users[3], context.Background())
 	if err != nil {
 		t.Fatalf("linking user to user failed: %s", err)
 	}
-	err = db.UserAdministersUser(users[2], users[3], nil)
+	err = db.UserAdministersUser(users[2], users[3], context.Background())
 	if err != nil {
 		t.Fatalf("linking user to user failed: %s", err)
 	}
-	if _, err := db.Edges.CreateDocument(nil, domain.Edge{
+	if _, err := db.Edges.CreateDocument(context.Background(), domain.Edge{
 		From:  "users/" + users[0].Key,
 		To:    "users/" + users[4].Key,
 		Label: "decoys",
 	}); err != nil {
 		t.Fatalf("Link failed: %s", err)
 	}
-	if _, err := db.Edges.CreateDocument(nil, domain.Edge{
+	if _, err := db.Edges.CreateDocument(context.Background(), domain.Edge{
 		From:  "users/" + users[4].Key,
 		To:    "users/" + users[5].Key,
 		Label: "decoys",
 	}); err != nil {
 		t.Fatalf("Link failed: %s", err)
 	}
-	if _, err := db.Edges.CreateDocument(nil, domain.Edge{
+	if _, err := db.Edges.CreateDocument(context.Background(), domain.Edge{
 		From:  "users/" + users[4].Key,
 		To:    "users/" + users[6].Key,
 		Label: "administers",
@@ -64,7 +65,7 @@ func TestGetAssumableUsers(t *testing.T) {
 		t.Fatalf("Link failed: %s", err)
 	}
 
-	assumableUsers, err := db.GetAdministeredUsers(users[0].Key, nil)
+	assumableUsers, err := db.GetAdministeredUsers(users[0].Key, context.Background())
 	if err != nil {
 		t.Fatalf("get assumable users failed: %s", err)
 	}

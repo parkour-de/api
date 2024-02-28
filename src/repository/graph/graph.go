@@ -1,8 +1,9 @@
 package graph
 
 import (
+	"context"
 	"fmt"
-	"github.com/arangodb/go-driver"
+	"github.com/arangodb/go-driver/v2/arangodb"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
 )
@@ -18,17 +19,17 @@ type DB interface {
 }*/
 
 type Db struct {
-	Database       driver.Database
+	Database       arangodb.Database
 	Trainings      EntityManager[*domain.Training]
 	Locations      EntityManager[*domain.Location]
 	Users          EntityManager[*domain.User]
 	Logins         EntityManager[*domain.Login]
 	Pages          EntityManager[*domain.Page]
-	Edges          driver.Collection
-	LocationsIndex driver.Index
+	Edges          arangodb.Collection
+	LocationsIndex arangodb.IndexResponse
 }
 
-func NewDB(database driver.Database, config *dpv.Config) (*Db, error) {
+func NewDB(database arangodb.Database, config *dpv.Config) (*Db, error) {
 	trainings, err := NewEntityManager[*domain.Training](database, "trainings", false, func() *domain.Training { return new(domain.Training) })
 	if err != nil {
 		return nil, err
@@ -53,7 +54,7 @@ func NewDB(database driver.Database, config *dpv.Config) (*Db, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not get or create edges collection: %w", err)
 	}
-	locationsIndex, _, err := locations.Collection.EnsureGeoIndex(nil, []string{"lat", "lng"}, nil)
+	locationsIndex, _, err := locations.Collection.EnsureGeoIndex(context.Background(), []string{"lat", "lng"}, nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not ensure geo index for locations: %w", err)
 	}

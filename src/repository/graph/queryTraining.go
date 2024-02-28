@@ -3,7 +3,8 @@ package graph
 import (
 	"context"
 	"fmt"
-	"github.com/arangodb/go-driver"
+	"github.com/arangodb/go-driver/v2/arangodb"
+	"github.com/arangodb/go-driver/v2/arangodb/shared"
 	"math"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
@@ -20,7 +21,7 @@ func (db *Db) GetFilteredTrainings(options domain.TrainingQueryOptions, ctx cont
 
 func (db *Db) GetTrainings(queryBuilder QueryBuilder, ctx context.Context) ([]domain.TrainingDTO, error) {
 	query, bindVars := queryBuilder()
-	cursor, err := db.Database.Query(ctx, query, bindVars)
+	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: bindVars})
 	if err != nil {
 		return nil, fmt.Errorf("query string invalid: %w", err)
 	}
@@ -30,7 +31,7 @@ func (db *Db) GetTrainings(queryBuilder QueryBuilder, ctx context.Context) ([]do
 	for {
 		var doc domain.TrainingDTO
 		_, err := cursor.ReadDocument(ctx, &doc)
-		if driver.IsNoMoreDocuments(err) {
+		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			return nil, fmt.Errorf("obtaining documents failed: %w", err)

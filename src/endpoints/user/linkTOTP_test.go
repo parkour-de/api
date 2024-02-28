@@ -2,6 +2,7 @@ package user
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"github.com/pquerna/otp/totp"
@@ -58,7 +59,7 @@ func TestTOTP(t *testing.T) {
 			},
 			func(db *graph.Db, requestTOTP http.HandlerFunc, enableTOTP http.HandlerFunc, params *httprouter.Params) {
 				user := domain.User{}
-				err := db.Users.Create(&user, nil)
+				err := db.Users.Create(&user, context.Background())
 				if err != nil {
 					t.Fatalf("user creation failed: %s", err)
 				}
@@ -92,7 +93,7 @@ func TestTOTP(t *testing.T) {
 					t.Fatalf("secret not found in response body")
 				}
 
-				login, err := db.Logins.Read(loginId, nil)
+				login, err := db.Logins.Read(loginId, context.Background())
 				if err != nil {
 					t.Fatalf("could not read login: %s", err)
 				}
@@ -152,7 +153,7 @@ func TestTOTP(t *testing.T) {
 					t.Errorf("with the correct code, handler returned unexpected status code: got %v want %v", rr.Code, http.StatusOK)
 				}
 
-				login, err = db.Logins.Read(loginId, nil)
+				login, err = db.Logins.Read(loginId, context.Background())
 				if err != nil {
 					t.Fatalf("could not read login: %s", err)
 				}

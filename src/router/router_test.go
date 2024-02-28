@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -94,7 +95,7 @@ func TestHandler(t *testing.T) {
 	slice2, err := graphDB.GetFilteredTrainings(domain.TrainingQueryOptions{
 		City:    "Hamburg",
 		Weekday: 5,
-	}, nil)
+	}, context.Background())
 	if err != nil {
 		t.Error(err)
 	}

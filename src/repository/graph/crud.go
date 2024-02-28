@@ -3,12 +3,12 @@ package graph
 import (
 	"context"
 	"fmt"
-	"github.com/arangodb/go-driver"
+	"github.com/arangodb/go-driver/v2/arangodb"
 	"pkv/api/src/domain"
 )
 
 type EntityManager[T Entity] struct {
-	Collection  driver.Collection
+	Collection  arangodb.Collection
 	Constructor func() T
 }
 
@@ -53,7 +53,7 @@ func (im *EntityManager[T]) Update(item T, ctx context.Context) error {
 }
 
 func (im *EntityManager[T]) Delete(item T, ctx context.Context) error {
-	_, err := im.Collection.RemoveDocument(ctx, item.GetKey())
+	_, err := im.Collection.DeleteDocument(ctx, item.GetKey())
 	if err != nil {
 		return fmt.Errorf("could not delete item with key %v: %w", item.GetKey(), err)
 	}

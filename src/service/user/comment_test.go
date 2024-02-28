@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/graph"
 	"strings"
@@ -13,40 +14,40 @@ func TestComments(t *testing.T) {
 		t.Fatalf("db initialisation failed: %s", err)
 	}
 	user := domain.User{}
-	err = db.Users.Create(&user, nil)
+	err = db.Users.Create(&user, context.Background())
 	if err != nil {
 		t.Fatalf("initialisation failed: %s", err)
 	}
 	service := NewService(db)
-	err = service.AddComment(user.Key, "author", "title", "text", nil)
+	err = service.AddComment(user.Key, "author", "title", "text", context.Background())
 	if err != nil {
 		t.Fatalf("add comment failed: %s", err)
 	}
-	err = service.AddComment(user.Key, "author", "title2", "text2", nil)
+	err = service.AddComment(user.Key, "author", "title2", "text2", context.Background())
 	if err != nil {
 		t.Fatalf("add comment failed: %s", err)
 	}
-	err = service.AddComment(user.Key, "author", "title2", "text2", nil)
+	err = service.AddComment(user.Key, "author", "title2", "text2", context.Background())
 	if err == nil {
 		t.Fatalf("add comment should fail")
 	}
-	err = service.EditComment(user.Key, "author", "title2", "title3", "text3", nil)
+	err = service.EditComment(user.Key, "author", "title2", "title3", "text3", context.Background())
 	if err != nil {
 		t.Fatalf("edit comment failed: %s", err)
 	}
-	err = service.EditComment(user.Key, "author", "title2", "title4", "text4", nil)
+	err = service.EditComment(user.Key, "author", "title2", "title4", "text4", context.Background())
 	if err == nil {
 		t.Fatalf("edit comment should fail")
 	}
-	err = service.EditComment(user.Key, "author", "title3", "title3", "text3", nil)
+	err = service.EditComment(user.Key, "author", "title3", "title3", "text3", context.Background())
 	if err != nil {
 		t.Fatalf("edit comment failed: %s", err)
 	}
-	err = service.EditComment(user.Key, "wrong_user", "title3", "title3", "text3", nil)
+	err = service.EditComment(user.Key, "wrong_user", "title3", "title3", "text3", context.Background())
 	if err == nil {
 		t.Fatalf("edit comment should fail")
 	}
-	puser, err := db.Users.Read(user.Key, nil)
+	puser, err := db.Users.Read(user.Key, context.Background())
 	if err != nil {
 		t.Fatalf("read user failed: %s", err)
 	}
@@ -65,15 +66,15 @@ func TestComments(t *testing.T) {
 	if puser.Comments[1].Author != "author" {
 		t.Fatalf("wrong comment author: %s", puser.Comments[0].Author)
 	}
-	err = service.DeleteComment(user.Key, "wrong_user", "title3", nil)
+	err = service.DeleteComment(user.Key, "wrong_user", "title3", context.Background())
 	if err == nil {
 		t.Fatalf("delete comment should fail")
 	}
-	err = service.DeleteComment(user.Key, "author", "title3", nil)
+	err = service.DeleteComment(user.Key, "author", "title3", context.Background())
 	if err != nil {
 		t.Fatalf("delete comment failed: %s", err)
 	}
-	puser, err = db.Users.Read(user.Key, nil)
+	puser, err = db.Users.Read(user.Key, context.Background())
 	if err != nil {
 		t.Fatalf("read user failed: %s", err)
 	}

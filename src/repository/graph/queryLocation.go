@@ -3,7 +3,8 @@ package graph
 import (
 	"context"
 	"fmt"
-	"github.com/arangodb/go-driver"
+	"github.com/arangodb/go-driver/v2/arangodb"
+	"github.com/arangodb/go-driver/v2/arangodb/shared"
 	"math"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
@@ -11,7 +12,7 @@ import (
 
 func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Context) ([]domain.LocationDTO, error) {
 	query, bindVars := buildLocationQuery(options)
-	cursor, err := db.Database.Query(ctx, query, bindVars)
+	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: bindVars})
 	if err != nil {
 		return nil, fmt.Errorf("query string invalid: %w", err)
 	}
@@ -21,7 +22,7 @@ func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Cont
 	for {
 		var doc domain.LocationDTO
 		_, err := cursor.ReadDocument(ctx, &doc)
-		if driver.IsNoMoreDocuments(err) {
+		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			return nil, fmt.Errorf("obtaining documents failed: %w", err)
