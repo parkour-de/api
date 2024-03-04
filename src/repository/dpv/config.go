@@ -31,12 +31,14 @@ type Config struct {
 		MinecraftInviteKey string `yaml:"minecraft_invite_key"`
 	} `yaml:"auth"`
 	Server struct {
-		Words1  string `yaml:"words1"`
-		Words2  string `yaml:"words2"`
-		ImgURL  string `yaml:"img_url"`
-		TmpURL  string `yaml:"tmp_url"`
-		ImgPath string `yaml:"img_path"`
-		TmpPath string `yaml:"tmp_path"`
+		Words1   string `yaml:"words1"`
+		Words2   string `yaml:"words2"`
+		ImgURL   string `yaml:"img_url"`
+		TmpURL   string `yaml:"tmp_url"`
+		ImgPath  string `yaml:"img_path"`
+		TmpPath  string `yaml:"tmp_path"`
+		Exiftool string `yaml:"exiftool"`
+		Python   string `yaml:"python"`
 	}
 	Settings struct {
 		Version   string

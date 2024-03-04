@@ -126,7 +126,7 @@ func PythonConvert(inFile string, outFile string) (domain.Photo, error) {
 	if err != nil {
 		return domain.Photo{}, fmt.Errorf("marshaling image info for image \"%v\" failed: %w", inFile, err)
 	}
-	cmd := exec.Command("python", "image_processor.py")
+	cmd := exec.Command(dpv.ConfigInstance.Server.Python, "image_processor.py")
 	cmd.Stdin = bytes.NewReader(jsonData)
 	var output bytes.Buffer
 	cmd.Stdout = &output
@@ -168,7 +168,7 @@ type ImgInfo struct {
 
 func Info(filename string) (img ImgInfo, err error) {
 	img.Date = time.Now().Unix()
-	cmd := exec.Command("exiftool", "-T", "-datetimeoriginal", "-orientation", "-gps:GPSLatitude", "-gps:GPSLongitude", "-imagewidth", "-imageheight", "-n", filename)
+	cmd := exec.Command(dpv.ConfigInstance.Server.Exiftool, "-T", "-datetimeoriginal", "-orientation", "-gps:GPSLatitude", "-gps:GPSLongitude", "-imagewidth", "-imageheight", "-n", filename)
 	out, err := cmd.StdoutPipe()
 	if err != nil {
 		err = fmt.Errorf("creating pipe for \"exiftool\" with \"%v\" failed: %w", filename, err)
