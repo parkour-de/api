@@ -10,11 +10,13 @@ import (
 	"pkv/api/src/domain"
 	"pkv/api/src/endpoints/authentication"
 	"pkv/api/src/endpoints/crud"
+	"pkv/api/src/endpoints/photo"
 	"pkv/api/src/endpoints/query"
 	"pkv/api/src/endpoints/server"
 	"pkv/api/src/endpoints/user"
 	"pkv/api/src/repository/dpv"
 	"pkv/api/src/repository/graph"
+	photoService "pkv/api/src/service/photo"
 	serverService "pkv/api/src/service/server"
 	userService "pkv/api/src/service/user"
 )
@@ -36,6 +38,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	pageCrudHandler := crud.NewHandler[*domain.Page](db, db.Pages)
 
 	serverHandler := server.NewHandler(serverService.NewService())
+	photoHandler := photo.NewHandler(photoService.NewService())
 
 	r := httprouter.New()
 
@@ -98,6 +101,8 @@ func NewServer(configPath string, test bool) *http.Server {
 
 	r.POST("/api/server/mail", serverHandler.ChangeMailPassword)
 	r.POST("/api/server/minecraft/whitelist", serverHandler.AddUsernameToWhitelist)
+
+	r.POST("/api/photo/upload", photoHandler.Upload)
 
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)

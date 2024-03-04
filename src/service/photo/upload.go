@@ -57,12 +57,41 @@ func (s *Service) Upload(data []byte, filename string, ctx context.Context) (dom
 	if err := tmpFile.Close(); err != nil {
 		return domain.Photo{}, fmt.Errorf("could not close uploaded file before conversion: %w", err)
 	}
-	randomFilename := RandomString() + ".o.jxl"
+	randomFilename := RandomString()
 	photo, err := PythonConvert(tmpFile.Name(), dpv.ConfigInstance.Server.TmpPath+randomFilename)
 	if err != nil {
 		return domain.Photo{}, fmt.Errorf("could not convert uploaded file: %w", err)
 	}
+	jsonData, err := json.Marshal(photo)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("could not marshal photo to JSON: %w", err)
+	}
+	err = os.WriteFile(dpv.ConfigInstance.Server.TmpPath+randomFilename+".json", jsonData, 0644)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("could not write JSON file: %w", err)
+	}
 	return photo, nil
+}
+
+func (s *Service) Clean(folderPath string, maxAge time.Duration) error {
+	now := time.Now()
+	cutoff := now.Add(-maxAge)
+
+	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() && info.ModTime().Before(cutoff) {
+			err := os.Remove(path)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	return err
 }
 
 type PythonInput struct {
@@ -160,8 +189,9 @@ func Info(filename string) (img ImgInfo, err error) {
 	data := strings.Split(strings.Trim(string(b), " \r\n"), "\t")
 	layout := "2006:01:02 15:04:05"
 	date, err := time.ParseInLocation(layout, data[0], time.Local)
-	if err == nil {
+	if err != nil {
 		img.Date = date.Unix()
+		err = nil
 	}
 	if len(data) < 2 { // Assume error "No matching files"
 		err = fmt.Errorf("no matching files")

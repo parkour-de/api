@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"pkv/api/src/repository/dpv"
 	"pkv/api/src/router"
+	"pkv/api/src/service/photo"
+	"time"
 )
 
 var version = "0"
@@ -16,6 +18,16 @@ func main() {
 	log.Printf("DPV version %s", version)
 	server := router.NewServer("config.yml", false)
 	dpv.ConfigInstance.Settings.Version = version
+	ticker := time.NewTicker(4 * time.Hour)
+	defer ticker.Stop()
+	go func() {
+		for range ticker.C {
+			err := photo.NewService().Clean(dpv.ConfigInstance.Server.TmpPath, 72*time.Hour)
+			if err != nil {
+				log.Printf("periodic cleaning up temp folder failed: %v", err)
+			}
+		}
+	}()
 	socketPath := os.Getenv("UNIX")
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

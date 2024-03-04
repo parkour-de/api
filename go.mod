@@ -1,6 +1,6 @@
 module pkv/api
 
-go 1.21
+go 1.22
 
 require (
 	github.com/arangodb/go-driver/v2 v2.0.3

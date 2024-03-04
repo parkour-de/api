@@ -348,3 +348,23 @@ types:
           body:
             application/json:
               description: User has been whitelisted successfully.
+/photo:
+  /upload:
+    post:
+      description: Uploads a new photo
+      body:
+        multipart/form-data:
+          properties:
+            file:
+              description: The image file to be uploaded
+              type: file
+      responses:
+        '200':
+          description: Successful response
+          body:
+            application/json:
+              type: Photo
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
