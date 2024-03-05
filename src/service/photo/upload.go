@@ -62,6 +62,7 @@ func (s *Service) Upload(data []byte, filename string, ctx context.Context) (dom
 	if err != nil {
 		return domain.Photo{}, fmt.Errorf("could not convert uploaded file: %w", err)
 	}
+	photo.Src = randomFilename
 	jsonData, err := json.Marshal(photo)
 	if err != nil {
 		return domain.Photo{}, fmt.Errorf("could not marshal photo to JSON: %w", err)
