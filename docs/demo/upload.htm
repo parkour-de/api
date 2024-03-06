@@ -267,13 +267,13 @@
     if (controller) {
       controller.abort();
       delete abortControllers[controllerId];
-      updateUploadSummary();
     }
     failedUploads = failedUploads.filter(upload => upload.imageContainer !== imageContainer);
     if (failedUploads.length === 0) {
       failedUploadsMessage.style.display = 'none';
     }
     imageContainer.remove();
+    updateUploadSummary();
   }
 
   function retryUpload(imageContainer) {
