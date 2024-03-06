@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Upload Demo</title>
+  <style>
+    /* Dark mode styles */
+    body {
+      background-color: #1a1a1a;
+      color: #ffffff;
+    }
+
+    a {
+        color: #69f;
+    }
+
+    /* File input styles */
+    #file-input-container {
+      background-color: #2b2b2b;
+      padding: 20px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+    }
+
+    #file-input-container.dragover {
+      background-color: #3b3b3b;
+    }
+
+    #file-input-container label {
+      margin-right: 10px;
+    }
+
+    #file-input {
+      padding: 5px;
+      border-radius: 3px;
+    }
+
+    /* Grid styles */
+    #image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      grid-gap: 10px;
+      margin-top: 20px;
+    }
+
+    .image-container {
+      position: relative;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .progress-bar {
+      height: 5px;
+      background-color: #ccc;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      transition: width 0.5s ease-in-out, opacity 2s ease-in-out;
+    }
+
+    .progress-bar.success {
+      background-color: green;
+      opacity: 0;
+    }
+
+    .action-buttons {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      display: flex;
+    }
+
+    .action-buttons button {
+      margin-left: 5px;
+      padding: 2px 5px;
+      background-color: #2b2b2b;
+      color: #ffffff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    #failed-uploads-message {
+      margin-top: 20px;
+      color: #ff4d4d;
+    }
+
+    code {
+      display: inline-block;
+      background-color: #2b2b2b;
+      color: #00ff00; /* Green color for the code block */
+      padding-left: 3px;
+      padding-right: 3px;
+      border-radius: 2px;
+      font-family: monospace;
+    }
+
+    #uploaded-files-list {
+      display: block;
+      background-color: #2b2b2b;
+      color: #00ff00; /* Green color for the code block */
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      overflow-x: auto; /* Add horizontal scrollbar if the content is too wide */
+    }
+  </style>
+</head>
+<body>
+<h1>Image Upload Demo</h1>
+<div id="file-input-container">
+  <label for="file-input">Select files or drag them over this button:</label>
+  <input type="file" id="file-input" multiple>
+</div>
+<div id="image-grid"></div>
+<div id="failed-uploads-message" style="display: none;">Some image uploads have failed. <button id="retry-failed">Retry</button></div>
+<div id="upload-summary" style="display: none;">
+  <h2>Upload Complete</h2>
+  <p>Here is the list of your uploaded files:</p>
+  <code id="uploaded-files-list"></code>
+  <p>If you prepend them with <code>https://8bj.de/obj/dpv/tmp/</code>, you can add the suffixes <code>.o.jxl</code>, <code>.h.jxl</code>, or <code>.s.jxl</code> for different preview resolutions. Please note that these files will be automatically deleted <strong>after 72 hours</strong>.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+
+  const fileInput = document.getElementById('file-input');
+  const imageGrid = document.getElementById('image-grid');
+  const failedUploadsMessage = document.getElementById('failed-uploads-message');
+  const retryFailedButton = document.getElementById('retry-failed');
+
+  let failedUploads = [];
+  let abortControllers = {};
+  let nextControllerIndex = 0;
+
+  // Add event listeners for file selection
+  fileInput.addEventListener('change', handleFileSelect);
+  fileInput.addEventListener('dragover', handleDragOver);
+  fileInput.addEventListener('dragend', handleDragEnd);
+  fileInput.addEventListener('dragleave', handleDragEnd);
+  fileInput.addEventListener('drop', handleDrop);
+  retryFailedButton.addEventListener('click', retryFailedUploads);
+
+  function handleFileSelect(event) {
+    uploadFiles(event.target.files);
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault();
+    document.getElementById('file-input-container').classList.add('dragover');
+  }
+
+  function handleDragEnd(event) {
+    document.getElementById('file-input-container').classList.remove('dragover');
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    uploadFiles(event.dataTransfer.files);
+  }
+
+  function uploadFiles(files) {
+    Array.from(files).forEach(uploadFile);
+  }
+
+  function uploadFile(file) {
+    const uploadSummary = document.getElementById('upload-summary');
+    uploadSummary.style.display = 'none';
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const controllerId = nextControllerIndex++;
+    abortControllers[controllerId] = controller;
+
+    const imageContainer = createImageContainer(file.name, controllerId);
+
+    imageGrid.appendChild(imageContainer);
+
+    axios.post('https://8bj.de/api/photo/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: function(progressEvent) {
+        const progressBar = imageContainer.querySelector('.progress-bar');
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        progressBar.style.width = `${percentCompleted}%`;
+      },
+      signal: signal
+    })
+      .then(function(response) {
+        const thumbnail = response.data.src + '.s.jxl';
+        const img = imageContainer.querySelector('img');
+        imageContainer.dataset.src = response.data.src;
+        img.src = `https://8bj.de/obj/dpv/tmp/${thumbnail}`;
+        img.alt = file.name;
+        img.title = file.name;
+        const progressBar = imageContainer.querySelector('.progress-bar');
+        progressBar.classList.add('success');
+        delete abortControllers[controllerId];
+        updateUploadSummary();
+      })
+      .catch(function(error) {
+        if (error.code === 'ERR_CANCELED') {
+          console.log('Upload canceled:', file.name);
+        } else {
+          console.error(error);
+          failedUploads.push({ file, imageContainer });
+          const progressBar = imageContainer.querySelector('.progress-bar');
+          progressBar.style.width = '100%';
+          progressBar.style.backgroundColor = 'red';
+          const retryButton = imageContainer.querySelector('.action-buttons button:last-child');
+          retryButton.style.display = 'inline-block';
+          showFailedUploadsMessage();
+        }
+        delete abortControllers[controllerId];
+        updateUploadSummary();
+      });
+  }
+
+  function createImageContainer(fileName, controllerId) {
+    const container = document.createElement('div');
+    container.classList.add('image-container');
+    container.dataset.controllerId = controllerId;
+
+    const img = document.createElement('img');
+    img.alt = fileName;
+    img.title = fileName;
+    img.src = 'https://8bj.de/obj/dpv/load.png';
+
+    const progressBar = document.createElement('div');
+    progressBar.classList.add('progress-bar');
+
+    const actionButtons = document.createElement('div');
+    actionButtons.classList.add('action-buttons');
+
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.addEventListener('click', () => cancelUpload(container));
+
+    const retryButton = document.createElement('button');
+    retryButton.textContent = 'Retry';
+    retryButton.style.display = 'none';
+    retryButton.addEventListener('click', () => retryUpload(container));
+
+    actionButtons.appendChild(cancelButton);
+    actionButtons.appendChild(retryButton);
+
+    container.appendChild(img);
+    container.appendChild(progressBar);
+    container.appendChild(actionButtons);
+
+    return container;
+  }
+
+  function cancelUpload(imageContainer) {
+    const controllerId = imageContainer.dataset.controllerId;
+    const controller = abortControllers[controllerId];
+
+    if (controller) {
+      controller.abort();
+      delete abortControllers[controllerId];
+      updateUploadSummary();
+    }
+    failedUploads = failedUploads.filter(upload => upload.imageContainer !== imageContainer);
+    if (failedUploads.length === 0) {
+      failedUploadsMessage.style.display = 'none';
+    }
+    imageContainer.remove();
+  }
+
+  function retryUpload(imageContainer) {
+    const file = failedUploads.find(upload => upload.imageContainer === imageContainer).file;
+    failedUploads = failedUploads.filter(upload => upload.file !== file);
+    imageContainer.remove();
+    uploadFile(file);
+    if (failedUploads.length === 0) {
+      failedUploadsMessage.style.display = 'none';
+    }
+  }
+
+  function showFailedUploadsMessage() {
+    failedUploadsMessage.style.display = 'block';
+  }
+
+  function retryFailedUploads() {
+    const failedUploadContainers = failedUploads.map(upload => upload.imageContainer);
+    failedUploadContainers.forEach(container => container.remove());
+    failedUploads.forEach(upload => uploadFile(upload.file));
+    failedUploads = [];
+    failedUploadsMessage.style.display = 'none';
+  }
+
+  function updateUploadSummary() {
+    const uploadedFilesList = document.getElementById('uploaded-files-list');
+    uploadedFilesList.innerHTML = '';
+
+    if (abortControllers && Object.keys(abortControllers).length === 0 && failedUploads.length === 0) {
+      const uploadSummary = document.getElementById('upload-summary');
+      uploadSummary.style.display = 'block';
+
+      const successfulUploads = Array.from(document.querySelectorAll('.image-container'))
+        .map(container => container.dataset.src)
+        .filter(src => src);
+
+      uploadedFilesList.textContent = `[${successfulUploads.map(src => `'${src}'`).join(', ')}]`;
+    } else {
+      const uploadSummary = document.getElementById('upload-summary');
+      uploadSummary.style.display = 'none';
+    }
+  }
+
+  const testImage = new Image()
+  testImage.onerror = function() {
+    const par = document.createElement('p')
+    par.innerHTML = 'Please come back if you have <a href="https://thorium.rocks/">Thorium</a>, a JPEG-XL capable web browser for all devices except iPhone. Or use <a href="https://apple.com/safari">Safari</a>.'
+    document.body.insertBefore(par, document.body.firstChild)
+  }
+  testImage.src = 'data:image/jxl;base64,/woAEAwkxY0AUxVIAJQAARAAAAAAYcNHAQAAVKiMMm7wcq7nyw8dFtM2rjO01baFJYyJZ4CFhEJiBA2GGAOVQAkA'
+</script>
+</body>
+</html>
