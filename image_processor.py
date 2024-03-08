@@ -10,9 +10,13 @@ def resize_image(image, width, height):
     # Use the smaller scaling factor to maintain aspect ratio
     scale_x = width / image.width
     scale_y = height / image.height
+    scale = min(scale_x, scale_y)
 
-    # Resize the image using libvips
-    return image.resize(min(scale_x, scale_y))
+    # Resize the image using libvips if needed
+    if scale < 1:
+        return image.resize(scale)
+    else:
+        return image
 
 
 def resize_fixed(image, width, height):

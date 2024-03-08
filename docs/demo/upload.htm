@@ -110,6 +110,10 @@
       font-family: monospace;
       overflow-x: auto; /* Add horizontal scrollbar if the content is too wide */
     }
+
+    .drag-over {
+      outline: 2px dashed #007bff;
+    }
   </style>
 </head>
 <body>
@@ -170,65 +174,74 @@
   }
 
   function uploadFile(file) {
-    const uploadSummary = document.getElementById('upload-summary');
-    uploadSummary.style.display = 'none';
     const formData = new FormData();
-    formData.append('file', file);
 
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const controllerId = nextControllerIndex++;
-    abortControllers[controllerId] = controller;
+    resizeImage(formData, file)
+      .then(_ => {
+        const uploadSummary = document.getElementById('upload-summary');
+        uploadSummary.style.display = 'none';
 
-    const imageContainer = createImageContainer(file.name, controllerId);
+        const controller = new AbortController();
+        const signal = controller.signal;
+        const controllerId = nextControllerIndex++;
+        abortControllers[controllerId] = controller;
 
-    imageGrid.appendChild(imageContainer);
+        const imageContainer = createImageContainer(file.name, controllerId);
 
-    axios.post('https://8bj.de/api/photo/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress: function(progressEvent) {
-        const progressBar = imageContainer.querySelector('.progress-bar');
-        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        progressBar.style.width = `${percentCompleted}%`;
-      },
-      signal: signal
-    })
-      .then(function(response) {
-        const thumbnail = response.data.src + '.s.jxl';
-        const img = imageContainer.querySelector('img');
-        imageContainer.dataset.src = response.data.src;
-        img.src = `https://8bj.de/obj/dpv/tmp/${thumbnail}`;
-        img.alt = file.name;
-        img.title = file.name;
-        const progressBar = imageContainer.querySelector('.progress-bar');
-        progressBar.classList.add('success');
-        delete abortControllers[controllerId];
-        updateUploadSummary();
+        imageGrid.appendChild(imageContainer);
+
+        axios.post('https://8bj.de/api/photo/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          onUploadProgress: function(progressEvent) {
+            const progressBar = imageContainer.querySelector('.progress-bar');
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            progressBar.style.width = `${percentCompleted}%`;
+          },
+          signal: signal
+        })
+          .then(function(response) {
+            const thumbnail = response.data.src + '.s.jxl';
+            const img = imageContainer.querySelector('img');
+            imageContainer.dataset.src = response.data.src;
+            img.src = `https://8bj.de/obj/dpv/tmp/${thumbnail}`;
+            img.alt = file.name;
+            img.title = file.name;
+            const progressBar = imageContainer.querySelector('.progress-bar');
+            progressBar.classList.add('success');
+            delete abortControllers[controllerId];
+            updateUploadSummary();
+          })
+          .catch(function(error) {
+            if (error.code === 'ERR_CANCELED') {
+              console.log('Upload canceled:', file.name);
+            } else {
+              console.error(error);
+              failedUploads.push({ file, imageContainer });
+              const progressBar = imageContainer.querySelector('.progress-bar');
+              progressBar.style.width = '100%';
+              progressBar.style.backgroundColor = 'red';
+              const retryButton = imageContainer.querySelector('.action-buttons button:last-child');
+              retryButton.style.display = 'inline-block';
+              showFailedUploadsMessage();
+            }
+            delete abortControllers[controllerId];
+            updateUploadSummary();
+          });
       })
-      .catch(function(error) {
-        if (error.code === 'ERR_CANCELED') {
-          console.log('Upload canceled:', file.name);
-        } else {
-          console.error(error);
-          failedUploads.push({ file, imageContainer });
-          const progressBar = imageContainer.querySelector('.progress-bar');
-          progressBar.style.width = '100%';
-          progressBar.style.backgroundColor = 'red';
-          const retryButton = imageContainer.querySelector('.action-buttons button:last-child');
-          retryButton.style.display = 'inline-block';
-          showFailedUploadsMessage();
-        }
-        delete abortControllers[controllerId];
-        updateUploadSummary();
-      });
   }
 
   function createImageContainer(fileName, controllerId) {
     const container = document.createElement('div');
     container.classList.add('image-container');
     container.dataset.controllerId = controllerId;
+
+    container.draggable = true;
+    container.addEventListener('dragstart', dragStart);
+    container.addEventListener('dragover', dragOver);
+    container.addEventListener('drop', drop);
+    container.addEventListener('dragleave', dragLeave);
 
     const img = document.createElement('img');
     img.alt = fileName;
@@ -315,6 +328,103 @@
       const uploadSummary = document.getElementById('upload-summary');
       uploadSummary.style.display = 'none';
     }
+  }
+
+  let draggedElement = null;
+  let dragOverElement = null;
+  let previousDragOverElement = null;
+
+  function dragStart(e) {
+    draggedElement = this;
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function dragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const target = e.target.closest('.image-container');
+    if (target && target !== draggedElement && target !== dragOverElement) {
+      if (previousDragOverElement) {
+        previousDragOverElement.classList.remove('drag-over');
+      }
+      dragOverElement = target;
+      dragOverElement.classList.add('drag-over');
+      previousDragOverElement = dragOverElement;
+    }
+  }
+
+  function drop(e) {
+    e.preventDefault();
+    if (dragOverElement) {
+      imageGrid.insertBefore(draggedElement, dragOverElement);
+      dragOverElement.classList.remove('drag-over');
+    } else {
+      imageGrid.appendChild(draggedElement);
+    }
+    draggedElement = null;
+    dragOverElement = null;
+    previousDragOverElement = null;
+    updateUploadSummary();
+  }
+
+  function dragLeave(e) {
+    if (this === dragOverElement) {
+      this.classList.remove('drag-over');
+      dragOverElement = null;
+      previousDragOverElement = null;
+    }
+  }
+
+  function resizeImage(formData, file) {
+    return new Promise((resolve, reject) => {
+      if (!window.CanvasRenderingContext2D) {
+        resolve(formData.append('file', file))
+        return
+      }
+
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+
+      reader.onerror = function() {
+        resolve(formData.append('file', file))
+      }
+
+      reader.onload = function(event) {
+        const img = new Image()
+        img.src = event.target.result
+
+        img.onload = function() {
+          if (img.width > 4096 || img.height > 4096) {
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+
+            let width = img.width
+            let height = img.height
+            if (width > height) {
+              if (width > 4096) {
+                height *= 4096 / width
+                width = 4096
+              }
+            } else {
+              if (height > 4096) {
+                width *= 4096 / height
+                height = 4096
+              }
+            }
+
+            canvas.width = width
+            canvas.height = height
+            ctx.drawImage(img, 0, 0, width, height)
+
+            canvas.toBlob(function(blob) {
+              resolve(formData.append('file', blob, file.name))
+            }, 'image/jpeg', 0.85)
+          } else {
+            resolve(formData.append('file', file))
+          }
+        }
+      }
+    })
   }
 
   const testImage = new Image()
