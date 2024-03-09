@@ -74,27 +74,6 @@ func (s *Service) Upload(data []byte, filename string, ctx context.Context) (dom
 	return photo, nil
 }
 
-func (s *Service) Clean(folderPath string, maxAge time.Duration) error {
-	now := time.Now()
-	cutoff := now.Add(-maxAge)
-
-	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && info.ModTime().Before(cutoff) {
-			err := os.Remove(path)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-
-	return err
-}
-
 type PythonInput struct {
 	InputFile   string `json:"input_file"`
 	OutputFile  string `json:"output_file"`
