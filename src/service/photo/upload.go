@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -72,6 +74,43 @@ func (s *Service) Upload(data []byte, filename string, ctx context.Context) (dom
 		return domain.Photo{}, fmt.Errorf("could not write JSON file: %w", err)
 	}
 	return photo, nil
+}
+
+func (s *Service) UploadFromURL(url string, ctx context.Context) (domain.Photo, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("could not download from URL %v: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	contentDisposition := resp.Header.Get("Content-Disposition")
+	filename := parseFilenameFromContentDisposition(contentDisposition)
+	if filename == "" {
+		filename = filepath.Base(url)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("could not read data from URL %v: %w", url, err)
+	}
+
+	photo, err := s.Upload(data, filename, ctx)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("could not upload file from URL %v: %w", url, err)
+	}
+	return photo, nil
+}
+
+func parseFilenameFromContentDisposition(contentDisposition string) string {
+	_, params, err := mime.ParseMediaType(contentDisposition)
+	if err != nil {
+		return ""
+	}
+	filename, ok := params["filename"]
+	if !ok {
+		return ""
+	}
+	return filename
 }
 
 type PythonInput struct {

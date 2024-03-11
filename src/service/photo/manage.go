@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -63,15 +65,29 @@ func (s *Service) Touch(filename string, path string, ctx context.Context) error
 }
 
 func (s *Service) MakePermanent(filename string, ctx context.Context) error {
-	return s.Move(filename, dpv.ConfigInstance.Server.TmpPath, dpv.ConfigInstance.Server.ImgPath, ctx)
+	if err := s.Move(filename, dpv.ConfigInstance.Server.TmpPath, dpv.ConfigInstance.Server.ImgPath, ctx); err != nil {
+		return fmt.Errorf("could not move file: %w", err)
+	}
+	return nil
 }
 
 func (s *Service) MakeTemporary(filename string, ctx context.Context) error {
 	// touch first, to avoid immediate deletion of stale files
 	if err := s.Touch(filename, dpv.ConfigInstance.Server.ImgPath, ctx); err != nil {
-		return err
+		return fmt.Errorf("could not touch file: %w", err)
 	}
-	return s.Move(filename, dpv.ConfigInstance.Server.ImgPath, dpv.ConfigInstance.Server.TmpPath, ctx)
+	if err := s.Move(filename, dpv.ConfigInstance.Server.ImgPath, dpv.ConfigInstance.Server.TmpPath, ctx); err != nil {
+		return fmt.Errorf("could not move file: %w", err)
+	}
+	return nil
+}
+
+func (s *Service) MakeClone(filename string, ctx context.Context) (domain.Photo, error) {
+	photo, err := s.Copy(filename, dpv.ConfigInstance.Server.ImgPath, dpv.ConfigInstance.Server.TmpPath, ctx)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("could not clone file: %w", err)
+	}
+	return photo, nil
 }
 
 func (s *Service) Move(filename string, fromPath string, toPath string, ctx context.Context) error {
@@ -95,6 +111,74 @@ func (s *Service) Move(filename string, fromPath string, toPath string, ctx cont
 		}
 	}
 	return nil
+}
+
+func (s *Service) Copy(filename string, fromPath string, toPath string, ctx context.Context) (domain.Photo, error) {
+	if matched, _ := regexp.MatchString("^[a-zA-Z0-9_-]{8,}$", filename); !matched {
+		return domain.Photo{}, errors.New("copy: valid filenames can only contain the characters a-z, A-Z, 0-9, _, and -")
+	}
+	fromPattern := filepath.Join(fromPath, filename+".*")
+
+	matches, err := filepath.Glob(fromPattern)
+	if err != nil {
+		return domain.Photo{}, err
+	}
+	if len(matches) == 0 {
+		return domain.Photo{}, errors.New("copy: no matching files found")
+	}
+
+	newFilename := RandomString()
+	var photo domain.Photo
+
+	for _, fromMatch := range matches {
+		ext := strings.TrimPrefix(filepath.Base(fromMatch), filename)
+		if ext == ".json" {
+			photoBytes, err := os.ReadFile(fromMatch)
+			if err != nil {
+				return domain.Photo{}, fmt.Errorf("copy: could not open json file %s%s: %w", filename, ext, err)
+			}
+			err = json.Unmarshal(photoBytes, &photo)
+			if err != nil {
+				return domain.Photo{}, fmt.Errorf("copy: could not decode json file %s%s: %w", filename, ext, err)
+			}
+			photo.Src = newFilename
+		} else {
+			fromFile, err := os.Open(fromMatch)
+			if err != nil {
+				return domain.Photo{}, fmt.Errorf("copy: failed reading file %s%s: %w", filename, ext, err)
+			}
+			defer fromFile.Close()
+
+			toMatch := filepath.Join(toPath, newFilename+ext)
+			toFile, err := os.Create(toMatch)
+			if err != nil {
+				return domain.Photo{}, fmt.Errorf("copy: failed creating file %s%s: %w", filename, ext, err)
+			}
+			defer toFile.Close()
+
+			_, err = io.Copy(toFile, fromFile)
+			if err != nil {
+				return domain.Photo{}, fmt.Errorf("copy: failed copying contents of file %s%s: %w", filename, ext, err)
+			}
+		}
+	}
+
+	if photo.Src == "" {
+		return domain.Photo{}, fmt.Errorf("copy: no json file found")
+	}
+
+	photoBytes, err := json.Marshal(photo)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("copy: could not encode json file %s: %w", filename, err)
+	}
+
+	jsonFilePath := filepath.Join(toPath, newFilename+".json")
+	err = os.WriteFile(jsonFilePath, photoBytes, 0644)
+	if err != nil {
+		return domain.Photo{}, fmt.Errorf("copy: could not save json file %s: %w", filename, err)
+	}
+
+	return photo, nil
 }
 
 func (s *Service) Clean(folderPath string, maxAge time.Duration) error {
