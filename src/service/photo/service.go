@@ -4,5 +4,5 @@ type Service struct {
 }
 
 func NewService() *Service {
-	return NewService()
+	return &Service{}
 }
