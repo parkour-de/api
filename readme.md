@@ -78,13 +78,24 @@ the build and image creation steps in this way, we can optimize the build proces
 
 ## Setting up ArangoDB
 
-    docker run -p 8529:8529 -e ARANGO_ROOT_PASSWORD=change-me -v /Users/changeme/path/to/dpv-db:/var/lib/arangodb3 arangodb/arangodb:latest
+```sh
+docker run -p 8529:8529 -e ARANGO_ROOT_PASSWORD=change-me -v /Users/changeme/path/to/dpv-db:/var/lib/arangodb3 arangodb/arangodb:latest
+```
+
+Alternatively, you can connect to a server and create a local jump host to connect to the database server. If your db
+password is set up accordingly, running the tests will create your ephemeral test databases on the remote server.
+
+```sh
+ssh -N -L 8529:127.0.0.1:8529 37.114.34.98
+```
 
 ## API documentation
 
 **Validate RAML files and generate HTML documentation and JSON file:**
 
-    make raml
+```sh
+make raml
+```
 
 **Interactive RAML documentation:**
 
