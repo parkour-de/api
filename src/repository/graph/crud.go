@@ -17,6 +17,12 @@ type Entity interface {
 	SetKey(key string)
 }
 
+type PhotoEntity interface {
+	Entity
+	GetPhotos() []domain.Photo
+	SetPhotos(photos []domain.Photo)
+}
+
 func (im *EntityManager[T]) Create(item T, ctx context.Context) error {
 	meta, err := im.Collection.CreateDocument(ctx, item)
 	if err != nil {

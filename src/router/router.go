@@ -28,14 +28,16 @@ func NewServer(configPath string, test bool) *http.Server {
 	}
 	dpv.ConfigInstance = config
 
-	userService := userService.NewService(db)
-	authenticationHandler := authentication.NewHandler(db, userService)
-	queryHandler := query.NewHandler(db)
-	userHandler := user.NewHandler(db, userService)
 	trainingCrudHandler := crud.NewHandler[*domain.Training](db, db.Trainings)
 	locationCrudHandler := crud.NewHandler[*domain.Location](db, db.Locations)
 	userCrudHandler := crud.NewHandler[*domain.User](db, db.Users)
 	pageCrudHandler := crud.NewHandler[*domain.Page](db, db.Pages)
+
+	userService := userService.NewService(db)
+	authenticationHandler := authentication.NewHandler(db, userService)
+	queryHandler := query.NewHandler(db)
+	userHandler := user.NewHandler(db, userService)
+	userPhotoHandler := photo.NewPhotoEntityHandler[*domain.User](photoService.NewService(), db.Users)
 
 	serverHandler := server.NewHandler(serverService.NewService())
 	photoHandler := photo.NewHandler(photoService.NewService())
@@ -94,6 +96,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.POST("/api/user/:key/totp", userHandler.EnableTOTP)
 	r.GET("/api/user/:key/email", userHandler.RequestEmail)
 	r.GET("/api/user/:key/email/:login", userHandler.EnableEmail)
+	r.POST("/api/user/:key/photos", userPhotoHandler.UpdatePhotos)
 
 	r.POST("/api/user/:key/comment", userHandler.AddComment)
 	r.PUT("/api/user/:key/comment", userHandler.EditComment)

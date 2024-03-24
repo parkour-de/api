@@ -12,22 +12,30 @@ import (
 func TestGetLocations(t *testing.T) {
 	cities := map[string]domain.Location{
 		"Hamburg": {
-			Key: "Hamburg",
+			Entity: domain.Entity{
+				Key: "Hamburg",
+			},
 			Lat: 53.55,
 			Lng: 9.99,
 		},
 		"Berlin": {
-			Key: "Berlin",
+			Entity: domain.Entity{
+				Key: "Berlin",
+			},
 			Lat: 52.52,
 			Lng: 13.4,
 		},
 		"Munich": {
-			Key: "Munich",
+			Entity: domain.Entity{
+				Key: "Munich",
+			},
 			Lat: 48.14,
 			Lng: 11.58,
 		},
 		"Bremen": {
-			Key: "Bremen",
+			Entity: domain.Entity{
+				Key: "Bremen",
+			},
 			Lat: 53.07,
 			Lng: 8.81,
 		},

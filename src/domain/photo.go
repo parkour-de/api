@@ -9,3 +9,15 @@ type Photo struct {
 	Lon   float64 `json:"lon,omitempty" example:"10.1457242963889"`
 	Color string  `json:"c,omitempty" example:"itV8NsR8q8ibacicQzREZmd3ZUZVmING"`
 }
+
+type Photos struct {
+	Photos []Photo `json:"photos,omitempty"`
+}
+
+func (p Photos) GetPhotos() []Photo {
+	return p.Photos
+}
+
+func (p *Photos) SetPhotos(photos []Photo) {
+	p.Photos = photos
+}

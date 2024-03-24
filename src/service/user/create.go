@@ -29,9 +29,9 @@ func (s *Service) Create(key string, name string, userType string, ctx context.C
 		return "", fmt.Errorf("cannot create administrator account")
 	}
 	user := domain.User{
-		Key:  key,
-		Name: name,
-		Type: userType,
+		Entity: domain.Entity{Key: key},
+		Name:   name,
+		Type:   userType,
 		Information: map[string]string{
 			"created": time.Now().Format(time.RFC3339),
 			"login":   time.Now().Format(time.RFC3339),

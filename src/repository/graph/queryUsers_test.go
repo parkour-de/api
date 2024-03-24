@@ -13,13 +13,13 @@ func TestGetAssumableUsers(t *testing.T) {
 		t.Fatalf("db initialisation failed: %s", err)
 	}
 	users := []domain.User{
-		{Key: "admin"},
-		{Key: "u1"},
-		{Key: "u11"},
-		{Key: "u12"},
-		{Key: "decoy1"},
-		{Key: "decoy2"},
-		{Key: "decoy3"},
+		{Entity: domain.Entity{Key: "admin"}},
+		{Entity: domain.Entity{Key: "u1"}},
+		{Entity: domain.Entity{Key: "u11"}},
+		{Entity: domain.Entity{Key: "u12"}},
+		{Entity: domain.Entity{Key: "decoy1"}},
+		{Entity: domain.Entity{Key: "decoy2"}},
+		{Entity: domain.Entity{Key: "decoy3"}},
 	}
 	for _, user := range users {
 		err = db.Users.Create(&user, context.Background())

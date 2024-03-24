@@ -44,11 +44,13 @@ func (s *Service) LinkPassword(key, password string, ctx context.Context) (strin
 
 	nonce := security.MakeNonce()
 	login := domain.Login{
-		Key:      "",
+		Entity: domain.Entity{
+			Key:     "",
+			Created: time.Now(),
+		},
 		Provider: "password",
 		Subject:  nonce + ":" + security.HashToken(":password::"+nonce+":"+password),
 		Enabled:  true,
-		Created:  time.Now(),
 	}
 	log.Println("pwd: " + password)
 	log.Println("sub: " + login.Subject)
@@ -56,7 +58,7 @@ func (s *Service) LinkPassword(key, password string, ctx context.Context) (strin
 		return "", fmt.Errorf("create login failed: %w", err)
 	}
 
-	if err := s.db.LoginAuthenticatesUser(login, domain.User{Key: key}, ctx); err != nil {
+	if err := s.db.LoginAuthenticatesUser(login, domain.User{Entity: domain.Entity{Key: key}}, ctx); err != nil {
 		return "", fmt.Errorf("link login to user failed: %w", err)
 	}
 

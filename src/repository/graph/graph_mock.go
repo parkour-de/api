@@ -40,7 +40,6 @@ func CreateDescription(language string, text string, translated bool) domain.Des
 			"Das wird euch sicher ganz gut gefallen",
 			translated,
 		}
-		break
 	case "en":
 		return domain.Description{
 			text + " - A cool thing",
@@ -48,7 +47,6 @@ func CreateDescription(language string, text string, translated bool) domain.Des
 			"That will be super cool",
 			translated,
 		}
-		break
 	}
 	return domain.Description{}
 }
@@ -78,7 +76,7 @@ func CreateUser(db *Db, i int) (domain.User, error) {
 	user.Type = "person"
 	user.Information = map[string]string{"email": "john.doe@example.com", "twitter": "johndoe"}
 	var err error
-	user.Photos, err = CreateMultiple(db, 5, CreatePhoto)
+	user.Photos.Photos, err = CreateMultiple(db, 5, CreatePhoto)
 	if err != nil {
 		return user, err
 	}
@@ -101,7 +99,7 @@ func CreateTraining(db *Db, i int) (domain.Training, error) {
 	if err != nil {
 		return training, err
 	}
-	training.Photos, err = CreateMultiple(db, 5, CreatePhoto)
+	training.Photos.Photos, err = CreateMultiple(db, 5, CreatePhoto)
 	if err != nil {
 		return training, err
 	}
@@ -138,7 +136,7 @@ func CreateLocation(db *Db, i int) (domain.Location, error) {
 		location.Lat = 52.52
 		location.Lng = 13.40
 	}
-	location.Photos, err = CreateMultiple(db, 5, CreatePhoto)
+	location.Photos.Photos, err = CreateMultiple(db, 5, CreatePhoto)
 	if err != nil {
 		return location, err
 	}
@@ -165,7 +163,9 @@ func CreateCycle(db *Db, i int) (domain.Cycle, error) {
 
 func SampleData(db *Db) {
 	admin := domain.User{
-		Key:  "admin",
+		Entity: domain.Entity{
+			Key: "admin",
+		},
 		Name: "Admin",
 		Type: "administrator",
 	}
@@ -175,7 +175,9 @@ func SampleData(db *Db) {
 	textDe := "Der Deutsche Parkour Verband e.V. (DPV) ist der Dachverband für Parkour und Freerunning in Deutschland. Er wurde 2024 gegründet und vertritt die Interessen der Parkour- und Freerunning-Szene in Deutschland. Der DPV ist zudem Mitglied im Deutschen Olympischen Sportbund (DOSB)."
 	textEn := "The German Parkour Association (DPV) is the umbrella organization for parkour and freerunning in Germany. It was founded in 2024 and represents the interests of the parkour and freerunning scene in Germany. The DPV is also a member of the German Olympic Sports Confederation (DOSB)."
 	dpv := domain.User{
-		Key:  "dpv",
+		Entity: domain.Entity{
+			Key: "dpv",
+		},
 		Name: "Deutscher Parkour Verband",
 		Type: "association",
 		Descriptions: map[string]domain.Description{
@@ -208,7 +210,9 @@ func SampleData(db *Db) {
 		log.Fatal(err)
 	}
 	berlin := domain.Location{
-		Key:  "berlin",
+		Entity: domain.Entity{
+			Key: "berlin",
+		},
 		City: "Berlin",
 		Lat:  52.52,
 		Lng:  13.40,
@@ -220,7 +224,9 @@ func SampleData(db *Db) {
 	textDe = "Das Berlin Meeting ist ein monatliches Treffen der Parkour- und Freerunning-Szene in Deutschland. Es findet jeden Monat statt und wird vom DPV organisiert."
 	textEn = "The Berlin Meeting is a monthly meeting of the parkour and freerunning scene in Germany. It takes place every month and is organized by the DPV."
 	meeting := domain.Training{
-		Key:  "berlin-meeting-november-2023",
+		Entity: domain.Entity{
+			Key: "berlin-meeting-november-2023",
+		},
 		Type: "meeting",
 		Descriptions: map[string]domain.Description{
 			"de": {
@@ -248,7 +254,9 @@ func SampleData(db *Db) {
 	textDe = "Die Satzung des Deutschen Parkour Verbandes e.V."
 	textEn = "The articles of association of the German Parkour Association e.V."
 	page := domain.Page{
-		Key: "satzung",
+		Entity: domain.Entity{
+			Key: "satzung",
+		},
 		Descriptions: map[string]domain.Description{
 			"de": {
 				Title:  "Satzung",

@@ -67,11 +67,9 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 		api.Error(w, r, fmt.Errorf("cannot perform UPDATE operation: %w", err), 400)
 		return
 	}
-	var item T
-	decoder := json.NewDecoder(r.Body)
-	defer r.Body.Close()
-	if err := decoder.Decode(&item); err != nil {
-		api.Error(w, r, fmt.Errorf("decoding request body failed: %w", err), 400)
+	item, err := h.PostBody(r)
+	if err != nil {
+		api.Error(w, r, err, 400)
 		return
 	}
 	err = h.em.Update(item, r.Context())
@@ -80,6 +78,16 @@ func (h *Handler[T]) Update(w http.ResponseWriter, r *http.Request, urlParams ht
 		return
 	}
 	api.SuccessJson(w, r, KeyResponse{item.GetKey()})
+}
+
+func (h *Handler[T]) PostBody(r *http.Request) (T, error) {
+	var item T
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+	if err := decoder.Decode(&item); err != nil {
+		return item, fmt.Errorf("decoding request body failed: %w", err)
+	}
+	return item, nil
 }
 
 // Delete handles the deletion of entities.

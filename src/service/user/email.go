@@ -24,16 +24,18 @@ func (s *Service) RequestEmail(key string, email string, ctx context.Context) er
 		}
 	}
 	login := domain.Login{
-		Key:      "",
+		Entity: domain.Entity{
+			Key:     "",
+			Created: time.Now(),
+		},
 		Provider: "email",
 		Subject:  email,
 		Enabled:  false,
-		Created:  time.Now(),
 	}
 	if err = s.db.Logins.Create(&login, ctx); err != nil {
 		return fmt.Errorf("create login failed: %w", err)
 	}
-	if err = s.db.LoginAuthenticatesUser(login, domain.User{Key: key}, ctx); err != nil {
+	if err = s.db.LoginAuthenticatesUser(login, domain.User{Entity: domain.Entity{Key: key}}, ctx); err != nil {
 		return fmt.Errorf("link login to user failed: %w", err)
 	}
 	activationCode := emailActivationCode(login)

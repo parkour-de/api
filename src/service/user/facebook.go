@@ -44,11 +44,13 @@ func (s *Service) LinkFacebook(key string, auth string, ctx context.Context) (st
 	}
 
 	login := domain.Login{
-		Key:      "",
+		Entity: domain.Entity{
+			Key:     "",
+			Created: time.Now(),
+		},
 		Provider: "facebook",
 		Subject:  validationResponse.Data.UserId,
 		Enabled:  true,
-		Created:  time.Now(),
 	}
 
 	if err = s.db.Logins.Create(&login, ctx); err != nil {
