@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/arangodb/go-driver/v2 v2.0.3
-	github.com/gomarkdown/markdown v0.0.0-20231222211730-1d6d20845b47
+	github.com/gomarkdown/markdown v0.0.0-20240419095408-642f0ee99ae2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pquerna/otp v1.4.0
