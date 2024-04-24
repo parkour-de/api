@@ -14,11 +14,13 @@ import (
 	"pkv/api/src/endpoints/query"
 	"pkv/api/src/endpoints/server"
 	"pkv/api/src/endpoints/user"
+	"pkv/api/src/endpoints/verband"
 	"pkv/api/src/repository/dpv"
 	"pkv/api/src/repository/graph"
 	photoService "pkv/api/src/service/photo"
 	serverService "pkv/api/src/service/server"
 	userService "pkv/api/src/service/user"
+	verbandService "pkv/api/src/service/verband"
 )
 
 func NewServer(configPath string, test bool) *http.Server {
@@ -41,6 +43,8 @@ func NewServer(configPath string, test bool) *http.Server {
 
 	serverHandler := server.NewHandler(serverService.NewService())
 	photoHandler := photo.NewHandler(photoService.NewService())
+
+	verbandHandler := verband.NewHandler(verbandService.NewService())
 
 	r := httprouter.New()
 
@@ -106,6 +110,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.POST("/api/server/minecraft/whitelist", serverHandler.AddUsernameToWhitelist)
 
 	r.POST("/api/photo/upload", photoHandler.Upload)
+
+	r.GET("/api/verband/vereine", verbandHandler.GetVereine)
 
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)

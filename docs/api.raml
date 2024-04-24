@@ -27,6 +27,7 @@ types:
   Photo: !include types/photo.raml
   ChangeMailPasswordRequest: !include types/changeMailPasswordRequest.raml
   AddToMinecraftWhitelistRequest: !include types/addToMinecraftWhitelistRequest.raml
+  Verein: !include types/verband/verein.raml
 /version:
   get:
     description: Returns the version of the API - the only endpoint that does not use JSON-formatted response, i.e. no quotes around version string
@@ -368,3 +369,13 @@ types:
           description: Bad request
         '500':
           description: Internal server error
+/verband:
+  /vereine:
+    get:
+      description: Returns a list of all vereine.
+      responses:
+        '200':
+          description: OK
+          body:
+            application/json:
+              type: Verein[]

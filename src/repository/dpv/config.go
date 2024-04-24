@@ -30,6 +30,12 @@ type Config struct {
 		DeepLUrl           string `yaml:"deepl_url"`
 		MinecraftInviteKey string `yaml:"minecraft_invite_key"`
 	} `yaml:"auth"`
+	Nextcloud struct {
+		URL    string `yaml:"url"`
+		User   string `yaml:"user"`
+		Pass   string `yaml:"pass"`
+		FormID string `yaml:"formId"`
+	} `yaml:"nextcloud"`
 	Server struct {
 		Words1   string `yaml:"words1"`
 		Words2   string `yaml:"words2"`

@@ -16,6 +16,11 @@ auth:
   deepl_key: 12345678-1234-1234-1234-123456789012:fz
   deepl_url: https://api-free.deepl.com/v2/translate
   minecraft_invite_key: minecraft-is-full-of-joy
+nextcloud:
+  url: https://share.parkour-deutschland.de/
+  user: dpv
+  pass: ABCDE-FGHIJ-KLMNO-PQRST-UVWXY
+  formId: 1234567890
 server:
   words1: words1.example.txt
   words2: words2.example.txt
