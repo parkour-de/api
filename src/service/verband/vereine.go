@@ -80,6 +80,9 @@ func (s *Service) GetVereine(ctx context.Context) ([]Verein, error) {
 		return nil, fmt.Errorf("could not create request: %w", err)
 	}
 	req.SetBasicAuth(user, pass)
+	req.Header.Add("OCS-APIRequest", "true")
+	req.Header.Add("Accept", "application/json")
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("could not send request: %w", err)
