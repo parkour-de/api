@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"pkv/api/src/repository/dpv"
 	"sort"
 )
@@ -108,6 +109,23 @@ func (s *Service) GetVereine(ctx context.Context) ([]Verein, error) {
 	return vereine, nil
 }
 
+func normalizeURL(inputURL string) (string, error) {
+	u, err := url.Parse(inputURL)
+	if err != nil {
+		return "", err
+	}
+	if u.Host == "" && u.Scheme == "" {
+		return normalizeURL("https://" + inputURL)
+	}
+	if u.Scheme == "" {
+		u.Scheme = "https"
+	}
+	if u.Path == "" {
+		u.Path = "/"
+	}
+	return u.String(), nil
+}
+
 func (s *Service) ExtractVereineList(response nextcloudResponse) []Verein {
 	ocsData := response.OCS.Data
 
@@ -115,11 +133,12 @@ func (s *Service) ExtractVereineList(response nextcloudResponse) []Verein {
 
 	for _, answer := range ocsData.Submissions {
 		if answer.Answers.findByQuestionId(16).Text == "Ja" {
+			normalizedURL, _ := normalizeURL(answer.Answers.findByQuestionId(6).Text)
 			vereine = append(vereine, Verein{
 				Bundesland: answer.Answers.findByQuestionId(17).Text,
 				Stadt:      answer.Answers.findByQuestionId(12).Text,
 				Name:       answer.Answers.findByQuestionId(13).Text,
-				Webseite:   answer.Answers.findByQuestionId(6).Text,
+				Webseite:   normalizedURL,
 			})
 		}
 	}

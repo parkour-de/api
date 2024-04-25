@@ -72,7 +72,7 @@ func TestExtractVereineList(t *testing.T) {
 							{QuestionId: 17, Text: "Bundesland1"},
 							{QuestionId: 12, Text: "Stadt1"},
 							{QuestionId: 13, Text: "Name1"},
-							{QuestionId: 6, Text: "Webseite1"},
+							{QuestionId: 6, Text: "Webseite1.de"},
 						},
 					},
 					{
@@ -82,6 +82,13 @@ func TestExtractVereineList(t *testing.T) {
 							{QuestionId: 12, Text: "Stadt2"},
 							{QuestionId: 13, Text: "Name2"},
 							{QuestionId: 6, Text: "Webseite2"},
+						},
+					},
+					{
+						Answers: []answer{
+							{QuestionId: 16, Text: "Ja"},
+							{QuestionId: 13, Text: "Name3"},
+							{QuestionId: 6, Text: "ftp://ftp.example.com"},
 						},
 					},
 				},
@@ -96,11 +103,17 @@ func TestExtractVereineList(t *testing.T) {
 			Bundesland: "Bundesland1",
 			Stadt:      "Stadt1",
 			Name:       "Name1",
-			Webseite:   "Webseite1",
+			Webseite:   "https://Webseite1.de/",
+		},
+		{
+			Bundesland: "",
+			Stadt:      "",
+			Name:       "Name3",
+			Webseite:   "ftp://ftp.example.com/",
 		},
 	}
 
 	if !reflect.DeepEqual(extractedVereine, expectedVereine) {
-		t.Errorf("ExtractVereineList did not return the expected result")
+		t.Errorf("ExtractVereineList did not return the expected result:\nexpected:\n%#v, \ngot:\n%#v", expectedVereine, extractedVereine)
 	}
 }
