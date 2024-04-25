@@ -116,8 +116,8 @@ func (s *Service) ExtractVereineList(response nextcloudResponse) []Verein {
 	for _, answer := range ocsData.Submissions {
 		if answer.Answers.findByQuestionId(16).Text == "Ja" {
 			vereine = append(vereine, Verein{
-				Bundesland: answer.Answers.findByQuestionId(12).Text,
-				Stadt:      answer.Answers.findByQuestionId(17).Text,
+				Bundesland: answer.Answers.findByQuestionId(17).Text,
+				Stadt:      answer.Answers.findByQuestionId(12).Text,
 				Name:       answer.Answers.findByQuestionId(13).Text,
 				Webseite:   answer.Answers.findByQuestionId(6).Text,
 			})
