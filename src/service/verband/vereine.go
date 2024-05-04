@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"pkv/api/src/repository/dpv"
 	"sort"
+	"strings"
 )
 
 type answer struct {
@@ -132,7 +133,7 @@ func (s *Service) ExtractVereineList(response nextcloudResponse) []Verein {
 	var vereine []Verein
 
 	for _, answer := range ocsData.Submissions {
-		if answer.Answers.findByQuestionId(16).Text == "Ja" {
+		if strings.Contains(answer.Answers.findByQuestionId(16).Text, "Ja") {
 			normalizedURL, _ := normalizeURL(answer.Answers.findByQuestionId(6).Text)
 			vereine = append(vereine, Verein{
 				Bundesland: answer.Answers.findByQuestionId(17).Text,
