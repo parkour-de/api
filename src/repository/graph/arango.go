@@ -51,11 +51,6 @@ func DropTestDatabases(c arangodb.Client) error {
 func GetOrCreateDatabase(c arangodb.Client, dbname string, config *dpv.Config) (arangodb.Database, error) {
 	var db arangodb.Database
 	if ok, err := c.DatabaseExists(context.Background(), dbname); !ok || err != nil {
-		// fix arangodb implementation bug
-		if err.Error() == "database not found" {
-			ok = false
-			err = nil
-		}
 		if err != nil {
 			return nil, fmt.Errorf("failed to look for database: %w", err)
 		}
@@ -75,11 +70,6 @@ func GetOrCreateDatabase(c arangodb.Client, dbname string, config *dpv.Config) (
 
 func GetOrCreateCollection(db arangodb.Database, name string, edges bool) (arangodb.Collection, error) {
 	if ok, err := db.CollectionExists(context.Background(), name); !ok || err != nil {
-		// fix arangodb implementation bug
-		if err.Error() == "collection or view not found" {
-			ok = false
-			err = nil
-		}
 		if err != nil {
 			return nil, fmt.Errorf("could not check if collection exists: %w", err)
 		}
