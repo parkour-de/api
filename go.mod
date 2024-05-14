@@ -3,7 +3,7 @@ module pkv/api
 go 1.22
 
 require (
-	github.com/arangodb/go-driver/v2 v2.0.3
+	github.com/arangodb/go-driver/v2 v2.1.0
 	github.com/gomarkdown/markdown v0.0.0-20240419095408-642f0ee99ae2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/microcosm-cc/bluemonday v1.0.26
