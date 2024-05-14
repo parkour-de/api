@@ -112,6 +112,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.POST("/api/photo/upload", photoHandler.Upload)
 
 	r.GET("/api/verband/vereine", verbandHandler.GetVereine)
+	r.GET("/api/verband/bundeslaender", verbandHandler.GetBundeslaender)
 
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)

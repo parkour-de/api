@@ -69,10 +69,10 @@ func TestExtractVereineList(t *testing.T) {
 					{
 						Answers: []answer{
 							{QuestionId: 16, Text: "Ja"},
-							{QuestionId: 17, Text: "Bundesland1"},
-							{QuestionId: 12, Text: "Stadt1"},
-							{QuestionId: 13, Text: "Name1"},
-							{QuestionId: 6, Text: "Webseite1.de"},
+							{QuestionId: 17, Text: "  Bundesland1  "},
+							{QuestionId: 12, Text: "  Stadt1  "},
+							{QuestionId: 13, Text: "  Name1  "},
+							{QuestionId: 6, Text: "  Webseite1.de  "},
 						},
 					},
 					{

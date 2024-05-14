@@ -111,6 +111,7 @@ func (s *Service) GetVereine(ctx context.Context) ([]Verein, error) {
 }
 
 func normalizeURL(inputURL string) (string, error) {
+	inputURL = strings.TrimSpace(inputURL)
 	u, err := url.Parse(inputURL)
 	if err != nil {
 		return "", err
@@ -136,9 +137,9 @@ func (s *Service) ExtractVereineList(response nextcloudResponse) []Verein {
 		if strings.Contains(answer.Answers.findByQuestionId(16).Text, "Ja") {
 			normalizedURL, _ := normalizeURL(answer.Answers.findByQuestionId(6).Text)
 			vereine = append(vereine, Verein{
-				Bundesland: answer.Answers.findByQuestionId(17).Text,
-				Stadt:      answer.Answers.findByQuestionId(12).Text,
-				Name:       answer.Answers.findByQuestionId(13).Text,
+				Bundesland: strings.TrimSpace(answer.Answers.findByQuestionId(17).Text),
+				Stadt:      strings.TrimSpace(answer.Answers.findByQuestionId(12).Text),
+				Name:       strings.TrimSpace(answer.Answers.findByQuestionId(13).Text),
 				Webseite:   normalizedURL,
 			})
 		}
