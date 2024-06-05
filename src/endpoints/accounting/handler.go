@@ -49,13 +49,13 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 
 	dateRegex := regexp.MustCompile(`^\d{2}\.\d{2}\.\d{4}`)
 
-	for _, msg := range messages {
+	for line, msg := range messages {
 		if !dateRegex.MatchString(msg) {
 			continue
 		}
 		err := s.UpdateBalanceSheet(&bs, msg)
 		if err != nil {
-			api.Error(w, r, fmt.Errorf("updating balance sheet failed: %w", err), 400)
+			api.Error(w, r, fmt.Errorf("updating balance sheet failed, error on line %d: %w", line, err), 400)
 			return
 		}
 	}
@@ -88,5 +88,6 @@ func (h *Handler) GetBalanceSheetCSV(w http.ResponseWriter, r *http.Request, url
 		api.Error(w, r, fmt.Errorf("could not get balance sheet: %w", err), 500)
 		return
 	}
-	api.SuccessJson(w, r, csv)
+	w.Header().Set("Content-Type", "text/csv")
+	api.Success(w, r, []byte(csv))
 }
