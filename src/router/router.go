@@ -8,6 +8,7 @@ import (
 	"os"
 	"pkv/api/src/api"
 	"pkv/api/src/domain"
+	"pkv/api/src/endpoints/accounting"
 	"pkv/api/src/endpoints/authentication"
 	"pkv/api/src/endpoints/crud"
 	"pkv/api/src/endpoints/photo"
@@ -17,6 +18,7 @@ import (
 	"pkv/api/src/endpoints/verband"
 	"pkv/api/src/repository/dpv"
 	"pkv/api/src/repository/graph"
+	accountingService "pkv/api/src/service/accounting"
 	photoService "pkv/api/src/service/photo"
 	serverService "pkv/api/src/service/server"
 	userService "pkv/api/src/service/user"
@@ -44,6 +46,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	serverHandler := server.NewHandler(serverService.NewService())
 	photoHandler := photo.NewHandler(photoService.NewService())
 
+	accountingHandler := accounting.NewHandler(accountingService.NewService())
 	verbandHandler := verband.NewHandler(verbandService.NewService())
 
 	r := httprouter.New()
@@ -110,6 +113,9 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.POST("/api/server/minecraft/whitelist", serverHandler.AddUsernameToWhitelist)
 
 	r.POST("/api/photo/upload", photoHandler.Upload)
+
+	r.GET("/api/account/:key", accountingHandler.GetBalanceSheetCSV)
+	r.POST("/api/account/:key", accountingHandler.AddStatements)
 
 	r.GET("/api/verband/vereine", verbandHandler.GetVereine)
 	r.GET("/api/verband/bundeslaender", verbandHandler.GetBundeslaender)

@@ -370,6 +370,29 @@ types:
           description: Bad request
         '500':
           description: Internal server error
+/account:
+  /{key}:
+    post:
+      description: Adds statements to an account
+      body: # a simple multiline string
+        text/plain:
+          type: string
+          example: |
+            13.01.2024 Cash 300.00 EUR - John Doe bought 10 apples from the store.
+      responses:
+        '200':
+          description: Successful response
+    get:
+      description: Returns CSV formatted account statements
+      responses:
+        '200':
+          description: Successful response
+          body:
+            text/csv:
+              type: string
+              example: |
+                Date,Balance Change,Notes
+                2024-01-13,300,John Doe bought 10 apples from the store.
 /verband:
   /vereine:
     get:

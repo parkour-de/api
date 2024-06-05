@@ -28,6 +28,9 @@ server:
   tmp_url: /obj/dpv/tmp
   img_path: /var/www/8bj/obj/dpv/img
   tmp_path: /var/www/8bj/obj/dpv/tmp
+  exiftool: exiftool
+  python: python3
+  account: /var/dpv/account.json
 settings:
   languages:
     - key: "de"

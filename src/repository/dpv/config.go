@@ -24,6 +24,7 @@ type Config struct {
 		DpvTokenSeconds    int    `yaml:"dpv_token_seconds"`
 		FacebookGraphUrl   string `yaml:"facebook_graph_url"`
 		FacebookAppId      string `yaml:"facebook_app_id"`
+		GoogleDriveApiKey  string `yaml:"google_drive_api_key"`
 		GoogleClientId     string `yaml:"google_client_id"`
 		GoogleClientSecret string `yaml:"google_client_secret"`
 		DeepLKey           string `yaml:"deepl_key"`
@@ -45,6 +46,7 @@ type Config struct {
 		TmpPath  string `yaml:"tmp_path"`
 		Exiftool string `yaml:"exiftool"`
 		Python   string `yaml:"python"`
+		Account  string `yaml:"account"`
 	}
 	Settings struct {
 		Version   string
