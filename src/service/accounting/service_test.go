@@ -41,7 +41,7 @@ func TestService_UpdateBalanceSheet(t *testing.T) {
 	}
 	// assert csv Data headers are correct
 	csvLines := strings.Split(csvData, "\n")
-	if len(csvLines) != 6 {
+	if len(csvLines) != 7 {
 		t.Errorf("Expected 6 lines in CSV, got %d", len(csvLines))
 	}
 	if csvLines[0] != "Date,Balance Change,Notes" {
@@ -59,7 +59,10 @@ func TestService_UpdateBalanceSheet(t *testing.T) {
 	if !strings.Contains(csvLines[4], "5.00") {
 		t.Errorf("Expected positive value, got %s", csvLines[4])
 	}
-	if csvLines[5] != "" {
+	if csvLines[5] != "Total,12340.67," {
+		t.Errorf("Expected total, got %s", csvLines[5])
+	}
+	if csvLines[6] != "" {
 		t.Errorf("Expected empty line, got %s", csvLines[4])
 	}
 }

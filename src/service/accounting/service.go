@@ -61,6 +61,7 @@ func (s *Service) ExportToCSV(sheet accounting.BalanceSheet) (string, error) {
 	if err := writer.Write([]string{"Date", "Balance Change", "Notes"}); err != nil {
 		return "", err
 	}
+	var val float64
 	for _, entry := range sheet.Entries {
 		row := []string{
 			entry.Date.Format(time.DateOnly),
@@ -70,6 +71,10 @@ func (s *Service) ExportToCSV(sheet accounting.BalanceSheet) (string, error) {
 		if err := writer.Write(row); err != nil {
 			return "", err
 		}
+		val += entry.BalanceChange
+	}
+	if err := writer.Write([]string{"Total", fmt.Sprintf("%.2f", val), ""}); err != nil {
+		return "", err
 	}
 	writer.Flush()
 	if err := writer.Error(); err != nil {
