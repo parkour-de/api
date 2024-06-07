@@ -23,10 +23,24 @@ import (
 	serverService "pkv/api/src/service/server"
 	userService "pkv/api/src/service/user"
 	verbandService "pkv/api/src/service/verband"
+	"time"
 )
 
 func NewServer(configPath string, test bool) *http.Server {
+	attempts := 0
+	if !test {
+		attempts = 5
+	}
 	db, config, err := graph.Init(configPath, test)
+	for attempt := 0; attempt < attempts; attempt++ {
+		if err != nil {
+			log.Println(err)
+			time.Sleep(time.Second * time.Duration(attempt*attempt)) // 0, 1, 4, 9, 16 seconds
+			db, config, err = graph.Init(configPath, test)
+			continue
+		}
+		break
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
