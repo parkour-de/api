@@ -1,6 +1,7 @@
 package verband
 
 import (
+	"pkv/api/src/domain/verband"
 	"reflect"
 	"testing"
 )
@@ -23,13 +24,13 @@ func TestFindByQuestionId(t *testing.T) {
 }
 
 func TestSortingVereine(t *testing.T) {
-	vereine := []Verein{
+	vereine := []verband.Verein{
 		{Bundesland: "Z", Stadt: "X", Name: "A"},
 		{Bundesland: "A", Stadt: "C", Name: "B"},
 		{Bundesland: "Z", Stadt: "Y", Name: "A"},
 	}
 
-	NewService().sortVereine(vereine)
+	verband.SortVereine(vereine)
 
 	// Add assertions to check if the slice is sorted correctly
 	if vereine[0].Bundesland != "A" {
@@ -73,6 +74,7 @@ func TestExtractVereineList(t *testing.T) {
 							{QuestionId: 12, Text: "  Stadt1  "},
 							{QuestionId: 13, Text: "  Name1  "},
 							{QuestionId: 6, Text: "  Webseite1.de  "},
+							{QuestionId: 8, Text: "  30  "},
 						},
 					},
 					{
@@ -89,6 +91,7 @@ func TestExtractVereineList(t *testing.T) {
 							{QuestionId: 16, Text: "Ja"},
 							{QuestionId: 13, Text: "Name3"},
 							{QuestionId: 6, Text: "ftp://ftp.example.com"},
+							{QuestionId: 8, Text: "  ungefähr acht  "},
 						},
 					},
 				},
@@ -96,9 +99,9 @@ func TestExtractVereineList(t *testing.T) {
 		},
 	}
 
-	extractedVereine := NewService().ExtractVereineList(sampleResponse)
+	extractedVereine, extractedVereineDetail := NewService().ExtractVereineList(sampleResponse)
 
-	expectedVereine := []Verein{
+	expectedVereine := []verband.Verein{
 		{
 			Bundesland: "Bundesland1",
 			Stadt:      "Stadt1",
@@ -113,7 +116,27 @@ func TestExtractVereineList(t *testing.T) {
 		},
 	}
 
+	expectedVereineDetail := []VereinDetail{
+		{
+			Bundesland: "Bundesland1",
+			Stadt:      "Stadt1",
+			Name:       "Name1",
+			Webseite:   "https://Webseite1.de/",
+			Mitglieder: 30,
+		},
+		{
+			Bundesland: "",
+			Stadt:      "",
+			Name:       "Name3",
+			Webseite:   "ftp://ftp.example.com/",
+			Mitglieder: 0,
+		},
+	}
+
 	if !reflect.DeepEqual(extractedVereine, expectedVereine) {
 		t.Errorf("ExtractVereineList did not return the expected result:\nexpected:\n%#v, \ngot:\n%#v", expectedVereine, extractedVereine)
+	}
+	if !reflect.DeepEqual(extractedVereineDetail, expectedVereineDetail) {
+		t.Errorf("ExtractVereineDetail did not return the expected result:\nexpected:\n%#v, \ngot:\n%#v", expectedVereineDetail, extractedVereineDetail)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"pkv/api/src/domain/verband"
 	"pkv/api/src/repository/dpv"
+	"strconv"
 	"strings"
 )
 
@@ -61,14 +62,14 @@ type question struct {
 	Text   string `json:"text"`
 }
 
-func (s *Service) GetVereine(ctx context.Context) ([]verband.Verein, error) {
+func (s *Service) GetVereine(ctx context.Context) ([]verband.Verein, []VereinDetail, error) {
 	url := dpv.ConfigInstance.Nextcloud.URL + "ocs/v2.php/apps/forms/api/v2.4/submissions/" + dpv.ConfigInstance.Nextcloud.FormID
 	user := dpv.ConfigInstance.Nextcloud.User
 	pass := dpv.ConfigInstance.Nextcloud.Pass
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not create request: %w", err)
+		return nil, nil, fmt.Errorf("could not create request: %w", err)
 	}
 	req.SetBasicAuth(user, pass)
 	req.Header.Add("OCS-APIRequest", "true")
@@ -76,27 +77,27 @@ func (s *Service) GetVereine(ctx context.Context) ([]verband.Verein, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("could not send request: %w", err)
+		return nil, nil, fmt.Errorf("could not send request: %w", err)
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("could not get vereine: %w", err)
+		return nil, nil, fmt.Errorf("could not get vereine: %w", err)
 	}
 
 	var response nextcloudResponse
 	if err := json.Unmarshal(bodyBytes, &response); err != nil {
-		return nil, fmt.Errorf("could not parse response: %w", err)
+		return nil, nil, fmt.Errorf("could not parse response: %w", err)
 	}
 
 	if response.OCS.Meta.Status != "ok" {
-		return nil, fmt.Errorf("could not get vereine: %s", response.OCS.Meta.Message)
+		return nil, nil, fmt.Errorf("could not get vereine: %s", response.OCS.Meta.Message)
 	}
 
-	vereine := s.ExtractVereineList(response)
+	vereine, vereineDetail := s.ExtractVereineList(response)
 	verband.SortVereine(vereine)
 
-	return vereine, nil
+	return vereine, vereineDetail, nil
 }
 
 func normalizeURL(inputURL string) (string, error) {
@@ -117,21 +118,41 @@ func normalizeURL(inputURL string) (string, error) {
 	return u.String(), nil
 }
 
-func (s *Service) ExtractVereineList(response nextcloudResponse) []verband.Verein {
+type VereinDetail struct {
+	Bundesland string `json:"bundesland" example:"Baden-Württemberg"`
+	Stadt      string `json:"stadt" example:"Karlsruhe"`
+	Name       string `json:"name" example:"Vereinsname"`
+	Webseite   string `json:"webseite" example:"https://verein.karlsruhe.de/"`
+	Mitglieder int    `json:"mitglieder" example:"42"`
+}
+
+func (s *Service) ExtractVereineList(response nextcloudResponse) ([]verband.Verein, []VereinDetail) {
 	ocsData := response.OCS.Data
 
 	var vereine []verband.Verein
+	var vereineDetail []VereinDetail
 
 	for _, answer := range ocsData.Submissions {
 		if strings.Contains(answer.Answers.findByQuestionId(16).Text, "Ja") {
 			normalizedURL, _ := normalizeURL(answer.Answers.findByQuestionId(6).Text)
+			mitglieder, err := strconv.Atoi(strings.TrimSpace(answer.Answers.findByQuestionId(8).Text))
+			if err != nil {
+				mitglieder = 0
+			}
 			vereine = append(vereine, verband.Verein{
 				Bundesland: strings.TrimSpace(answer.Answers.findByQuestionId(17).Text),
 				Stadt:      strings.TrimSpace(answer.Answers.findByQuestionId(12).Text),
 				Name:       strings.TrimSpace(answer.Answers.findByQuestionId(13).Text),
 				Webseite:   normalizedURL,
 			})
+			vereineDetail = append(vereineDetail, VereinDetail{
+				Bundesland: strings.TrimSpace(answer.Answers.findByQuestionId(17).Text),
+				Stadt:      strings.TrimSpace(answer.Answers.findByQuestionId(12).Text),
+				Name:       strings.TrimSpace(answer.Answers.findByQuestionId(13).Text),
+				Webseite:   normalizedURL,
+				Mitglieder: mitglieder,
+			})
 		}
 	}
-	return vereine
+	return vereine, vereineDetail
 }

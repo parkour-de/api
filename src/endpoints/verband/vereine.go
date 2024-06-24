@@ -7,7 +7,7 @@ import (
 )
 
 func (h *Handler) GetVereine(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	list, err := h.service.GetVereine(r.Context())
+	list, _, err := h.service.GetVereine(r.Context())
 	if err != nil {
 		api.Error(w, r, err, 400)
 		return
