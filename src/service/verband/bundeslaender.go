@@ -1,6 +1,9 @@
 package verband
 
-import "context"
+import (
+	"context"
+	"pkv/api/src/domain/verband"
+)
 
 type Bundesland struct {
 	Vereine int `json:"vereine"`
@@ -32,7 +35,7 @@ func (s *Service) VereineByBundesland(ctx context.Context) (map[string]int, erro
 	return aggregation, nil
 }
 
-func aggregateVereineByBundesland(vereine []Verein) map[string]int {
+func aggregateVereineByBundesland(vereine []verband.Verein) map[string]int {
 	aggregation := make(map[string]int)
 	for _, verein := range vereine {
 		aggregation[verein.Bundesland]++
