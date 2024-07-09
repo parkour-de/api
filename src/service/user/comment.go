@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"pkv/api/src/domain"
-	description "pkv/api/src/service/descripion"
+	description "pkv/api/src/service/description"
 	"time"
 )
 

@@ -121,7 +121,7 @@ func (s *Service) Update(photos []domain.Photo, files []string, ctx context.Cont
 		if !found {
 			photo, err := s.ReadPhoto(file, dpv.ConfigInstance.Server.TmpPath, ctx)
 			if err != nil {
-				return photos, s.Undo(addedPhotos, removedPhotos, ctx, fmt.Errorf("could not read photo information for %v: %w", photo.Src, err))
+				return photos, s.Undo(addedPhotos, removedPhotos, ctx, fmt.Errorf("could not read photo information for %v: %w", file, err))
 			}
 			if err := s.MakePermanent(file, ctx); err != nil {
 				return photos, s.Undo(addedPhotos, removedPhotos, ctx, fmt.Errorf("could not make photo %v permanent: %w", photo.Src, err))

@@ -12,6 +12,10 @@ import (
 
 func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Context) ([]domain.LocationDTO, error) {
 	query, bindVars := buildLocationQuery(options)
+	return db.RunLocationQuery(query, bindVars, ctx)
+}
+
+func (db *Db) RunLocationQuery(query string, bindVars map[string]interface{}, ctx context.Context) ([]domain.LocationDTO, error) {
 	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: bindVars})
 	if err != nil {
 		return nil, fmt.Errorf("query string invalid: %w", err)
@@ -31,6 +35,19 @@ func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Cont
 	}
 
 	return result, nil
+}
+
+func BuildImportIdQuery(source string, id string) (string, map[string]interface{}) {
+	query := `
+        FOR location IN locations
+        FILTER location.information.importedFrom == @importedFrom AND location.information.importedId == @importedId
+        RETURN location
+    `
+	bindVars := map[string]interface{}{
+		"importedFrom": source,
+		"importedId":   id,
+	}
+	return query, bindVars
 }
 
 func buildLocationQuery(options domain.LocationQueryOptions) (string, map[string]interface{}) {

@@ -17,8 +17,8 @@ func setup(t *testing.T, imgDir string, tmpDir string) {
 	}
 	dpv.ConfigInstance = config
 
-	dpv.ConfigInstance.Server.ImgPath = imgDir
-	dpv.ConfigInstance.Server.TmpPath = tmpDir
+	dpv.ConfigInstance.Server.ImgPath = imgDir + "/"
+	dpv.ConfigInstance.Server.TmpPath = tmpDir + "/"
 }
 
 func TestService_Update_DontCareIfUnchanged(t *testing.T) {

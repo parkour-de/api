@@ -11,6 +11,7 @@ import (
 	"pkv/api/src/endpoints/accounting"
 	"pkv/api/src/endpoints/authentication"
 	"pkv/api/src/endpoints/crud"
+	"pkv/api/src/endpoints/location"
 	"pkv/api/src/endpoints/photo"
 	"pkv/api/src/endpoints/query"
 	"pkv/api/src/endpoints/server"
@@ -57,8 +58,11 @@ func NewServer(configPath string, test bool) *http.Server {
 	userHandler := user.NewHandler(db, userService)
 	userPhotoHandler := photo.NewPhotoEntityHandler[*domain.User](photoService.NewService(), db.Users)
 
+	photoService := photoService.NewService()
+
 	serverHandler := server.NewHandler(serverService.NewService())
-	photoHandler := photo.NewHandler(photoService.NewService())
+	photoHandler := photo.NewHandler(photoService)
+	locationHandler := location.NewHandler(db, photoService, db.Locations)
 
 	accountingHandler := accounting.NewHandler(accountingService.NewService())
 	verbandHandler := verband.NewHandler(verbandService.NewService())
@@ -99,6 +103,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.DELETE("/api/admin/page/:key", pageCrudHandler.Delete)
 
 	r.GET("/api/login/facebook", authenticationHandler.Facebook)
+
+	r.POST("/api/locations/import/pkorg", locationHandler.Import)
 
 	r.GET("/api/training", queryHandler.GetTrainings)
 	r.GET("/api/training/:key", queryHandler.GetTraining)

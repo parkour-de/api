@@ -393,6 +393,23 @@ types:
               example: |
                 Date,Balance Change,Notes
                 2024-01-13,300,John Doe bought 10 apples from the store.
+/locations:
+  /import:
+    /pkorg:
+      post:
+        description: Imports a location from pkorg and returns the key of the new object created.
+        queryParameters:
+          spot:
+            description: The spot identifier
+            type: string
+            required: true
+        responses:
+          '200':
+            description: OK
+            body:
+              application/json:
+                type: string
+                example: "12345"
 /verband:
   /vereine:
     get:

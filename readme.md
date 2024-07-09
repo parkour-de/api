@@ -25,6 +25,12 @@ This API comes with a variety of features, including:
 - **Event Scheduling:** Organizers can create and schedule training sessions, workshops, and events.
 - **OAuth Integration:** Support for OAuth authentication, allowing users to log in with their preferred social media accounts.
 
+## Prerequisites
+
+You will need Go to run this project. You will also need python3 and pip for the image converter:
+
+    python3 -m pip install -r requirements.txt
+
 ## Deployment
 This project is set up for Google Cloud Build, as it can build,test the Golang application and push the
 resulting Docker image to Google Container Registry.
