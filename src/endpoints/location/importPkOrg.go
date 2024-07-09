@@ -58,6 +58,7 @@ func (h *Handler) Import(w http.ResponseWriter, r *http.Request, urlParams httpr
 	}
 	if existing {
 		api.Error(w, r, fmt.Errorf("location already found in database"), 409)
+		return
 	}
 	if spotID == "" {
 		api.Error(w, r, fmt.Errorf("missing 'spot' query parameter"), 400)
@@ -66,6 +67,7 @@ func (h *Handler) Import(w http.ResponseWriter, r *http.Request, urlParams httpr
 	spot, filenames, err := h.readPkOrgData(spotID, r.Context())
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("failed to extract information from PkOrg spot %s: %w", spotID, err), 500)
+		return
 	}
 
 	photos, err := h.photoService.Update([]domain.Photo{}, filenames, r.Context())
