@@ -104,7 +104,7 @@ func NewServer(configPath string, test bool) *http.Server {
 
 	r.GET("/api/login/facebook", authenticationHandler.Facebook)
 
-	r.POST("/api/locations/import/pkorg", locationHandler.Import)
+	r.POST("/api/locations/import/pkorg", locationHandler.ImportPkOrgSpot)
 
 	r.GET("/api/training", queryHandler.GetTrainings)
 	r.GET("/api/training/:key", queryHandler.GetTraining)

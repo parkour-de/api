@@ -49,7 +49,7 @@ type Image struct {
 
 type SpotCategoryDetail struct{}
 
-func (h *Handler) Import(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+func (h *Handler) ImportPkOrgSpot(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	spotID := r.URL.Query().Get("spot")
 	existing, err := h.isPkOrgLocationExisting(spotID, r.Context())
 	if err != nil {

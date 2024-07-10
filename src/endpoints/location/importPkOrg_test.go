@@ -41,7 +41,7 @@ func createHandler(t *testing.T) Handler {
 	return handler
 }
 
-func TestHandler_Import(t *testing.T) {
+func TestHandler_ImportPkOrgSpot(t *testing.T) {
 	h := createHandler(t)
 
 	imgDir, err := os.MkdirTemp("", "dpv-test")
@@ -61,7 +61,7 @@ func TestHandler_Import(t *testing.T) {
 		t.Fatalf("request creation failed: %s", err)
 	}
 	rr := httptest.NewRecorder()
-	h.Import(rr, req, httprouter.Params{})
+	h.ImportPkOrgSpot(rr, req, httprouter.Params{})
 	if rr.Code != 400 {
 		t.Errorf("should have rejected missing spot id, got %v want %v", rr.Code, 400)
 	}
@@ -70,7 +70,7 @@ func TestHandler_Import(t *testing.T) {
 		t.Fatalf("request creation failed: %s", err)
 	}
 	rr = httptest.NewRecorder()
-	h.Import(rr, req, httprouter.Params{})
+	h.ImportPkOrgSpot(rr, req, httprouter.Params{})
 	if rr.Code != 200 {
 		t.Errorf("should have succeeded, got %v want %v", rr.Code, 200)
 	}
