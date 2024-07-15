@@ -31,6 +31,7 @@ var validAGs = map[string]string{
 	"it":              "IT",
 	"lizenzen":        "Lizenzen und Ausbildung",
 	"oeffentlichkeit": "Öffentlichkeitsarbeit",
+	"parkourparks":    "Parkour-Parks",
 	"satzung":         "Satzung",
 	"wettkampf":       "Wettkampf",
 }
