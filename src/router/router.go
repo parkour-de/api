@@ -20,6 +20,7 @@ import (
 	"pkv/api/src/repository/dpv"
 	"pkv/api/src/repository/graph"
 	accountingService "pkv/api/src/service/accounting"
+	"pkv/api/src/service/captcha"
 	photoService "pkv/api/src/service/photo"
 	serverService "pkv/api/src/service/server"
 	userService "pkv/api/src/service/user"
@@ -52,6 +53,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	userCrudHandler := crud.NewHandler[*domain.User](db, db.Users)
 	pageCrudHandler := crud.NewHandler[*domain.Page](db, db.Pages)
 
+	captchaService := captcha.NewService()
+
 	userService := userService.NewService(db)
 	authenticationHandler := authentication.NewHandler(db, userService)
 	queryHandler := query.NewHandler(db)
@@ -65,7 +68,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	locationHandler := location.NewHandler(db, photoService, db.Locations)
 
 	accountingHandler := accounting.NewHandler(accountingService.NewService())
-	verbandHandler := verband.NewHandler(verbandService.NewService())
+	verbandHandler := verband.NewHandler(verbandService.NewService(), captchaService)
 
 	r := httprouter.New()
 
@@ -81,6 +84,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	})
 
 	r.GET("/api/version", Version)
+	r.GET("/api/captcha", captchaService.GetChallenge)
 
 	r.POST("/api/admin/training", trainingCrudHandler.Create)
 	r.GET("/api/admin/training/:key", trainingCrudHandler.Read)

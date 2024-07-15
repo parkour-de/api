@@ -15,7 +15,10 @@ func (h *Handler) Mitmachen(w http.ResponseWriter, r *http.Request, _ httprouter
 		api.Error(w, r, fmt.Errorf("error decoding request: %w", err), http.StatusBadRequest)
 		return
 	}
-
+	if err := h.captchaService.Solve(data.Altcha); err != nil {
+		api.Error(w, r, fmt.Errorf("captcha error: %w", err), http.StatusPaymentRequired)
+		return
+	}
 	if err := h.service.Mitmachen(data); err != nil {
 		api.Error(w, r, fmt.Errorf("error submitting request: %w", err), http.StatusBadRequest)
 		return

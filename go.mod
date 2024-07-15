@@ -6,6 +6,7 @@ require (
 	github.com/arangodb/go-driver/v2 v2.1.0
 	github.com/gomarkdown/markdown v0.0.0-20240419095408-642f0ee99ae2
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/k42-software/go-altcha v0.1.1
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pquerna/otp v1.4.0
 	golang.org/x/crypto v0.24.0

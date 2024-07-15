@@ -6,4 +6,5 @@ type MitmachenRequest struct {
 	AG          string `json:"ag" example:"oeffentlichkeit"`
 	Kompetenzen string `json:"kompetenzen" example:"Ich habe 10 Jahre lang als Nachrichtensprecher gearbeitet."`
 	Fragen      string `json:"fragen" example:"Gibt es auch Live-Meetings?"`
+	Altcha      string `json:"altcha" example:"BASE64EncodedStringWithASolvedCaptcha"`
 }

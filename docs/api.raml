@@ -39,6 +39,15 @@ types:
         body:
           type: string
           example: "42"
+/captcha:
+  get:
+    description: Returns a captcha challenge to be solved - as per Altcha specification, the challenge is a JSON, but it is returned as a string with no quotes around
+    responses:
+      '200':
+        description: OK
+        body:
+          type: string
+          example: "{solve: \"me\"}"
 /admin:
   /page:
     post:
