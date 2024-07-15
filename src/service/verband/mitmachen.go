@@ -2,12 +2,15 @@ package verband
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"html"
 	"mime/quotedprintable"
+	"net"
+	"net/smtp"
 	"net/textproto"
-	"os/exec"
 	"pkv/api/src/domain/verband"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -17,11 +20,12 @@ const (
 	maxLengthTextArea = 100000
 	maxLengthInput    = 100
 	smtpServer        = "localhost"
-	smtpPort          = "2525"
+	smtpPort          = "25"
 )
 
 var validAGs = map[string]string{
 	"bildung":         "Bildung, Forschung und Wissenschaft",
+	"bjoern":          "Björn's VIP-Club",
 	"design":          "Logo & Corporate Design",
 	"finanzen":        "Finanzen",
 	"it":              "IT",
@@ -29,7 +33,6 @@ var validAGs = map[string]string{
 	"oeffentlichkeit": "Öffentlichkeitsarbeit",
 	"satzung":         "Satzung",
 	"wettkampf":       "Wettkampf",
-	"bjoern":          "Björn's VIP-Club",
 }
 
 func trimAndSanitize(input string, maxLength int) (string, error) {
@@ -50,8 +53,8 @@ func (s *Service) Mitmachen(data verband.MitmachenRequest) error {
 	if data.Name, err = trimAndSanitize(data.Name, maxLengthInput); err != nil {
 		return fmt.Errorf("invalid name - %w", err)
 	}
-	if data.Email, err = trimAndSanitize(data.Email, maxLengthInput); err != nil {
-		return fmt.Errorf("invalid email - %w", err)
+	if match, err := regexp.Match("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", []byte(data.Email)); !match || err != nil {
+		return fmt.Errorf("invalid email - email must pass this spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address - %w", err)
 	}
 	if data.Kompetenzen, err = trimAndSanitize(data.Kompetenzen, maxLengthTextArea); err != nil {
 		return fmt.Errorf("invalid kompetenzen - %w", err)
@@ -90,7 +93,7 @@ func (s *Service) Mitmachen(data verband.MitmachenRequest) error {
 %s
 <p>Ich möchte euch außerdem sagen:</p>
 %s
-<p>Ich freue mich auf eure Antwort, oder schreibt mir unter %s.</p>
+<p>Ich freue mich auf eure Antwort, oder schreibt mir unter <a href="mailto:%s">%s</a>.</p>
 <p>Bis bald!</p>
 <p>%s</p>
 </body>
@@ -110,27 +113,37 @@ func validateLine(line string) error {
 	}
 	return nil
 }
+
+func encodeBase64Header(header string) string {
+	return "=?utf-8?B?" + base64.StdEncoding.EncodeToString([]byte(header)) + "?="
+}
+
 func (s *Service) SendMail(from, to, subject, body string) error {
 	if err := validateLine(from); err != nil {
-		return err
+		return fmt.Errorf("invalid from: %w", err)
 	}
 	if err := validateLine(to); err != nil {
-		return err
+		return fmt.Errorf("invalid to: %w", err)
 	}
 	if err := validateLine(subject); err != nil {
-		return err
+		return fmt.Errorf("invalid subject: %w", err)
 	}
 	header := textproto.MIMEHeader{}
+	header.Set("MIME-Version:", "1.0")
+	header.Set("Date", time.Now().Format(time.RFC1123Z))
 	header.Set("From", "noreply@8bj.de")
 	header.Set("To", to)
 	header.Set("Reply-To", from)
-	header.Set("Subject", subject)
+	header.Set("Subject", encodeBase64Header(subject))
 	header.Set("Content-Type", "text/html; charset=utf-8")
 	header.Set("Content-Transfer-Encoding", "quoted-printable")
 
 	var buf bytes.Buffer
 	writer := quotedprintable.NewWriter(&buf)
-	writer.Write([]byte(body))
+	_, err := writer.Write([]byte(body))
+	if err != nil {
+		return err
+	}
 	writer.Close()
 
 	msg := ""
@@ -141,19 +154,36 @@ func (s *Service) SendMail(from, to, subject, body string) error {
 
 	println(msg)
 
-	cmd := exec.Command("sendmail", "-F", "Parkour Deutschland", "-f", "noreply@8bj.de", "-i", "--", to)
+	conn, err := net.Dial("tcp", smtpServer+":"+smtpPort)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
 
-	stdin, err := cmd.StdinPipe()
+	c, err := smtp.NewClient(conn, smtpServer)
+	if err != nil {
+		return err
+	}
+	defer c.Quit()
+
+	if err := c.Mail("noreply@8bj.de"); err != nil {
+		return err
+	}
+	if err := c.Rcpt(to); err != nil {
+		return err
+	}
+
+	w, err := c.Data()
 	if err != nil {
 		return err
 	}
 
-	go func() {
-		defer stdin.Close()
-		stdin.Write([]byte(msg))
-	}()
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		return err
+	}
 
-	err = cmd.Run()
+	err = w.Close()
 	if err != nil {
 		return err
 	}

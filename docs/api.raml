@@ -29,6 +29,7 @@ types:
   AddToMinecraftWhitelistRequest: !include types/addToMinecraftWhitelistRequest.raml
   Verein: !include types/verband/verein.raml
   Bundeslaender: !include types/verband/bundeslaender.raml
+  MitmachenRequest: !include types/verband/mitmachenRequest.raml
 /version:
   get:
     description: Returns the version of the API - the only endpoint that does not use JSON-formatted response, i.e. no quotes around version string
@@ -429,3 +430,13 @@ types:
           body:
             application/json:
               type: Bundeslaender
+  /mitmachen:
+    post:
+      description: Submit a request to join a team.
+      body:
+        application/json:
+          type: MitmachenRequest
+          description: The details of the request
+      responses:
+        '200':
+          description: OK

@@ -140,6 +140,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/verband/vereine", verbandHandler.GetVereine)
 	r.GET("/api/verband/bundeslaender", verbandHandler.GetBundeslaender)
 
+	r.POST("/api/verband/mitmachen", verbandHandler.Mitmachen)
+
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)
 		api.Error(w, r, fmt.Errorf("Whoops! It seems we've stumbled upon a glitch here. In the meantime, consider this a chance to take a breather."), http.StatusInternalServerError)
