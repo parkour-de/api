@@ -99,7 +99,7 @@ func (s *Service) Mitmachen(data verband.MitmachenRequest) error {
 </body>
 </html>`,
 		prettyAG, time.Now().Format("Monday, 2 January 2006 at 15:04"), data.Name,
-		indent(data.Kompetenzen), indent(data.Fragen), data.Email, data.Name)
+		indent(data.Kompetenzen), indent(data.Fragen), data.Email, data.Email, data.Name)
 
 	if err := s.SendMail(data.Email, to, subject, body); err != nil {
 		return err
