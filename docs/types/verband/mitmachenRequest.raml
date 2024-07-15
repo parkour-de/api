@@ -1,0 +1,23 @@
+#%RAML 1.0 DataType
+description: A request to join a team.
+properties:
+  name:
+    type: string
+    required: false
+    example: "Erika Mustermann"
+  email:
+    type: string
+    required: false
+    example: "erika.mustermann@mail.de"
+  ag:
+    type: string
+    required: true
+    example: "oeffentlichkeit"
+  kompetenzen:
+    type: string
+    required: false
+    example: "Ich habe 10 Jahre lang als Nachrichtensprecher gearbeitet."
+  fragen:
+    type: string
+    required: false
+    example: "Gibt es auch Live-Meetings?"
