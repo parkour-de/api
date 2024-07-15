@@ -252,7 +252,7 @@ func Test_mapLocationFromPkOrgSpot(t *testing.T) {
 				"de": {
 					"Hello World",
 					"# Heading\n<b>Bold</b><script>hide me</script>",
-					"<h1 id=\"heading\">Heading</h1>\n\n<p><b>Bold</b></p>\n",
+					"\n<h1 id=\"heading\">Heading</h1>\n\n<p><b>Bold</b></p>\n",
 					false,
 				},
 			},
