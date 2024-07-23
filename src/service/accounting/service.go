@@ -1,6 +1,7 @@
 package accounting
 
 import (
+	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -50,6 +51,58 @@ func (s *Service) UpdateBalanceSheet(sheet *accounting.BalanceSheet, message str
 	sheet.Entries = append(sheet.Entries, newEntry)
 	sheet.Modified = time.Now()
 	return nil
+}
+
+func (s *Service) UpdateBalanceSheet2(sheet *accounting.BalanceSheet, message string) error {
+	scanner := bufio.NewScanner(strings.NewReader(message))
+
+	dateRegex := regexp.MustCompile(`📅 (\d{2}\.\d{2}\.\d{4})`)
+	transactionRegex := regexp.MustCompile(`([+\-−]\d{1,3}(?:,\d{3})*(?:\.\d{2})?) \| (.+)`)
+
+	var currentDate time.Time
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if dateMatch := dateRegex.FindStringSubmatch(line); dateMatch != nil {
+			var err error
+			currentDate, err = time.Parse("02.01.2006", dateMatch[1])
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		if transactionMatch := transactionRegex.FindStringSubmatch(line); transactionMatch != nil {
+			balanceChangeStr := strings.Replace(transactionMatch[1], ",", "", -1)
+			balanceChangeStr = strings.Replace(balanceChangeStr, "+", "", 1)
+			balanceChangeStr = strings.Replace(balanceChangeStr, "−", "-", 1)
+			balanceChange, err := strconv.ParseFloat(balanceChangeStr, 64)
+			if err != nil {
+				return err
+			}
+			notes := transactionMatch[2]
+
+			newEntry := accounting.Entry{
+				Date:          currentDate,
+				BalanceChange: balanceChange,
+				Notes:         notes,
+			}
+
+			entryExists := false
+			for _, entry := range sheet.Entries {
+				if entry.Date.Equal(newEntry.Date) && entry.BalanceChange == newEntry.BalanceChange && entry.Notes == newEntry.Notes {
+					entryExists = true
+					break
+				}
+			}
+			if !entryExists {
+				sheet.Entries = append(sheet.Entries, newEntry)
+			}
+		}
+	}
+
+	return scanner.Err()
 }
 
 func (s *Service) ExportToCSV(sheet accounting.BalanceSheet) (string, error) {
