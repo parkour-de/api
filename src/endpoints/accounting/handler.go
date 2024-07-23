@@ -93,9 +93,14 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 }
 
 func (h *Handler) GetBalanceSheetCSV(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
+	file := urlParams.ByName("file")
+	if file != "1" && file != "2" {
+		api.Error(w, r, fmt.Errorf("must specify either file 1 or file 2"), 400)
+		return
+	}
 	key := urlParams.ByName("key")
 	s := h.service
-	bs, err := s.LoadFromJson(dpv.ConfigInstance.Server.Account)
+	bs, err := s.LoadFromJson(dpv.ConfigInstance.Server.Account + "-" + file + ".json")
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("could not open accounting file: %w", err), 400)
 		return
