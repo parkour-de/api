@@ -83,7 +83,7 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 		return
 	}
 
-	err = s.SaveToJson(bs, dpv.ConfigInstance.Server.Account)
+	err = s.SaveToJson(bs, dpv.ConfigInstance.Server.Account+"-"+file+".json")
 	if err != nil {
 		api.Error(w, r, fmt.Errorf("could not save accounting file: %w", err), 500)
 		return
