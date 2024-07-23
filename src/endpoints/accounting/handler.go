@@ -21,7 +21,7 @@ func NewHandler(service *accounting.Service) *Handler {
 }
 
 func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	file := urlParams.ByName("file")
+	file := r.URL.Query().Get("file")
 	if file != "1" && file != "2" {
 		api.Error(w, r, fmt.Errorf("must specify either file 1 or file 2"), 400)
 		return
@@ -93,7 +93,7 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 }
 
 func (h *Handler) GetBalanceSheetCSV(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
-	file := urlParams.ByName("file")
+	file := r.URL.Query().Get("file")
 	if file != "1" && file != "2" {
 		api.Error(w, r, fmt.Errorf("must specify either file 1 or file 2"), 400)
 		return
