@@ -42,6 +42,7 @@ func createHandler(t *testing.T) Handler {
 }
 
 func TestHandler_ImportPkOrgSpot(t *testing.T) {
+	t.Skip("cannot be run in pipeline without server simulation")
 	h := createHandler(t)
 
 	imgDir, err := os.MkdirTemp("", "dpv-test")
@@ -77,6 +78,7 @@ func TestHandler_ImportPkOrgSpot(t *testing.T) {
 }
 
 func TestHandler_extractPkOrgImages(t *testing.T) {
+	t.Skip("cannot be run in pipeline without server simulation")
 	h := createHandler(t)
 
 	imgDir, err := os.MkdirTemp("", "dpv-test")
