@@ -243,15 +243,17 @@ types:
               description: Facebook auth token
               type: string
     /password:
-      get:
-        description: Links a password to a user, so the user can log in using a password. It also returns a new login token.
+      post:
+        description:
+          Links a password to a user, so the user can log in using a password. It also returns a new login token.
+          If no Authentication header is set, by providing the correct password it also returns a fresh login token.
         responses:
           '200':
             description: OK
             body:
               type: string
               example: "p:johndoe:1700000000:eyI_In0"
-        queryString:
+        body:
           properties:
             password: string
     /totp:

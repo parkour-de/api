@@ -1,9 +1,11 @@
 package user
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"pkv/api/src/domain"
@@ -50,27 +52,27 @@ func TestPassword(t *testing.T) {
 				}
 				*params = httprouter.Params{{"key", user.Key}}
 				// attempt to set up no password
-				rr := callLinkPassword(linkPassword, user.Key, "/", t)
+				rr := callLinkPassword(linkPassword, user.Key, "/", "nil", t)
 				if rr.Code != 400 {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 				// attempt to set up empty password
-				rr = callLinkPassword(linkPassword, user.Key, "/?password=", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/", "", t)
 				if rr.Code != 400 {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 				// attempt to set up simple password
-				rr = callLinkPassword(linkPassword, user.Key, "/?password=123456", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/", "123456", t)
 				if rr.Code != 400 {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
 				// attempt to set up a normal password
-				rr = callLinkPassword(linkPassword, user.Key, "/?password=Tr0ub4dor%263", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/", "Tr0ub4dor&3", t)
 				if rr.Code != http.StatusOK {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, http.StatusOK)
 				}
 				// attempt to set up another password
-				rr = callLinkPassword(linkPassword, user.Key, "/?password=Tr0ub4dor%264", t)
+				rr = callLinkPassword(linkPassword, user.Key, "/", "Tr0ub4dor&4", t)
 				if rr.Code != 400 {
 					t.Errorf("handler returned unexpected status code: got %v want %v", rr.Code, 400)
 				}
@@ -103,7 +105,7 @@ func TestPassword(t *testing.T) {
 			s := user.NewService(db)
 			h := NewHandler(db, s)
 			linkPassword := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-				h.LinkPassword(writer, request, params)
+				h.Password(writer, request, params)
 			})
 			verifyPassword := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				h.VerifyPassword(writer, request, params)
@@ -113,8 +115,18 @@ func TestPassword(t *testing.T) {
 	}
 }
 
-func callLinkPassword(linkPassword http.HandlerFunc, user, url string, t *testing.T) *httptest.ResponseRecorder {
-	req, err := http.NewRequest("GET", url, nil)
+func callLinkPassword(linkPassword http.HandlerFunc, user, url string, password string, t *testing.T) *httptest.ResponseRecorder {
+	var body io.Reader
+	if password != "nil" {
+		jsonData, err := json.Marshal(map[string]string{
+			"password": password,
+		})
+		if err != nil {
+			t.Error(err)
+		}
+		body = bytes.NewReader(jsonData)
+	}
+	req, err := http.NewRequest("POST", url, body)
 	loginAs(user, req)
 	if err != nil {
 		t.Fatalf("request creation failed: %s", err)
@@ -122,9 +134,6 @@ func callLinkPassword(linkPassword http.HandlerFunc, user, url string, t *testin
 	rr := httptest.NewRecorder()
 	linkPassword.ServeHTTP(rr, req)
 	expectedContentType := "application/json"
-	// log.Printf("Status-Code: %d\n", rr.Code)
-	// log.Printf("Content-Type: %s\n", rr.Header().Get("Content-Type"))
-	// log.Printf("Body: %s\n", rr.Body.String())
 	if rr.Header().Get("Content-Type") != expectedContentType {
 		t.Errorf("handler returned unexpected content-type: got %v want %v",
 			rr.Header().Get("Content-Type"), expectedContentType)
@@ -141,9 +150,6 @@ func callVerifyPassword(verifyPassword http.HandlerFunc, user, url string, t *te
 	rr := httptest.NewRecorder()
 	verifyPassword.ServeHTTP(rr, req)
 	expectedContentType := "application/json"
-	//log.Printf("Status-Code: %d\n", rr.Code)
-	//log.Printf("Content-Type: %s\n", rr.Header().Get("Content-Type"))
-	//log.Printf("Body: %s\n", rr.Body.String())
 	if rr.Header().Get("Content-Type") != expectedContentType {
 		t.Errorf("handler returned unexpected content-type: got %v want %v",
 			rr.Header().Get("Content-Type"), expectedContentType)

@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 	"os"
 	"pkv/api/src/domain"
@@ -52,8 +51,6 @@ func (s *Service) LinkPassword(key, password string, ctx context.Context) (strin
 		Subject:  nonce + ":" + security.HashToken(":password::"+nonce+":"+password),
 		Enabled:  true,
 	}
-	log.Println("pwd: " + password)
-	log.Println("sub: " + login.Subject)
 	if err := s.db.Logins.Create(&login, ctx); err != nil {
 		return "", fmt.Errorf("create login failed: %w", err)
 	}
@@ -115,9 +112,6 @@ func (s *Service) VerifyPassword(key, password string, ctx context.Context) (boo
 	if !login.Enabled {
 		return false, fmt.Errorf("password login not enabled")
 	}
-
-	log.Println("pwd: " + password)
-	log.Println("sub: " + login.Subject)
 	success := verifyPassword(password, login.Subject)
 
 	return success, nil

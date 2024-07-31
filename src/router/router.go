@@ -122,7 +122,7 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/user/:key/exists", userHandler.Exists)
 	r.POST("/api/user/:key/claim", userHandler.Claim)
 	r.GET("/api/user/:key/facebook", userHandler.LinkFacebook)
-	r.GET("/api/user/:key/password", userHandler.LinkPassword)
+	r.GET("/api/user/:key/password", userHandler.Password)
 	r.GET("/api/user/:key/totp", userHandler.RequestTOTP)
 	r.POST("/api/user/:key/totp", userHandler.EnableTOTP)
 	r.GET("/api/user/:key/email", userHandler.RequestEmail)
