@@ -118,22 +118,17 @@ When a user finally clicks on "Continue", the following text is shown:
 > - freelancer
 >   - A freelancer is a person who is running a business, but is not a company
 > - company
->
->   A company is a legal entity that is offering services to its customers
+>   - A company is a legal entity that is offering services to its customers
 > - school
->
->   A school is an institution that offers education
+>   - A school is an institution that offers education
 > - government
->
->   This could be a government agency, a ministry, a city, a state, a country, etc.
+>   - This could be a government agency, a ministry, a city, a state, a country, etc.
 > - robot
->
->   A robot is a computer program that is running on a server. While you don't need a user account
->   to interact with most of the API, you can create a user account for your robot, so you can
->   create and modify pages, comments, import and export data programmatically.
+>   - A robot is a computer program that is running on a server. While you don't need a user account
+>     to interact with most of the API, you can create a user account for your robot, so you can
+>     create and modify pages, comments, import and export data programmatically.
 > - ~~administrator~~
->
->   ~~An administrator can create and modify more pages than a normal user~~
+>     - ~~An administrator can create and modify more pages than a normal user~~
 >
 > `Continue`
 
