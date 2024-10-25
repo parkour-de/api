@@ -2,12 +2,12 @@ package accounting
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"io"
 	"net/http"
 	"pkv/api/src/api"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 	"pkv/api/src/service/accounting"
 	"regexp"
 )
@@ -23,7 +23,7 @@ func NewHandler(service *accounting.Service) *Handler {
 func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	file := r.URL.Query().Get("file")
 	if file != "1" && file != "2" {
-		api.Error(w, r, fmt.Errorf("must specify either file 1 or file 2"), 400)
+		api.Error(w, r, t.Errorf("must specify either file 1 or file 2"), 400)
 		return
 	}
 	key := urlParams.ByName("key")
@@ -32,12 +32,12 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 	s := h.service
 	bs, err := s.LoadFromJson(dpv.ConfigInstance.Server.Account + "-" + file + ".json")
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("could not open accounting file: %w", err), 400)
+		api.Error(w, r, t.Errorf("could not open accounting file: %w", err), 400)
 		return
 	}
 
 	if key != bs.Key {
-		api.Error(w, r, fmt.Errorf("wrong key provided"), 403)
+		api.Error(w, r, t.Errorf("wrong key provided"), 403)
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 		}
 
 		if err := scanner.Err(); err != nil {
-			api.Error(w, r, fmt.Errorf("reading request body failed: %w", err), 400)
+			api.Error(w, r, t.Errorf("reading request body failed: %w", err), 400)
 			return
 		}
 
@@ -62,30 +62,30 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 			}
 			err := s.UpdateBalanceSheet(&bs, msg)
 			if err != nil {
-				api.Error(w, r, fmt.Errorf("updating balance sheet failed, error on line %d: %w", line, err), 400)
+				api.Error(w, r, t.Errorf("updating balance sheet failed, error on line %d: %w", line, err), 400)
 				return
 			}
 		}
 	} else if file == "2" {
 		bytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			api.Error(w, r, fmt.Errorf("reading request body failed: %w", err), 400)
+			api.Error(w, r, t.Errorf("reading request body failed: %w", err), 400)
 			return
 		}
 
 		err = s.UpdateBalanceSheet2(&bs, string(bytes))
 		if err != nil {
-			api.Error(w, r, fmt.Errorf("updating balance sheet failed: %w", err), 400)
+			api.Error(w, r, t.Errorf("updating balance sheet failed: %w", err), 400)
 			return
 		}
 	} else {
-		api.Error(w, r, fmt.Errorf("provided file is not supported"), 400)
+		api.Error(w, r, t.Errorf("provided file is not supported"), 400)
 		return
 	}
 
 	err = s.SaveToJson(bs, dpv.ConfigInstance.Server.Account+"-"+file+".json")
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("could not save accounting file: %w", err), 500)
+		api.Error(w, r, t.Errorf("could not save accounting file: %w", err), 500)
 		return
 	}
 
@@ -95,25 +95,25 @@ func (h *Handler) AddStatements(w http.ResponseWriter, r *http.Request, urlParam
 func (h *Handler) GetBalanceSheetCSV(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	file := r.URL.Query().Get("file")
 	if file != "1" && file != "2" {
-		api.Error(w, r, fmt.Errorf("must specify either file 1 or file 2"), 400)
+		api.Error(w, r, t.Errorf("must specify either file 1 or file 2"), 400)
 		return
 	}
 	key := urlParams.ByName("key")
 	s := h.service
 	bs, err := s.LoadFromJson(dpv.ConfigInstance.Server.Account + "-" + file + ".json")
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("could not open accounting file: %w", err), 400)
+		api.Error(w, r, t.Errorf("could not open accounting file: %w", err), 400)
 		return
 	}
 
 	if key != bs.Key {
-		api.Error(w, r, fmt.Errorf("wrong key provided"), 403)
+		api.Error(w, r, t.Errorf("wrong key provided"), 403)
 		return
 	}
 
 	csv, err := h.service.ExportToCSV(bs)
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("could not get balance sheet: %w", err), 500)
+		api.Error(w, r, t.Errorf("could not get balance sheet: %w", err), 500)
 		return
 	}
 	w.Header().Set("Content-Type", "text/csv")

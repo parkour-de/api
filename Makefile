@@ -13,6 +13,9 @@ all: test build ## Run test, then build
 build: ## Build the binary
 	go build -o $(OUT_DIR)/endpoint1 -ldflags "-X main.version=$$(git rev-list --count main)" ./src/cmd/endpoint1
 
+strings: ## Update translatable strings
+	bash ./strings.sh
+
 test: ## Run tests
 	go test ./... -p 8
 

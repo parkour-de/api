@@ -2,10 +2,10 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"github.com/arangodb/go-driver/v2/arangodb"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 )
 
 /*
@@ -52,23 +52,23 @@ func NewDB(database arangodb.Database, config *dpv.Config) (*Db, error) {
 	}
 	edges, err := GetOrCreateCollection(database, "edges", true)
 	if err != nil {
-		return nil, fmt.Errorf("could not get or create edges collection: %w", err)
+		return nil, t.Errorf("could not get or create edges collection: %w", err)
 	}
 	locationsIndex, _, err := locations.Collection.EnsureGeoIndex(context.Background(), []string{"lat", "lng"}, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not ensure geo index for locations: %w", err)
+		return nil, t.Errorf("could not ensure geo index for locations: %w", err)
 	}
 	if err := CreateViewIfNotExists(database, config, "trainings"); err != nil {
-		return nil, fmt.Errorf("could not create view: %w", err)
+		return nil, t.Errorf("could not create view: %w", err)
 	}
 	if err := CreateViewIfNotExists(database, config, "locations"); err != nil {
-		return nil, fmt.Errorf("could not create view: %w", err)
+		return nil, t.Errorf("could not create view: %w", err)
 	}
 	if err := CreateViewIfNotExists(database, config, "users"); err != nil {
-		return nil, fmt.Errorf("could not create view: %w", err)
+		return nil, t.Errorf("could not create view: %w", err)
 	}
 	if err := CreateViewIfNotExists(database, config, "pages"); err != nil {
-		return nil, fmt.Errorf("could not create view: %w", err)
+		return nil, t.Errorf("could not create view: %w", err)
 	}
 	return &Db{
 		database,

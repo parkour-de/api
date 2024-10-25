@@ -1,12 +1,12 @@
 package captcha
 
 import (
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/k42-software/go-altcha"
 	"math/rand"
 	"net/http"
 	"pkv/api/src/api"
+	"pkv/api/src/repository/t"
 	"sync"
 	"time"
 )
@@ -46,23 +46,23 @@ func (s *Service) Challenge() string {
 func (s *Service) Solve(response string) error {
 	msg, err := altcha.DecodeResponse(response)
 	if err != nil {
-		return fmt.Errorf("can't decode response")
+		return t.Errorf("can't decode response")
 	}
 	s.mutex.RLock()
 	created, ok := s.signatures[msg.Signature]
 	s.mutex.RUnlock()
 	if !ok {
-		return fmt.Errorf("challenge not found")
+		return t.Errorf("challenge not found")
 	}
 	s.mutex.Lock()
 	delete(s.signatures, msg.Signature)
 	s.mutex.Unlock()
 	if created.Before(time.Now()) {
-		return fmt.Errorf("challenge too old")
+		return t.Errorf("challenge too old")
 	}
 	ok = msg.IsValidResponse()
 	if !ok {
-		return fmt.Errorf("response invalid")
+		return t.Errorf("response invalid")
 	}
 	return nil
 }

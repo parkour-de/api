@@ -40,6 +40,8 @@ type Config struct {
 	Server struct {
 		Words1   string `yaml:"words1"`
 		Words2   string `yaml:"words2"`
+		Words3   string `yaml:"words3"`
+		Words4   string `yaml:"words4"`
 		ImgURL   string `yaml:"img_url"`
 		TmpURL   string `yaml:"tmp_url"`
 		ImgPath  string `yaml:"img_path"`

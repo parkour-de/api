@@ -3,16 +3,16 @@ package security
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"golang.org/x/crypto/sha3"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 )
 
 func MakeNonce() string {
 	buff := make([]byte, 12)
 	_, err := rand.Read(buff)
 	if err != nil {
-		println(fmt.Errorf("random number generation failed: %w", err).Error())
+		println(t.Errorf("random number generation failed: %w", err).Error())
 	}
 	return base64.RawURLEncoding.EncodeToString(buff)
 }

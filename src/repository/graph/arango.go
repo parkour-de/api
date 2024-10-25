@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"pkv/api/src/repository/dpv"
 	"pkv/api/src/repository/security"
+	"pkv/api/src/repository/t"
 	"strings"
 	"time"
 )
@@ -35,13 +36,13 @@ func Connect(config *dpv.Config, useRoot bool) (arangodb.Client, error) {
 func DropTestDatabases(c arangodb.Client) error {
 	dbs, err := c.Databases(context.Background())
 	if err != nil {
-		return fmt.Errorf("could not list databases: %w", err)
+		return t.Errorf("could not list databases: %w", err)
 	}
 	for _, db := range dbs {
 		if strings.HasPrefix(db.Name(), "test-") {
 			err = db.Remove(context.Background())
 			if err != nil {
-				return fmt.Errorf("could not remove database: %w", err)
+				return t.Errorf("could not remove database: %w", err)
 			}
 		}
 	}
@@ -52,17 +53,17 @@ func GetOrCreateDatabase(c arangodb.Client, dbname string, config *dpv.Config) (
 	var db arangodb.Database
 	if ok, err := c.DatabaseExists(context.Background(), dbname); !ok || err != nil {
 		if err != nil {
-			return nil, fmt.Errorf("failed to look for database: %w", err)
+			return nil, t.Errorf("failed to look for database: %w", err)
 		}
 		trueBool := true
 		if db, err = c.CreateDatabase(context.Background(), dbname, &arangodb.CreateDatabaseOptions{Users: []arangodb.CreateDatabaseUserOptions{
 			{config.DB.User, config.DB.Pass, &trueBool, nil},
 		}}); err != nil {
-			return nil, fmt.Errorf("failed to create database: %w", err)
+			return nil, t.Errorf("failed to create database: %w", err)
 		}
 	} else {
 		if db, err = c.Database(context.Background(), dbname); err != nil {
-			return nil, fmt.Errorf("failed to open database: %w", err)
+			return nil, t.Errorf("failed to open database: %w", err)
 		}
 	}
 	return db, nil
@@ -71,7 +72,7 @@ func GetOrCreateDatabase(c arangodb.Client, dbname string, config *dpv.Config) (
 func GetOrCreateCollection(db arangodb.Database, name string, edges bool) (arangodb.Collection, error) {
 	if ok, err := db.CollectionExists(context.Background(), name); !ok || err != nil {
 		if err != nil {
-			return nil, fmt.Errorf("could not check if collection exists: %w", err)
+			return nil, t.Errorf("could not check if collection exists: %w", err)
 		}
 		if edges {
 			return db.CreateCollection(context.Background(), name, &arangodb.CreateCollectionProperties{Type: arangodb.CollectionTypeEdge})
@@ -120,7 +121,7 @@ func FieldsForAllLanguages(config *dpv.Config) map[string]arangodb.ArangoSearchE
 func CreateViewIfNotExists(db arangodb.Database, config *dpv.Config, name string) error {
 	ok, err := db.ViewExists(context.Background(), name+"-descriptions")
 	if err != nil {
-		return fmt.Errorf("could not check if view for collection %v exists: %w", name, err)
+		return t.Errorf("could not check if view for collection %v exists: %w", name, err)
 	}
 	if !ok {
 		_, err := db.CreateArangoSearchView(context.Background(), name+"-descriptions", &arangodb.ArangoSearchViewProperties{
@@ -135,7 +136,7 @@ func CreateViewIfNotExists(db arangodb.Database, config *dpv.Config, name string
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("could not create view for collection %v: %w", name, err)
+			return t.Errorf("could not create view for collection %v: %w", name, err)
 		}
 	}
 	return nil
@@ -144,7 +145,7 @@ func CreateViewIfNotExists(db arangodb.Database, config *dpv.Config, name string
 func NewEntityManager[T Entity](db arangodb.Database, name string, edges bool, constructor func() T) (EntityManager[T], error) {
 	collection, err := GetOrCreateCollection(db, name, edges)
 	if err != nil {
-		return EntityManager[T]{}, fmt.Errorf("could not get or create %s collection: %w", name, err)
+		return EntityManager[T]{}, t.Errorf("could not get or create %s collection: %w", name, err)
 	}
 	return EntityManager[T]{collection, constructor}, nil
 }
@@ -153,11 +154,14 @@ func Init(configPath string, test bool) (*Db, *dpv.Config, error) {
 	var err error
 	config, err := dpv.NewConfig(configPath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not initialise config instance: %w", err)
+		return nil, nil, t.Errorf("could not initialise config instance: %w", err)
+	}
+	if err := t.LoadDE(config); err != nil {
+		log.Printf("Could not load strings_de.ini: %v", err)
 	}
 	c, err := Connect(config, true)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not connect to database server: %w", err)
+		return nil, nil, t.Errorf("could not connect to database server: %w", err)
 	}
 	dbname := "dpv"
 	if test {
@@ -166,20 +170,20 @@ func Init(configPath string, test bool) (*Db, *dpv.Config, error) {
 	}
 	database, err := GetOrCreateDatabase(c, dbname, config)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not use database: %w", err)
+		return nil, nil, t.Errorf("could not use database: %w", err)
 	}
 	db, err := NewDB(database, config)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not initialise database: %w", err)
+		return nil, nil, t.Errorf("could not initialise database: %w", err)
 	}
 	if !test {
 		collection, err := db.Database.Collection(context.Background(), "users")
 		if err != nil {
-			return nil, nil, fmt.Errorf("could not get users collection: %w", err)
+			return nil, nil, t.Errorf("could not get users collection: %w", err)
 		}
 		count, err := collection.Count(context.Background())
 		if err != nil {
-			return nil, nil, fmt.Errorf("could not count users: %w", err)
+			return nil, nil, t.Errorf("could not count users: %w", err)
 		}
 		if count == 0 {
 			log.Println("Creating sample data")

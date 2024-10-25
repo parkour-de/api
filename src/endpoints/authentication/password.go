@@ -1,10 +1,10 @@
 package authentication
 
 import (
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"pkv/api/src/api"
+	"pkv/api/src/repository/t"
 	"pkv/api/src/service/user"
 )
 
@@ -12,7 +12,7 @@ import (
 func (h *Handler) Password(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	key, password, ok := r.BasicAuth()
 	if !ok {
-		api.Error(w, r, fmt.Errorf("authorization header needs to be RFC 2617 Section 2 compliant"), 400)
+		api.Error(w, r, t.Errorf("authorization header needs to be RFC 2617 Section 2 compliant"), 400)
 		return
 	}
 

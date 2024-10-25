@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"pkv/api/src/domain"
+	"pkv/api/src/repository/t"
 	"time"
 )
 
@@ -15,7 +16,7 @@ func CreateMultiple[T any](db *Db, count int, createFunc func(*Db, int) (T, erro
 	for i := 1; i <= count; i++ {
 		entity, err := createFunc(db, i)
 		if err != nil {
-			return nil, fmt.Errorf("could not create multiple entities: %w", err)
+			return nil, t.Errorf("could not create multiple entities: %w", err)
 		}
 		entities = append(entities, entity)
 	}

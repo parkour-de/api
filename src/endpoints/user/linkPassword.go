@@ -2,10 +2,10 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"pkv/api/src/api"
+	"pkv/api/src/repository/t"
 )
 
 func (h *Handler) Password(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
@@ -27,13 +27,13 @@ func (h *Handler) linkPassword(w http.ResponseWriter, r *http.Request, key strin
 		return
 	}
 	if user != key {
-		api.Error(w, r, fmt.Errorf("you cannot modify a different user"), 400)
+		api.Error(w, r, t.Errorf("you cannot modify a different user"), 400)
 		return
 	}
 
 	password, err := extractPassword(r)
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("invalid request body: %w", err), 400)
+		api.Error(w, r, t.Errorf("invalid request body: %w", err), 400)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (h *Handler) linkPassword(w http.ResponseWriter, r *http.Request, key strin
 func (h *Handler) loginWithPassword(w http.ResponseWriter, r *http.Request, key string) {
 	password, err := extractPassword(r)
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("invalid request body: %w", err), 400)
+		api.Error(w, r, t.Errorf("invalid request body: %w", err), 400)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *Handler) loginWithPassword(w http.ResponseWriter, r *http.Request, key 
 
 func extractPassword(r *http.Request) (string, error) {
 	if r.Body == nil {
-		return "", fmt.Errorf("request body missing")
+		return "", t.Errorf("request body missing")
 	}
 	var requestBody struct {
 		Password string `json:"password"`
@@ -85,7 +85,7 @@ func (h *Handler) VerifyPassword(w http.ResponseWriter, r *http.Request, urlPara
 		return
 	}
 	if user != key {
-		api.Error(w, r, fmt.Errorf("you cannot modify a different user"), 400)
+		api.Error(w, r, t.Errorf("you cannot modify a different user"), 400)
 		return
 	}
 	password := r.URL.Query().Get("password")

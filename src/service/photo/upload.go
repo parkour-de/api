@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -15,6 +14,7 @@ import (
 	"path/filepath"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 	"slices"
 	"strconv"
 	"strings"
@@ -44,34 +44,34 @@ var PyVipsFiles = []string{
 func (s *Service) Upload(data []byte, filename string, ctx context.Context) (domain.Photo, error) {
 	ext := filepath.Ext(filename)
 	if !slices.Contains(PyVipsFiles, ext) {
-		return domain.Photo{}, fmt.Errorf("unsupported image format: %s", ext)
+		return domain.Photo{}, t.Errorf("unsupported image format: %s", ext)
 	}
 	// save original file in a more temporary temp location
 	tmpFile, err := os.CreateTemp(os.TempDir(), "upload-*"+ext)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("could not create temporary file before conversion: %w", err)
+		return domain.Photo{}, t.Errorf("could not create temporary file before conversion: %w", err)
 	}
 	defer os.Remove(tmpFile.Name())
 
 	if _, err := tmpFile.Write(data); err != nil {
-		return domain.Photo{}, fmt.Errorf("could not save uploaded file before conversion: %w", err)
+		return domain.Photo{}, t.Errorf("could not save uploaded file before conversion: %w", err)
 	}
 	if err := tmpFile.Close(); err != nil {
-		return domain.Photo{}, fmt.Errorf("could not close uploaded file before conversion: %w", err)
+		return domain.Photo{}, t.Errorf("could not close uploaded file before conversion: %w", err)
 	}
 	randomFilename := RandomString()
 	photo, err := PythonConvert(tmpFile.Name(), dpv.ConfigInstance.Server.TmpPath+randomFilename)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("could not convert uploaded file: %w", err)
+		return domain.Photo{}, t.Errorf("could not convert uploaded file: %w", err)
 	}
 	photo.Src = randomFilename
 	jsonData, err := json.Marshal(photo)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("could not marshal photo to JSON: %w", err)
+		return domain.Photo{}, t.Errorf("could not marshal photo to JSON: %w", err)
 	}
 	err = os.WriteFile(dpv.ConfigInstance.Server.TmpPath+randomFilename+".json", jsonData, 0644)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("could not write JSON file: %w", err)
+		return domain.Photo{}, t.Errorf("could not write JSON file: %w", err)
 	}
 	return photo, nil
 }
@@ -79,7 +79,7 @@ func (s *Service) Upload(data []byte, filename string, ctx context.Context) (dom
 func (s *Service) UploadFromURL(url string, ctx context.Context) (domain.Photo, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("could not download from URL %v: %w", url, err)
+		return domain.Photo{}, t.Errorf("could not download from URL %v: %w", url, err)
 	}
 	defer resp.Body.Close()
 
@@ -91,12 +91,12 @@ func (s *Service) UploadFromURL(url string, ctx context.Context) (domain.Photo, 
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("could not read data from URL %v: %w", url, err)
+		return domain.Photo{}, t.Errorf("could not read data from URL %v: %w", url, err)
 	}
 
 	photo, err := s.Upload(data, filename, ctx)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("could not upload file from URL %v: %w", url, err)
+		return domain.Photo{}, t.Errorf("could not upload file from URL %v: %w", url, err)
 	}
 	return photo, nil
 }
@@ -129,7 +129,7 @@ type PythonOutput struct {
 func PythonConvert(inFile string, outFile string) (domain.Photo, error) {
 	img, err := Info(inFile)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("empty image information: %w", err)
+		return domain.Photo{}, t.Errorf("empty image information: %w", err)
 	}
 	if img.Orientation > 4 && img.ExifH > img.ExifW {
 		img.Orientation = 1
@@ -143,7 +143,7 @@ func PythonConvert(inFile string, outFile string) (domain.Photo, error) {
 	}
 	jsonData, err := json.Marshal(input)
 	if err != nil {
-		return domain.Photo{}, fmt.Errorf("marshaling image info for image \"%v\" failed: %w", inFile, err)
+		return domain.Photo{}, t.Errorf("marshaling image info for image \"%v\" failed: %w", inFile, err)
 	}
 	cmd := exec.Command(dpv.ConfigInstance.Server.Python, "image_processor.py")
 	cmd.Stdin = bytes.NewReader(jsonData)
@@ -151,14 +151,14 @@ func PythonConvert(inFile string, outFile string) (domain.Photo, error) {
 	cmd.Stdout = &output
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
-		return domain.Photo{}, fmt.Errorf("could not start python process for image \"%v\": %w", inFile, err)
+		return domain.Photo{}, t.Errorf("could not start python process for image \"%v\": %w", inFile, err)
 	}
 	if err := cmd.Wait(); err != nil {
-		return domain.Photo{}, fmt.Errorf("python process exited with error for image \"%v\": %w", inFile, err)
+		return domain.Photo{}, t.Errorf("python process exited with error for image \"%v\": %w", inFile, err)
 	}
 	var result PythonOutput
 	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
-		return domain.Photo{}, fmt.Errorf("error decoding python result for image \"%v\": %w", inFile, err)
+		return domain.Photo{}, t.Errorf("error decoding python result for image \"%v\": %w", inFile, err)
 	}
 	img.Width = result.Width
 	img.Height = result.Height
@@ -190,19 +190,19 @@ func Info(filename string) (img ImgInfo, err error) {
 	cmd := exec.Command(dpv.ConfigInstance.Server.Exiftool, "-T", "-datetimeoriginal", "-orientation", "-gps:GPSLatitude", "-gps:GPSLongitude", "-imagewidth", "-imageheight", "-n", filename)
 	out, err := cmd.StdoutPipe()
 	if err != nil {
-		err = fmt.Errorf("creating pipe for \"exiftool\" with \"%v\" failed: %w", filename, err)
+		err = t.Errorf("creating pipe for \"exiftool\" with \"%v\" failed: %w", filename, err)
 		return
 	}
 	err = cmd.Start()
 	if err != nil {
-		err = fmt.Errorf("executing \"exiftool\" with \"%v\" failed: %w", filename, err)
+		err = t.Errorf("executing \"exiftool\" with \"%v\" failed: %w", filename, err)
 		return
 	}
 	defer out.Close()
 	b, err := io.ReadAll(out)
 	defer cmd.Wait()
 	if err != nil {
-		err = fmt.Errorf("reading from pipe of \"exiftool\" with \"%v\" failed: %w", filename, err)
+		err = t.Errorf("reading from pipe of \"exiftool\" with \"%v\" failed: %w", filename, err)
 		return
 	}
 	data := strings.Split(strings.Trim(string(b), " \r\n"), "\t")
@@ -213,7 +213,7 @@ func Info(filename string) (img ImgInfo, err error) {
 		err = nil
 	}
 	if len(data) < 2 { // Assume error "No matching files"
-		err = fmt.Errorf("no matching files")
+		err = t.Errorf("no matching files")
 		return
 	}
 
@@ -244,7 +244,7 @@ func RandomString() string {
 	buff := make([]byte, 6)
 	_, err := rand.Read(buff)
 	if err != nil {
-		println(fmt.Errorf("random number generation failed: %w", err).Error())
+		println(t.Errorf("random number generation failed: %w", err).Error())
 	}
 	return base64.RawURLEncoding.EncodeToString(buff)
 }

@@ -2,12 +2,13 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"os"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
 	"pkv/api/src/repository/security"
+	"pkv/api/src/repository/t"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,29 +16,29 @@ import (
 func (s *Service) LinkPassword(key, password string, ctx context.Context) (string, error) {
 	// Check password length
 	if len(password) < 8 {
-		return "", fmt.Errorf("password too short")
+		return "", t.Errorf("password too short")
 	}
 
 	// Check password strength
 	if !security.IsStrongPassword(password) {
-		return "", fmt.Errorf("password too weak")
+		return "", t.Errorf("password too weak")
 	}
 
 	// Check if the user exists
 	_, err := s.db.Users.Read(key, ctx)
 	if err != nil {
-		return "", fmt.Errorf("read user failed: %w", err)
+		return "", t.Errorf("read user failed: %w", err)
 	}
 
 	// Check if the user already has a password login
 	logins, err := s.db.GetLoginsForUser(key, ctx)
 	if err != nil {
-		return "", fmt.Errorf("read logins failed: %w", err)
+		return "", t.Errorf("read logins failed: %w", err)
 	}
 
 	for _, login := range logins {
 		if login.Provider == "password" {
-			return "", fmt.Errorf("password already set")
+			return "", t.Errorf("password already set")
 		}
 	}
 
@@ -52,11 +53,11 @@ func (s *Service) LinkPassword(key, password string, ctx context.Context) (strin
 		Enabled:  true,
 	}
 	if err := s.db.Logins.Create(&login, ctx); err != nil {
-		return "", fmt.Errorf("create login failed: %w", err)
+		return "", t.Errorf("create login failed: %w", err)
 	}
 
 	if err := s.db.LoginAuthenticatesUser(login, domain.User{Entity: domain.Entity{Key: key}}, ctx); err != nil {
-		return "", fmt.Errorf("link login to user failed: %w", err)
+		return "", t.Errorf("link login to user failed: %w", err)
 	}
 
 	unix := time.Now().Unix()
@@ -68,10 +69,10 @@ func (s *Service) LinkPassword(key, password string, ctx context.Context) (strin
 func (s *Service) Password(key, password string, ctx context.Context) (string, error) {
 	success, err := s.VerifyPassword(key, password, ctx)
 	if err != nil {
-		return "", fmt.Errorf("verify password failed: %w", err)
+		return "", t.Errorf("verify password failed: %w", err)
 	}
 	if !success {
-		return "", fmt.Errorf("password incorrect")
+		return "", t.Errorf("password incorrect")
 	}
 	unix := time.Now().Unix()
 	expiry := unix + 3600
@@ -84,13 +85,13 @@ func (s *Service) VerifyPassword(key, password string, ctx context.Context) (boo
 	// Check if the user exists
 	_, err := s.db.Users.Read(key, ctx)
 	if err != nil {
-		return false, fmt.Errorf("read user failed: %w", err)
+		return false, t.Errorf("read user failed: %w", err)
 	}
 
 	// Check if the user has a password login
 	logins, err := s.db.GetLoginsForUser(key, ctx)
 	if err != nil {
-		return false, fmt.Errorf("read logins failed: %w", err)
+		return false, t.Errorf("read logins failed: %w", err)
 	}
 
 	var login *domain.Login
@@ -101,43 +102,43 @@ func (s *Service) VerifyPassword(key, password string, ctx context.Context) (boo
 	}
 
 	if login == nil {
-		return false, fmt.Errorf("password login not found")
+		return false, t.Errorf("password login not found")
 	}
 
 	login, err = s.db.Logins.Read(login.Key, ctx)
 	if err != nil {
-		return false, fmt.Errorf("read login failed: %w", err)
+		return false, t.Errorf("read login failed: %w", err)
 	}
 
 	if !login.Enabled {
-		return false, fmt.Errorf("password login not enabled")
+		return false, t.Errorf("password login not enabled")
 	}
 	success := verifyPassword(password, login.Subject)
 
 	return success, nil
 }
 
-var words1 string
-var words2 string
+var words3 string
+var words4 string
 
 func Suggest() (string, error) {
 	sep := "-. /"
 	randomSeparator := string(sep[rand.Intn(len(sep))])
 	var err error
-	if words1 == "" {
-		words1, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words1)
+	if words3 == "" {
+		words3, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words1)
 		if err != nil {
-			return "", fmt.Errorf("load words failed: %w", err)
+			return "", t.Errorf("load words failed: %w", err)
 		}
 	}
-	words1list := strings.Split(words1, " ")
-	if words2 == "" {
-		words2, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words2)
+	words1list := strings.Split(words3, " ")
+	if words4 == "" {
+		words4, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words2)
 		if err != nil {
-			return "", fmt.Errorf("load words failed: %w", err)
+			return "", t.Errorf("load words failed: %w", err)
 		}
 	}
-	words2list := strings.Split(words2, " ")
+	words2list := strings.Split(words4, " ")
 	var randomWords []string
 	for i := 0; i < 5; i++ {
 		randomWords = append(randomWords, words1list[rand.Intn(len(words1list))])
@@ -150,11 +151,30 @@ func Suggest() (string, error) {
 	return strings.Join(randomWords, randomSeparator), nil
 }
 
+func User() (string, error) {
+	var err error
+	if words3 == "" {
+		words3, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words3)
+		if err != nil {
+			return "", t.Errorf("load words failed: %w", err)
+		}
+	}
+	words3list := strings.Split(words3, " ")
+	if words4 == "" {
+		words4, err = loadWords(dpv.ConfigInstance.Path + dpv.ConfigInstance.Server.Words4)
+		if err != nil {
+			return "", t.Errorf("load words failed: %w", err)
+		}
+	}
+	words4list := strings.Split(words4, " ")
+	return words3list[rand.Intn(len(words3list))] + words4list[rand.Intn(len(words4list))] + strconv.Itoa(rand.Intn(64)), nil
+}
+
 func loadWords(filename string) (string, error) {
 	bytes, err := os.ReadFile(filename)
 	if err != nil {
 		wd, _ := os.Getwd()
-		return "", fmt.Errorf("could not load config file, looking for %v in %v: %w", filename, wd, err)
+		return "", t.Errorf("could not load config file, looking for %v in %v: %w", filename, wd, err)
 	}
 	// file contains a string of words separated by spaces
 	return string(bytes), nil

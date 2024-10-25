@@ -1,11 +1,11 @@
 package photo
 
 import (
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"io"
 	"net/http"
 	"pkv/api/src/api"
+	"pkv/api/src/repository/t"
 )
 
 type SomeStruct struct{}
@@ -13,13 +13,13 @@ type SomeStruct struct{}
 func (h *Handler) Upload(w http.ResponseWriter, r *http.Request, urlParams httprouter.Params) {
 	err := r.ParseMultipartForm(32 << 20) // 32MB
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("parsing multipart form failed: %v", err), http.StatusBadRequest)
+		api.Error(w, r, t.Errorf("parsing multipart form failed: %v", err), http.StatusBadRequest)
 		return
 	}
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("getting uploaded file failed: %v", err), http.StatusBadRequest)
+		api.Error(w, r, t.Errorf("getting uploaded file failed: %v", err), http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
@@ -28,7 +28,7 @@ func (h *Handler) Upload(w http.ResponseWriter, r *http.Request, urlParams httpr
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("reading uploaded file failed: %v", err), http.StatusInternalServerError)
+		api.Error(w, r, t.Errorf("reading uploaded file failed: %v", err), http.StatusInternalServerError)
 		return
 	}
 

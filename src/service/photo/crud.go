@@ -2,9 +2,9 @@ package photo
 
 import (
 	"context"
-	"fmt"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 )
 
 // Manage aims to move images between the temporary and the permanent folder
@@ -101,7 +101,7 @@ func (s *Service) Reorder(photos []domain.Photo, order []string, ctx context.Con
 func (s *Service) Update(photos []domain.Photo, files []string, ctx context.Context) ([]domain.Photo, error) {
 	// if it is possible to do all of the above in a single function, give it a try!
 	if hasDuplicates(files) {
-		return photos, fmt.Errorf("input slice contains duplicates")
+		return photos, t.Errorf("input slice contains duplicates")
 	}
 
 	var updatedPhotos []domain.Photo
@@ -121,10 +121,10 @@ func (s *Service) Update(photos []domain.Photo, files []string, ctx context.Cont
 		if !found {
 			photo, err := s.ReadPhoto(file, dpv.ConfigInstance.Server.TmpPath, ctx)
 			if err != nil {
-				return photos, s.Undo(addedPhotos, removedPhotos, ctx, fmt.Errorf("could not read photo information for %v: %w", file, err))
+				return photos, s.Undo(addedPhotos, removedPhotos, ctx, t.Errorf("could not read photo information for %v: %w", file, err))
 			}
 			if err := s.MakePermanent(file, ctx); err != nil {
-				return photos, s.Undo(addedPhotos, removedPhotos, ctx, fmt.Errorf("could not make photo %v permanent: %w", photo.Src, err))
+				return photos, s.Undo(addedPhotos, removedPhotos, ctx, t.Errorf("could not make photo %v permanent: %w", photo.Src, err))
 			}
 			addedPhotos = append(addedPhotos, photo)
 		}
@@ -141,7 +141,7 @@ func (s *Service) Update(photos []domain.Photo, files []string, ctx context.Cont
 
 		if !found {
 			if err := s.MakeTemporary(photo.Src, ctx); err != nil {
-				return photos, s.Undo(addedPhotos, removedPhotos, ctx, fmt.Errorf("could not make photo %v temporary: %w", photo.Src, err))
+				return photos, s.Undo(addedPhotos, removedPhotos, ctx, t.Errorf("could not make photo %v temporary: %w", photo.Src, err))
 			}
 			removedPhotos = append(removedPhotos, photo.Src)
 		}
@@ -154,12 +154,12 @@ func (s *Service) Update(photos []domain.Photo, files []string, ctx context.Cont
 func (s *Service) Undo(addedPhotos []domain.Photo, removedPhotos []string, ctx context.Context, err error) error {
 	for _, p := range addedPhotos {
 		if err2 := s.MakeTemporary(p.Src, ctx); err != nil {
-			err = fmt.Errorf("%w; reverting %v to Temporary failed: %v", err, p, err2.Error())
+			err = t.Errorf("%w; reverting %v to Temporary failed: %v", err, p, err2.Error())
 		}
 	}
 	for _, p := range removedPhotos {
 		if err2 := s.MakePermanent(p, ctx); err != nil {
-			err = fmt.Errorf("%w; reverting %v to Permanent failed: %v", err, p, err2.Error())
+			err = t.Errorf("%w; reverting %v to Permanent failed: %v", err, p, err2.Error())
 		}
 	}
 	return err

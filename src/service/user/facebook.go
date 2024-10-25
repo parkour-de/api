@@ -3,13 +3,13 @@ package user
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 	"time"
 )
 
@@ -26,15 +26,15 @@ type FacebookTokenValidationResponse struct {
 func (s *Service) LinkFacebook(key string, auth string, ctx context.Context) (string, error) {
 	user, err := s.db.Users.Read(key, ctx)
 	if err != nil {
-		return "", fmt.Errorf("read user failed: %w", err)
+		return "", t.Errorf("read user failed: %w", err)
 	}
 	logins, err := s.db.GetLoginsForUser(key, ctx)
 	if err != nil {
-		return "", fmt.Errorf("read logins failed: %w", err)
+		return "", t.Errorf("read logins failed: %w", err)
 	}
 	for _, login := range logins {
 		if login.Provider == "facebook" {
-			return "", fmt.Errorf("facebook already connected")
+			return "", t.Errorf("facebook already connected")
 		}
 	}
 
@@ -54,11 +54,11 @@ func (s *Service) LinkFacebook(key string, auth string, ctx context.Context) (st
 	}
 
 	if err = s.db.Logins.Create(&login, ctx); err != nil {
-		return "", fmt.Errorf("create login failed: %w", err)
+		return "", t.Errorf("create login failed: %w", err)
 	}
 
 	if err = s.db.LoginAuthenticatesUser(login, *user, ctx); err != nil {
-		return "", fmt.Errorf("link login to user failed: %w", err)
+		return "", t.Errorf("link login to user failed: %w", err)
 	}
 
 	exp := int64(validationResponse.Data.ExpiresAt)
@@ -89,14 +89,14 @@ func (s *Service) Facebook(auth string) ([]string, error) {
 
 	logins, err := s.db.GetLoginsByProvider("facebook", validationResponse.Data.UserId, context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("read logins failed: %w", err)
+		return nil, t.Errorf("read logins failed: %w", err)
 	}
 	var foundUsers []domain.User
 	if len(logins) > 0 {
 		for _, login := range logins {
 			users, err := s.db.GetLoginUsers(login.Key, context.Background())
 			if err != nil {
-				return nil, fmt.Errorf("read users failed: %w", err)
+				return nil, t.Errorf("read users failed: %w", err)
 			} else if len(users) > 1 {
 				log.Printf("[Consistency] login %s has more than one user\n", login.Key)
 			} else if len(users) == 0 {
@@ -105,7 +105,7 @@ func (s *Service) Facebook(auth string) ([]string, error) {
 			foundUsers = append(foundUsers, users...)
 		}
 	} else {
-		return nil, fmt.Errorf("no user exists with this facebook login")
+		return nil, t.Errorf("no user exists with this facebook login")
 	}
 
 	var keys []string
@@ -130,7 +130,7 @@ func (s *Service) checkFacebookAuth(auth string) (FacebookTokenValidationRespons
 	resp, err := http.Get(validationURL + "?" + params.Encode())
 	if err != nil {
 		log.Printf("token validation failed - %s\n", err.Error())
-		return FacebookTokenValidationResponse{}, fmt.Errorf("token validation failed - check server logs")
+		return FacebookTokenValidationResponse{}, t.Errorf("token validation failed - check server logs")
 	}
 	defer resp.Body.Close()
 
@@ -142,22 +142,22 @@ func (s *Service) checkFacebookAuth(auth string) (FacebookTokenValidationRespons
 		} else {
 			log.Println(string(bodyBytes))
 		}
-		return FacebookTokenValidationResponse{}, fmt.Errorf("token validation failed - check server logs")
+		return FacebookTokenValidationResponse{}, t.Errorf("token validation failed - check server logs")
 	}
 
 	// Parse the validation response
 	var validationResponse FacebookTokenValidationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&validationResponse); err != nil {
 		log.Printf("could not parse validation response - %s\n", err.Error())
-		return FacebookTokenValidationResponse{}, fmt.Errorf("could not parse validation response - check server logs")
+		return FacebookTokenValidationResponse{}, t.Errorf("could not parse validation response - check server logs")
 	}
 
 	if !validationResponse.Data.IsValid {
-		return FacebookTokenValidationResponse{}, fmt.Errorf("facebook says, data is not valid")
+		return FacebookTokenValidationResponse{}, t.Errorf("facebook says, data is not valid")
 	}
 
 	if validationResponse.Data.AppId != dpv.ConfigInstance.Auth.FacebookAppId {
-		return FacebookTokenValidationResponse{}, fmt.Errorf("facebook says, this token belongs to a different app")
+		return FacebookTokenValidationResponse{}, t.Errorf("facebook says, this token belongs to a different app")
 	}
 
 	iat := int64(validationResponse.Data.IssuedAt)
@@ -165,11 +165,11 @@ func (s *Service) checkFacebookAuth(auth string) (FacebookTokenValidationRespons
 	unix := time.Now().Unix()
 
 	if iat > unix {
-		return FacebookTokenValidationResponse{}, fmt.Errorf("facebook says, this token is from the future")
+		return FacebookTokenValidationResponse{}, t.Errorf("facebook says, this token is from the future")
 	}
 
 	if exp < unix {
-		return FacebookTokenValidationResponse{}, fmt.Errorf("facebook says, this token is from the past")
+		return FacebookTokenValidationResponse{}, t.Errorf("facebook says, this token is from the past")
 	}
 	return validationResponse, nil
 }

@@ -3,12 +3,12 @@ package verband
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"pkv/api/src/domain/verband"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 	"strconv"
 	"strings"
 )
@@ -69,7 +69,7 @@ func (s *Service) GetVereine(ctx context.Context) ([]verband.Verein, []VereinDet
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not create request: %w", err)
+		return nil, nil, t.Errorf("could not create request: %w", err)
 	}
 	req.SetBasicAuth(user, pass)
 	req.Header.Add("OCS-APIRequest", "true")
@@ -77,21 +77,21 @@ func (s *Service) GetVereine(ctx context.Context) ([]verband.Verein, []VereinDet
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not send request: %w", err)
+		return nil, nil, t.Errorf("could not send request: %w", err)
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		return nil, nil, fmt.Errorf("could not get vereine: %w", err)
+		return nil, nil, t.Errorf("could not get vereine: %w", err)
 	}
 
 	var response nextcloudResponse
 	if err := json.Unmarshal(bodyBytes, &response); err != nil {
-		return nil, nil, fmt.Errorf("could not parse response: %w", err)
+		return nil, nil, t.Errorf("could not parse response: %w", err)
 	}
 
 	if response.OCS.Meta.Status != "ok" {
-		return nil, nil, fmt.Errorf("could not get vereine: %s", response.OCS.Meta.Message)
+		return nil, nil, t.Errorf("could not get vereine: %s", response.OCS.Meta.Message)
 	}
 
 	vereine, vereineDetail := s.ExtractVereineList(response)

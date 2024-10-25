@@ -1,10 +1,10 @@
 package user
 
 import (
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"pkv/api/src/api"
+	"pkv/api/src/repository/t"
 )
 
 // LinkFacebook attaches a facebook subject (sub) to a user
@@ -16,7 +16,7 @@ func (h *Handler) LinkFacebook(w http.ResponseWriter, r *http.Request, urlParams
 		return
 	}
 	if user != key {
-		api.Error(w, r, fmt.Errorf("you cannot modify a different user"), 400)
+		api.Error(w, r, t.Errorf("you cannot modify a different user"), 400)
 		return
 	}
 	auth := r.URL.Query().Get("auth")

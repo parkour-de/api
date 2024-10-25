@@ -1,9 +1,9 @@
 package user
 
 import (
-	"fmt"
 	"pkv/api/src/repository/graph"
 	"pkv/api/src/repository/security"
+	"pkv/api/src/repository/t"
 	"strconv"
 	"strings"
 	"time"
@@ -34,19 +34,19 @@ func ValidateUserToken(token string) (string, string, error) {
 	// example: "x:username:expiry_unix:hash"
 	tokens := strings.SplitN(token, ":", 4)
 	if len(tokens) != 4 {
-		return "", "", fmt.Errorf("token not correctly formatted")
+		return "", "", t.Errorf("token not correctly formatted")
 	}
 	unix := time.Now().Unix()
 	expiry, err := strconv.ParseInt(tokens[2], 10, 64)
 	if err != nil {
-		return "", "", fmt.Errorf("expiry not correctly formatted")
+		return "", "", t.Errorf("expiry not correctly formatted")
 	}
 	if unix > expiry {
-		return "", "", fmt.Errorf("token expired")
+		return "", "", t.Errorf("token expired")
 	}
 	hash := HashUserToken(tokens[0] + ":" + tokens[1] + ":" + tokens[2])
 	if hash != tokens[3] {
-		return "", "", fmt.Errorf("token invalid")
+		return "", "", t.Errorf("token invalid")
 	}
 	return tokens[1], tokens[0], nil
 }

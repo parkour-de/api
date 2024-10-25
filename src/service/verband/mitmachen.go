@@ -10,6 +10,7 @@ import (
 	"net/smtp"
 	"net/textproto"
 	"pkv/api/src/domain/verband"
+	"pkv/api/src/repository/t"
 	"regexp"
 	"strings"
 	"time"
@@ -39,7 +40,7 @@ var validAGs = map[string]string{
 func trimAndSanitize(input string, maxLength int) (string, error) {
 	input = strings.TrimSpace(input)
 	if utf8.RuneCountInString(input) > maxLength {
-		return "", fmt.Errorf("maximum field length exceeded - maximum length is %d chars, %d given", maxLength, utf8.RuneCountInString(input))
+		return "", t.Errorf("maximum field length exceeded - maximum length is %d chars, %d given", maxLength, utf8.RuneCountInString(input))
 	}
 	return html.EscapeString(input), nil
 }
@@ -52,16 +53,16 @@ func indent(content string) string {
 func (s *Service) Mitmachen(data verband.MitmachenRequest) error {
 	var err error
 	if data.Name, err = trimAndSanitize(data.Name, maxLengthInput); err != nil {
-		return fmt.Errorf("invalid name - %w", err)
+		return t.Errorf("invalid name - %w", err)
 	}
 	if match, err := regexp.Match("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", []byte(data.Email)); !match || err != nil {
-		return fmt.Errorf("invalid email - email must pass this spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address - %w", err)
+		return t.Errorf("invalid email - email must pass this spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address - %w", err)
 	}
 	if data.Kompetenzen, err = trimAndSanitize(data.Kompetenzen, maxLengthTextArea); err != nil {
-		return fmt.Errorf("invalid kompetenzen - %w", err)
+		return t.Errorf("invalid kompetenzen - %w", err)
 	}
 	if data.Fragen, err = trimAndSanitize(data.Fragen, maxLengthTextArea); err != nil {
-		return fmt.Errorf("invalid fragen - %w", err)
+		return t.Errorf("invalid fragen - %w", err)
 	}
 
 	if data.Name == "" {
@@ -73,7 +74,7 @@ func (s *Service) Mitmachen(data verband.MitmachenRequest) error {
 
 	prettyAG, valid := validAGs[data.AG]
 	if !valid {
-		return fmt.Errorf("invalid AG provided")
+		return t.Errorf("invalid AG provided")
 	}
 
 	subject := fmt.Sprintf("[ANFRAGE] %s möchte bei %s mitmachen", data.Name, prettyAG)
@@ -110,7 +111,7 @@ func (s *Service) Mitmachen(data verband.MitmachenRequest) error {
 
 func validateLine(line string) error {
 	if strings.ContainsAny(line, "\n\r") {
-		return fmt.Errorf("smtp: A line must not contain CR or LF")
+		return t.Errorf("smtp: A line must not contain CR or LF")
 	}
 	return nil
 }
@@ -121,13 +122,13 @@ func encodeBase64Header(header string) string {
 
 func (s *Service) SendMail(from, to, subject, body string) error {
 	if err := validateLine(from); err != nil {
-		return fmt.Errorf("invalid from: %w", err)
+		return t.Errorf("invalid from: %w", err)
 	}
 	if err := validateLine(to); err != nil {
-		return fmt.Errorf("invalid to: %w", err)
+		return t.Errorf("invalid to: %w", err)
 	}
 	if err := validateLine(subject); err != nil {
-		return fmt.Errorf("invalid subject: %w", err)
+		return t.Errorf("invalid subject: %w", err)
 	}
 	header := textproto.MIMEHeader{}
 	header.Set("MIME-Version:", "1.0")

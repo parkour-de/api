@@ -7,6 +7,7 @@ import (
 	"github.com/arangodb/go-driver/v2/arangodb/shared"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 )
 
 func (db *Db) GetAllUsers(ctx context.Context) ([]domain.User, error) {
@@ -30,7 +31,7 @@ func (db *Db) GetUsers(queryBuilder QueryBuilder, ctx context.Context) ([]domain
 	query, bindVars := queryBuilder()
 	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: bindVars})
 	if err != nil {
-		return nil, fmt.Errorf("query string invalid: %w", err)
+		return nil, t.Errorf("query string invalid: %w", err)
 	}
 	defer cursor.Close()
 
@@ -41,7 +42,7 @@ func (db *Db) GetUsers(queryBuilder QueryBuilder, ctx context.Context) ([]domain
 		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			return nil, fmt.Errorf("obtaining documents failed: %w", err)
+			return nil, t.Errorf("obtaining documents failed: %w", err)
 		}
 		result = append(result, doc)
 	}

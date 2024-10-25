@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"pkv/api/src/domain/accounting"
+	"pkv/api/src/repository/t"
 	"regexp"
 	"sort"
 	"strconv"
@@ -25,7 +26,7 @@ func (s *Service) UpdateBalanceSheet(sheet *accounting.BalanceSheet, message str
 	re := regexp.MustCompile(`(\d{2}\.\d{2}\.\d{4}) (\D*) (-?[\d,]+(?:\.\d{2})?) \w+ - (.+)`)
 	matches := re.FindStringSubmatch(message)
 	if len(matches) != 5 {
-		return fmt.Errorf("message format is incorrect")
+		return t.Errorf("message format is incorrect")
 	}
 	date, err := time.Parse("02.01.2006", matches[1])
 	if err != nil {

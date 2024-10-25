@@ -8,6 +8,7 @@ import (
 	"math"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 )
 
 func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Context) ([]domain.LocationDTO, error) {
@@ -18,7 +19,7 @@ func (db *Db) GetLocations(options domain.LocationQueryOptions, ctx context.Cont
 func (db *Db) RunLocationQuery(query string, bindVars map[string]interface{}, ctx context.Context) ([]domain.LocationDTO, error) {
 	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: bindVars})
 	if err != nil {
-		return nil, fmt.Errorf("query string invalid: %w", err)
+		return nil, t.Errorf("query string invalid: %w", err)
 	}
 	defer cursor.Close()
 
@@ -29,7 +30,7 @@ func (db *Db) RunLocationQuery(query string, bindVars map[string]interface{}, ct
 		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			return nil, fmt.Errorf("obtaining documents failed: %w", err)
+			return nil, t.Errorf("obtaining documents failed: %w", err)
 		}
 		result = append(result, doc)
 	}

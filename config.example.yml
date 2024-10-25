@@ -24,6 +24,8 @@ nextcloud:
 server:
   words1: words1.example.txt
   words2: words2.example.txt
+  words3: words3.txt
+  words4: words4.txt
   img_url: /obj/dpv/img
   tmp_url: /obj/dpv/tmp
   img_path: /var/www/8bj/obj/dpv/img

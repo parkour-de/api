@@ -2,11 +2,11 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/graph"
+	"pkv/api/src/repository/t"
 	"pkv/api/src/service/user"
 	"strconv"
 	"strings"
@@ -20,14 +20,14 @@ func CheckAuth(r *http.Request) (string, string, error) {
 	auth := r.Header.Get("Authorization")
 	format, auth, found := strings.Cut(auth, " ")
 	if !found {
-		return "", "", fmt.Errorf("authorization header missing")
+		return "", "", t.Errorf("authorization header missing")
 	}
 	if format != "user" {
-		return "", "", fmt.Errorf("authorization header needs to start with 'user'")
+		return "", "", t.Errorf("authorization header needs to start with 'user'")
 	}
 	key, method, err := user.ValidateUserToken(auth)
 	if err != nil {
-		return "", "", fmt.Errorf("invalid token: %w", err)
+		return "", "", t.Errorf("invalid token: %w", err)
 	}
 	return key, method, nil
 }
@@ -38,7 +38,7 @@ func Authenticated(r *http.Request) (string, error) {
 		return "", err
 	}
 	if method == "a" {
-		return "", fmt.Errorf("your temporary login is expiring soon, please add a login method to your account first")
+		return "", t.Errorf("your temporary login is expiring soon, please add a login method to your account first")
 	}
 	return key, nil
 }
@@ -53,7 +53,7 @@ func RequireSameUser(key string, r *http.Request) error {
 		return err
 	}
 	if key != user {
-		return fmt.Errorf("you are logged in as %s, but you are trying to access %s", user, key)
+		return t.Errorf("you are logged in as %s, but you are trying to access %s", user, key)
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func RequireUserAdmin(key string, r *http.Request, db *graph.Db) (string, string
 	if key != user {
 		users, err := db.GetAdministeredUsers(user, r.Context())
 		if err != nil {
-			return "", "", fmt.Errorf("cannot get list of administered users: %w", err)
+			return "", "", t.Errorf("cannot get list of administered users: %w", err)
 		}
 		found := false
 		for _, u := range users {
@@ -79,7 +79,7 @@ func RequireUserAdmin(key string, r *http.Request, db *graph.Db) (string, string
 			}
 		}
 		if !found {
-			return "", "", fmt.Errorf("user %s is not administered by %s", key, user)
+			return "", "", t.Errorf("user %s is not administered by %s", key, user)
 		}
 	}
 	return key, user, nil
@@ -88,14 +88,14 @@ func RequireUserAdmin(key string, r *http.Request, db *graph.Db) (string, string
 func RequireGlobalAdmin(r *http.Request, db *graph.Db) (*domain.User, error) {
 	key, err := Authenticated(r)
 	if err != nil {
-		return nil, fmt.Errorf("authentication failed: %w", err)
+		return nil, t.Errorf("authentication failed: %w", err)
 	}
 	user, err := db.Users.Read(key, r.Context())
 	if err != nil {
-		return nil, fmt.Errorf("reading current user failed: %w", err)
+		return nil, t.Errorf("reading current user failed: %w", err)
 	}
 	if !IsAdmin(*user) {
-		return nil, fmt.Errorf("you are not an administrator")
+		return nil, t.Errorf("you are not an administrator")
 	}
 	return user, nil
 }
@@ -103,7 +103,7 @@ func RequireGlobalAdmin(r *http.Request, db *graph.Db) (*domain.User, error) {
 func SuccessJson(w http.ResponseWriter, r *http.Request, data interface{}) {
 	jsonMsg, err := json.Marshal(data)
 	if err != nil {
-		Error(w, r, fmt.Errorf("serialising response failed: %w", err), 400)
+		Error(w, r, t.Errorf("serialising response failed: %w", err), 400)
 		return
 	} else {
 		w.Header().Set("Content-Type", "application/json")
@@ -130,7 +130,7 @@ func Error(w http.ResponseWriter, r *http.Request, err error, code int) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(code)
 	if err == nil {
-		err = fmt.Errorf("nil err")
+		err = t.Errorf("nil err")
 	}
 	logErr := err
 	errorMsgJSON, err := json.Marshal(ErrorResponse{

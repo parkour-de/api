@@ -1,10 +1,10 @@
 package user
 
 import (
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"pkv/api/src/api"
+	"pkv/api/src/repository/t"
 )
 
 // RequestEmail generates an activation link and sends it via email
@@ -18,7 +18,7 @@ func (h *Handler) RequestEmail(w http.ResponseWriter, r *http.Request, urlParams
 		return
 	}
 	if user != key {
-		api.Error(w, r, fmt.Errorf("you cannot modify a different user"), 400)
+		api.Error(w, r, t.Errorf("you cannot modify a different user"), 400)
 		return
 	}
 	email := r.URL.Query().Get("email")
@@ -39,7 +39,7 @@ func (h *Handler) EnableEmail(w http.ResponseWriter, r *http.Request, urlParams 
 		return
 	}
 	if user != key {
-		api.Error(w, r, fmt.Errorf("you cannot modify a different user"), 400)
+		api.Error(w, r, t.Errorf("you cannot modify a different user"), 400)
 		return
 	}
 	loginId := urlParams.ByName("login")

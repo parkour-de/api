@@ -8,6 +8,7 @@ import (
 	"math"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 	"strings"
 )
 
@@ -23,7 +24,7 @@ func (db *Db) GetTrainings(queryBuilder QueryBuilder, ctx context.Context) ([]do
 	query, bindVars := queryBuilder()
 	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: bindVars})
 	if err != nil {
-		return nil, fmt.Errorf("query string invalid: %w", err)
+		return nil, t.Errorf("query string invalid: %w", err)
 	}
 	defer cursor.Close()
 
@@ -34,7 +35,7 @@ func (db *Db) GetTrainings(queryBuilder QueryBuilder, ctx context.Context) ([]do
 		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			return nil, fmt.Errorf("obtaining documents failed: %w", err)
+			return nil, t.Errorf("obtaining documents failed: %w", err)
 		}
 		result = append(result, doc)
 	}

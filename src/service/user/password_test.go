@@ -22,3 +22,20 @@ func TestSuggest(t *testing.T) {
 		t.Log("Suggest() = ", val)
 	}
 }
+
+func TestUser(t *testing.T) {
+	config, err := dpv.NewConfig("../../../config.yml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dpv.ConfigInstance = config
+
+	val, err := User()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 10; i++ {
+		val, err = User()
+		t.Log("User() = ", val)
+	}
+}

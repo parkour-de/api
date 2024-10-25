@@ -10,6 +10,7 @@ import (
 	"pkv/api/src/api"
 	"pkv/api/src/domain"
 	"pkv/api/src/repository/graph"
+	"pkv/api/src/repository/t"
 	"pkv/api/src/service/description"
 	"strconv"
 	"strings"
@@ -53,26 +54,26 @@ func (h *Handler) ImportPkOrgSpot(w http.ResponseWriter, r *http.Request, urlPar
 	spotID := r.URL.Query().Get("spot")
 	existing, err := h.isPkOrgLocationExisting(spotID, r.Context())
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("checking for existing locations failed: %w", err), 400)
+		api.Error(w, r, t.Errorf("checking for existing locations failed: %w", err), 400)
 		return
 	}
 	if existing {
-		api.Error(w, r, fmt.Errorf("location already found in database"), 409)
+		api.Error(w, r, t.Errorf("location already found in database"), 409)
 		return
 	}
 	if spotID == "" {
-		api.Error(w, r, fmt.Errorf("missing 'spot' query parameter"), 400)
+		api.Error(w, r, t.Errorf("missing 'spot' query parameter"), 400)
 		return
 	}
 	spot, filenames, err := h.readPkOrgData(spotID, r.Context())
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("failed to extract information from PkOrg spot %s: %w", spotID, err), 500)
+		api.Error(w, r, t.Errorf("failed to extract information from PkOrg spot %s: %w", spotID, err), 500)
 		return
 	}
 
 	photos, err := h.photoService.Update([]domain.Photo{}, filenames, r.Context())
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("failed to update photos for spot %s: %w", spotID, err), 500)
+		api.Error(w, r, t.Errorf("failed to update photos for spot %s: %w", spotID, err), 500)
 		return
 	}
 
@@ -81,7 +82,7 @@ func (h *Handler) ImportPkOrgSpot(w http.ResponseWriter, r *http.Request, urlPar
 
 	err = h.em.Create(&location, r.Context())
 	if err != nil {
-		api.Error(w, r, fmt.Errorf("failed to create location for spot %s: %w", spotID, err), 500)
+		api.Error(w, r, t.Errorf("failed to create location for spot %s: %w", spotID, err), 500)
 		return
 	}
 
@@ -112,19 +113,19 @@ func (h *Handler) isPkOrgLocationExisting(spotID string, ctx context.Context) (b
 func (h *Handler) extractPkOrgSpotInfo(url string) (SpotResponse, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return SpotResponse{}, fmt.Errorf("failed to fetch data: %w", err)
+		return SpotResponse{}, t.Errorf("failed to fetch data: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return SpotResponse{}, fmt.Errorf("failed to read response body: %w", err)
+		return SpotResponse{}, t.Errorf("failed to read response body: %w", err)
 	}
 
 	var spotResponse SpotResponse
 	err = json.Unmarshal(body, &spotResponse)
 	if err != nil {
-		return SpotResponse{}, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		return SpotResponse{}, t.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
 	return spotResponse, err
@@ -137,20 +138,20 @@ func (h *Handler) extractPkOrgImages(images []Image, ctx context.Context) ([]str
 		imageURL := fmt.Sprintf("https://map.parkour.org/images/spots/%s", img.Filename)
 		resp, err := http.Get(imageURL)
 		if err != nil {
-			errors = append(errors, fmt.Errorf("failed to fetch image data for image %d: %w", i, err).Error())
+			errors = append(errors, t.Errorf("failed to fetch image data for image %d: %w", i, err).Error())
 			continue
 		}
 		defer resp.Body.Close()
 
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
-			errors = append(errors, fmt.Errorf("failed to read image data for image %d: %w", i, err).Error())
+			errors = append(errors, t.Errorf("failed to read image data for image %d: %w", i, err).Error())
 			continue
 		}
 
 		photo, err := h.photoService.Upload(data, img.Filename, ctx)
 		if err != nil {
-			errors = append(errors, fmt.Errorf("failed to upload photo for image %d: %w", i, err).Error())
+			errors = append(errors, t.Errorf("failed to upload photo for image %d: %w", i, err).Error())
 			continue
 		}
 
@@ -158,7 +159,7 @@ func (h *Handler) extractPkOrgImages(images []Image, ctx context.Context) ([]str
 	}
 	var err error
 	if len(errors) > 0 {
-		err = fmt.Errorf("errors occured with spot images: %v", strings.Join(errors, "; "))
+		err = t.Errorf("errors occured with spot images: %v", strings.Join(errors, "; "))
 	}
 	return filenames, err
 }

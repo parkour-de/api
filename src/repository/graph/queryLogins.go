@@ -2,10 +2,10 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"github.com/arangodb/go-driver/v2/arangodb"
 	"github.com/arangodb/go-driver/v2/arangodb/shared"
 	"pkv/api/src/domain"
+	"pkv/api/src/repository/t"
 )
 
 func (db *Db) GetLoginsForUser(key string, ctx context.Context) ([]domain.Login, error) {
@@ -16,7 +16,7 @@ func (db *Db) GetLoginsForUser(key string, ctx context.Context) ([]domain.Login,
 	query += "  RETURN logins"
 	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: map[string]interface{}{"key": key}})
 	if err != nil {
-		return nil, fmt.Errorf("query string invalid: %w", err)
+		return nil, t.Errorf("query string invalid: %w", err)
 	}
 	defer cursor.Close()
 
@@ -27,7 +27,7 @@ func (db *Db) GetLoginsForUser(key string, ctx context.Context) ([]domain.Login,
 		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			return nil, fmt.Errorf("obtaining documents failed: %w", err)
+			return nil, t.Errorf("obtaining documents failed: %w", err)
 		}
 		result = append(result, doc...)
 	}
@@ -41,7 +41,7 @@ func (db *Db) GetLoginsByProvider(provider string, sub string, ctx context.Conte
 	query += "  RETURN login"
 	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: map[string]interface{}{"provider": provider, "sub": sub}})
 	if err != nil {
-		return nil, fmt.Errorf("query string invalid: %w", err)
+		return nil, t.Errorf("query string invalid: %w", err)
 	}
 	defer cursor.Close()
 
@@ -52,7 +52,7 @@ func (db *Db) GetLoginsByProvider(provider string, sub string, ctx context.Conte
 		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			return nil, fmt.Errorf("obtaining documents failed: %w", err)
+			return nil, t.Errorf("obtaining documents failed: %w", err)
 		}
 		result = append(result, doc)
 	}
@@ -67,7 +67,7 @@ func (db *Db) GetLoginUsers(key string, ctx context.Context) ([]domain.User, err
 	query += "    RETURN user"
 	cursor, err := db.Database.Query(ctx, query, &arangodb.QueryOptions{BindVars: map[string]interface{}{"key": key}})
 	if err != nil {
-		return nil, fmt.Errorf("query string invalid: %w", err)
+		return nil, t.Errorf("query string invalid: %w", err)
 	}
 	defer cursor.Close()
 
@@ -78,7 +78,7 @@ func (db *Db) GetLoginUsers(key string, ctx context.Context) ([]domain.User, err
 		if shared.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			return nil, fmt.Errorf("obtaining documents failed: %w", err)
+			return nil, t.Errorf("obtaining documents failed: %w", err)
 		}
 		result = append(result, doc)
 	}

@@ -3,11 +3,11 @@ package description
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"pkv/api/src/repository/dpv"
+	"pkv/api/src/repository/t"
 )
 
 // TranslateDocument translates a document from one language to another.
@@ -15,7 +15,7 @@ func TranslateDocument(text, srcLang, destLang string, ctx context.Context) (str
 	deeplKey := dpv.ConfigInstance.Auth.DeepLKey
 	deeplUrl, err := url.Parse(dpv.ConfigInstance.Auth.DeepLUrl)
 	if err != nil {
-		return "", fmt.Errorf("invalid DeepL url: %w", err)
+		return "", t.Errorf("invalid DeepL url: %w", err)
 	}
 	q := deeplUrl.Query()
 	q.Add("auth_key", deeplKey)
@@ -25,7 +25,7 @@ func TranslateDocument(text, srcLang, destLang string, ctx context.Context) (str
 	deeplUrl.RawQuery = q.Encode()
 	req, err := http.NewRequest(http.MethodPost, deeplUrl.String(), nil)
 	if err != nil {
-		return "", fmt.Errorf("creating DeepL request failed: %w", err)
+		return "", t.Errorf("creating DeepL request failed: %w", err)
 	}
 	req.Header.Add("User-Agent", "dpv-api")
 	if ctx != nil {
@@ -33,7 +33,7 @@ func TranslateDocument(text, srcLang, destLang string, ctx context.Context) (str
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("DeepL request failed: %w", err)
+		return "", t.Errorf("DeepL request failed: %w", err)
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := io.ReadAll(resp.Body)
@@ -43,9 +43,9 @@ func TranslateDocument(text, srcLang, destLang string, ctx context.Context) (str
 		}
 		outStruct := &ErrorResponse{}
 		if err := json.Unmarshal(bodyBytes, outStruct); err != nil {
-			return "", fmt.Errorf("DeepL request failed with status %v, decoding error JSON failed: %w, error message: %v", resp.StatusCode, err, string(bodyBytes))
+			return "", t.Errorf("DeepL request failed with status %v, decoding error JSON failed: %w, error message: %v", resp.StatusCode, err, string(bodyBytes))
 		}
-		return "", fmt.Errorf("DeepL request failed with status %v: %v", resp.StatusCode, outStruct.ErrMessage)
+		return "", t.Errorf("DeepL request failed with status %v: %v", resp.StatusCode, outStruct.ErrMessage)
 	}
 	type translation struct {
 		DetectedSourceLanguage string `json:"detected_source_language"`
@@ -56,7 +56,7 @@ func TranslateDocument(text, srcLang, destLang string, ctx context.Context) (str
 	}
 	outStruct := &TranslateResponse{}
 	if err := json.Unmarshal(bodyBytes, outStruct); err != nil {
-		return "", fmt.Errorf("DeepL request failed with status %v, decoding response JSON failed: %w, response: %v", resp.StatusCode, err, string(bodyBytes))
+		return "", t.Errorf("DeepL request failed with status %v, decoding response JSON failed: %w, response: %v", resp.StatusCode, err, string(bodyBytes))
 	}
 	return outStruct.Translations[0].Text, nil
 }
