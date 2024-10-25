@@ -73,7 +73,7 @@ Go modules, running unit tests, building the application, building the Docker im
 Google Container Registry.
 
 In order to optimize the build process and make the resulting Docker image as small and performant as possible,
-we use `golang:1.22-alpine` as the builder image and `alpine:latest` as the final Docker image. The builder
+we use `golang:1.23-alpine` as the builder image and `alpine:latest` as the final Docker image. The builder
 image includes the necessary tools to build and test the application, while the final image is based on Alpine
 Linux, which is a lightweight Linux distribution that is optimized for containerized environments.
 
