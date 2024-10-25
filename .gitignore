@@ -2,6 +2,9 @@
 config.yml
 words1.txt
 words2.txt
+words3.txt
+words4.txt
+keys.txt
 
 # Test files containing secrets
 frontend/facebook.htm
