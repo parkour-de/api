@@ -106,7 +106,7 @@ func ProxyChatCompletions(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	}
 	geminiReq.GenerationConfig.MaxOutputTokens = openAIReq.MaxTokens
 	geminiReq.GenerationConfig.Temperature = openAIReq.Temperature
-	geminiReq.GenerationConfig.ResponseMimeType = "application/json" // Ensure JSON response
+	geminiReq.GenerationConfig.ResponseMimeType = "text/plain" // Ensure JSON response
 
 	// Process messages: system role goes to system_instruction, others to contents
 	for _, msg := range openAIReq.Messages {
