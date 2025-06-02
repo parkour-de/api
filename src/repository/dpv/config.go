@@ -24,6 +24,8 @@ type Config struct {
 		DpvTokenSeconds    int    `yaml:"dpv_token_seconds"`
 		FacebookGraphUrl   string `yaml:"facebook_graph_url"`
 		FacebookAppId      string `yaml:"facebook_app_id"`
+		GeminiApiKey       string `yaml:"gemini_api_key"`
+		GeminiUrl          string `yaml:"gemini_url"`
 		GoogleDriveApiKey  string `yaml:"google_drive_api_key"`
 		GoogleClientId     string `yaml:"google_client_id"`
 		GoogleClientSecret string `yaml:"google_client_secret"`

@@ -11,6 +11,8 @@ auth:
   dpv_token_seconds: 3600
   facebook_graph_url: https://graph.facebook.com/debug_token
   facebook_app_id: 448535201950
+  gemini_api_key: 12345678901234567890123456789012
+  gemini_url: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=
   google_client_id: 123456789012-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com
   google_client_secret: GOCSBX-abcdefghijklmnopqrstuvwxyz
   deepl_key: 12345678-1234-1234-1234-123456789012:fz

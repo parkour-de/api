@@ -11,6 +11,7 @@ import (
 	"pkv/api/src/endpoints/authentication"
 	"pkv/api/src/endpoints/crud"
 	"pkv/api/src/endpoints/location"
+	"pkv/api/src/endpoints/openai"
 	"pkv/api/src/endpoints/photo"
 	"pkv/api/src/endpoints/query"
 	"pkv/api/src/endpoints/server"
@@ -145,6 +146,8 @@ func NewServer(configPath string, test bool) *http.Server {
 	r.GET("/api/verband/bundeslaender", verbandHandler.GetBundeslaender)
 
 	r.POST("/api/verband/mitmachen", verbandHandler.Mitmachen)
+
+	r.POST("/api/openai/v1/chat/completions", openai.ProxyChatCompletions)
 
 	r.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		log.Printf("panic: %+v", err)
