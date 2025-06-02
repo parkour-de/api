@@ -31,8 +31,9 @@ type Message struct {
 
 // GeminiRequest represents the Gemini API request format
 type GeminiRequest struct {
-	Contents         []GeminiContent `json:"contents"`
-	GenerationConfig struct {
+	Contents          []GeminiContent   `json:"contents"`
+	SystemInstruction SystemInstruction `json:"system_instruction"`
+	GenerationConfig  struct {
 		MaxOutputTokens  int     `json:"maxOutputTokens"`
 		Temperature      float64 `json:"temperature"`
 		ResponseMimeType string  `json:"responseMimeType"`
@@ -48,6 +49,11 @@ type GeminiContent struct {
 // GeminiPart represents a part in the Gemini content
 type GeminiPart struct {
 	Text string `json:"text"`
+}
+
+// SystemInstruction represents the system instruction for Gemini
+type SystemInstruction struct {
+	Parts []GeminiPart `json:"parts"`
 }
 
 // GeminiResponse represents the Gemini API response
@@ -96,16 +102,21 @@ func ProxyChatCompletions(w http.ResponseWriter, r *http.Request, _ httprouter.P
 
 	// Convert OpenAI request to Gemini request
 	geminiReq := GeminiRequest{
-		Contents: make([]GeminiContent, len(openAIReq.Messages)),
+		Contents: make([]GeminiContent, 0, len(openAIReq.Messages)),
 	}
 	geminiReq.GenerationConfig.MaxOutputTokens = openAIReq.MaxTokens
 	geminiReq.GenerationConfig.Temperature = openAIReq.Temperature
 	geminiReq.GenerationConfig.ResponseMimeType = "application/json" // Ensure JSON response
 
-	for i, msg := range openAIReq.Messages {
-		geminiReq.Contents[i] = GeminiContent{
-			Role:  msg.Role,
-			Parts: []GeminiPart{{Text: msg.Content}},
+	// Process messages: system role goes to system_instruction, others to contents
+	for _, msg := range openAIReq.Messages {
+		if msg.Role == "system" {
+			geminiReq.SystemInstruction.Parts = append(geminiReq.SystemInstruction.Parts, GeminiPart{Text: msg.Content})
+		} else {
+			geminiReq.Contents = append(geminiReq.Contents, GeminiContent{
+				Role:  "user", // Force user role for all non-system messages
+				Parts: []GeminiPart{{Text: msg.Content}},
+			})
 		}
 	}
 
