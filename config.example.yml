@@ -24,6 +24,7 @@ nextcloud:
   pass: ABCDE-FGHIJ-KLMNO-PQRST-UVWXY
   formId: 1234567890
 server:
+  ip: 37.114.34.98
   words1: words1.example.txt
   words2: words2.example.txt
   words3: words3.txt

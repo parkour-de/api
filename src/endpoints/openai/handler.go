@@ -75,7 +75,7 @@ func ProxyChatCompletions(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	// Check client IP (from RemoteAddr and X-Forwarded-For)
 	clientIP := getClientIP(r)
 
-	if clientIP != "127.0.0.1" && clientIP != "::1" {
+	if clientIP != "127.0.0.1" && clientIP != "::1" && clientIP != dpv.ConfigInstance.Server.IP {
 		api.Error(w, r, t.Errorf("Forbidden: requests not allowed from %v", clientIP), 403)
 		return
 	}

@@ -40,6 +40,7 @@ type Config struct {
 		FormID string `yaml:"formId"`
 	} `yaml:"nextcloud"`
 	Server struct {
+		IP       string `yaml:"ip"`
 		Words1   string `yaml:"words1"`
 		Words2   string `yaml:"words2"`
 		Words3   string `yaml:"words3"`
