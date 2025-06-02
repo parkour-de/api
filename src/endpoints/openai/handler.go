@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"pkv/api/src/api"
@@ -138,6 +139,8 @@ func ProxyChatCompletions(w http.ResponseWriter, r *http.Request, _ httprouter.P
 
 	if resp.StatusCode != http.StatusOK {
 		api.Error(w, r, t.Errorf("Gemini API returned status: %d", resp.StatusCode), resp.StatusCode)
+		geminiRespBody, _ := io.ReadAll(resp.Body)
+		log.Println(string(geminiRespBody))
 		return
 	}
 
