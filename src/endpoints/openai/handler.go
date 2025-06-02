@@ -76,7 +76,7 @@ func ProxyChatCompletions(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	clientIP := getClientIP(r)
 
 	if clientIP != "127.0.0.1" && clientIP != "::1" {
-		api.Error(w, r, t.Errorf("Forbidden: requests only allowed from localhost"), 403)
+		api.Error(w, r, t.Errorf("Forbidden: requests not allowed from %v", clientIP), 403)
 		return
 	}
 
