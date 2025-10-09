@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/arangodb/go-driver/v2 v2.1.3
-	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
+	github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/k42-software/go-altcha v0.1.1
 	github.com/microcosm-cc/bluemonday v1.0.27
