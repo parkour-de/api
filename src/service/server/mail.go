@@ -61,7 +61,7 @@ func (s *Service) ChangeMailPassword(email string, oldpassword string, newpasswo
 		return t.Errorf("cannot save the new password")
 	}
 
-	services := []string{"dovecot2.service", "postfix-setup.service", "postfix.service"}
+	services := []string{"dovecot.service", "postfix-setup.service", "postfix.service"}
 	for _, service := range services {
 		if err := restartService(service); err != nil {
 			return t.Errorf("the password has been changed successfully, but the mail server could not be restarted - you may still have to use the old password, or you can try restarting it again by typing in your new password in all three password fields: %w", err)
